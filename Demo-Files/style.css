@@ -4,7 +4,7 @@
 }
 
 body {
-  background-color: #99ccaa;
+  background-color: #cadfd1;
 }
 
 .main-game {
@@ -12,7 +12,7 @@ body {
   flex-wrap: none;
   justify-content: center;
   margin: 2rem auto;
-  max-width: 800px;
+  max-width: 90%;
   flex-direction: row;
 }
 
@@ -21,7 +21,7 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   margin: 1rem auto;
-  max-width: 40%;
+  max-width: 30%;
   gap: 1rem;
 }
 
@@ -32,12 +32,16 @@ body {
   gap: 0.5rem;
 }
 
+.item-list {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
 .container-image {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   margin: 1rem auto;
-  max-width: 50%;
   gap: 1rem;
 }
 
@@ -47,15 +51,18 @@ body {
 }
 
 button {
-  background-color: #4caf50;
-  border: none;
+  background-color: #3b863d;
+  border-radius: 5px;
   color: white;
+  background-color: #1d2b1d;
   padding: 2px 6px;
   text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 8px;
+  font-size: 10px;
   margin: 4px 2px;
   cursor: pointer;
   height: 30px;
+}
+
+button:hover {
+  background-color: #295a2b;
 }
