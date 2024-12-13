@@ -9,10 +9,10 @@ body {
 
 .main-game {
   display: flex;
-  flex-wrap: none;
   justify-content: center;
   margin: 2rem auto;
-  max-width: 90%;
+  max-width: 800px;
+  width: 800px;
   flex-direction: row;
 }
 
@@ -21,7 +21,7 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   margin: 1rem auto;
-  max-width: 30%;
+  width: 200px;
   gap: 1rem;
 }
 
@@ -37,24 +37,39 @@ body {
   font-weight: bold;
 }
 
+/* This is the container that holds the image and canvas and is set to relative */
 .container-image {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 1rem auto;
-  gap: 1rem;
+  position: relative;
+  width: 600px;
+  height: 400px;
+  margin-left: 2rem;
 }
 
+/* Image should fill the container and be behind the canvas */
 .container-image img {
-  width: 100%;
-  height: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 400px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Canvas positioned over the image to that it can overlay all our stats and show feedback while it detects the objects */
+#canvas-main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 400px;
+  z-index: 2;
 }
 
 button {
-  background-color: #3b863d;
+  background-color: #1d2b1d;
   border-radius: 5px;
   color: white;
-  background-color: #1d2b1d;
   padding: 2px 6px;
   text-align: center;
   font-size: 10px;
