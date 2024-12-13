@@ -1,31 +1,26 @@
 # ----------------------------
-# OS-generated files
+# Node / NPM
 # ----------------------------
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*.swn
-*.lock~ 
-*.tmp
-
-# ----------------------------
-# Logs and crash reports
-# ----------------------------
+node_modules/
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-*.log
-.log/
-logs/
-log/
 
 # ----------------------------
-# Runtime files and temporary states
+# Logs
 # ----------------------------
-pids/
+*.log
+log/
+logs/
+*.log.[0-9]*
+
+# ----------------------------
+# Runtime and temporary files
+# ----------------------------
+.pids
 *.pid
 *.seed
 *.pid.lock
@@ -33,16 +28,6 @@ tmp/
 temp/
 .cache/
 *.cache
-*.log.[0-9]*
-*.out
-*.err
-
-# ----------------------------
-# Dependency directories
-# ----------------------------
-node_modules/
-bower_components/
-jspm_packages/
 
 # ----------------------------
 # Build outputs
@@ -51,166 +36,49 @@ dist/
 build/
 out/
 coverage/
-public/build/
-server/build/
-client/build/
-client/dist/
-.eslintcache
 .nyc_output/
 
-# Next.js or Nuxt.js build outputs
-.next/
-.nuxt/
-.svelte-kit/
-
-# Angular
-.angular/
-.angular-cache/
-
-# Vue
-.vuepress/dist/
-packages/*/dist/
-
-# React Native
-.expo/
-android/
-ios/
-*.apk
-*.aab
+# If using a front-end build:
+public/build/
+client/build/
+client/dist/
 
 # ----------------------------
 # Environment files
 # ----------------------------
 .env
-.env.* 
+.env.*
 !.env.example
 !.env.sample
 
 # ----------------------------
-# Editor / IDE files
+# OS-specific files
+# ----------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.swn
+*.lock~
+*.tmp
+
+# ----------------------------
+# Editor / IDE settings
 # ----------------------------
 .vscode/
-.vscode/*
 .idea/
-.idea/*
 *.iml
 *.sublime-project
 *.sublime-workspace
 *.code-workspace
-*.session
-
-# IntelliJ / WebStorm
-*.iws
-*.ipr
-
-# Visual Studio Code settings
-.vscode/
-.history/
 
 # ----------------------------
-# System Files
+# Miscellaneous
 # ----------------------------
-.sass-cache/
-*.DS_Store
-*.DS_Store?
-.Spotlight-V100
-.Trashes
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# ----------------------------
-# Testing-related files
-# ----------------------------
-coverage/
-mochawesome-report/
-junit-report.xml
-jest-html-reporters-*.html
-junit.xml
-test-report.xml
-
-# Cypress
-cypress/videos/
-cypress/screenshots/
-cypress/report/
-
-# ----------------------------
-# Package managers
-# ----------------------------
-package-lock.json*
-yarn.lock
-pnpm-lock.yaml
-*.tgz
-
-# ----------------------------
-# Backend-specific ignores
-# ----------------------------
-# If using Python backend:
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.egg
-*.egg-info/
-build/
-dist/
-
-# If using Java (just in case)
-*.class
-*.jar
-*.war
-*.ear
-*.zip
-target/
-
-# Docker & Deployment
-*.tar
-*.tar.gz
-docker-compose.override.yml
-.dockerignore
-
-# ----------------------------
-# Framework-specific or Misc.
-# ----------------------------
-# Meteor
-.meteor/local
-
-# Prisma
-.prisma/
-*.db-journal
-*.db
-
-# PM2
-.pm2/
-
-# Firebase
-.firebase/
-.firebaserc
-
-# Python venv
-venv/
-env/
-env.bak/
-.envrc
-
-# Ruby / Rails
-.bundle/
-log/
-tmp/
-public/assets/
-public/packs/
-public/packs-test/
-node_modules/
-yarn-error.log
-.byebug_history
-
-# ----------------------------
-# Misc
-# ----------------------------
+.eslintcache
+package-lock.json
 *.orig
 *.rej
 *.bak
 *.old
 *.backup
-*.crt
-*.key
