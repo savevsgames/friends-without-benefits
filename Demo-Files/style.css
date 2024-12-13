@@ -1,0 +1,83 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background-color: #cadfd1;
+}
+
+.main-game {
+  display: flex;
+  justify-content: center;
+  margin: 2rem auto;
+  max-width: 800px;
+  width: 800px;
+  flex-direction: row;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 1rem auto;
+  width: 200px;
+  gap: 1rem;
+}
+
+.container-buttons {
+  display: flex;
+  justify-content: center;
+  margin: 1rem auto;
+  gap: 0.5rem;
+}
+
+.item-list {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* This is the container that holds the image and canvas and is set to relative */
+.container-image {
+  position: relative;
+  width: 600px;
+  height: 400px;
+  margin-left: 2rem;
+}
+
+/* Image should fill the container and be behind the canvas */
+.container-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 400px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Canvas positioned over the image to that it can overlay all our stats and show feedback while it detects the objects */
+#canvas-main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 400px;
+  z-index: 2;
+}
+
+button {
+  background-color: #1d2b1d;
+  border-radius: 5px;
+  color: white;
+  padding: 2px 6px;
+  text-align: center;
+  font-size: 10px;
+  margin: 4px 2px;
+  cursor: pointer;
+  height: 30px;
+}
+
+button:hover {
+  background-color: #295a2b;
+}
