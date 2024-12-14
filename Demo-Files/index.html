@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Object Detection - Scavenger Hunt Testing</title>
     <link href="style.css" rel="stylesheet" />
+    <!-- Load main.js -->
+    <script defer src="main.js" type="text/javascript"></script>
     <!-- Load OpenCV.js -->
     <script async src="opencv.js" onload="OpenCVReady()"></script>
   </head>
@@ -15,10 +17,19 @@
     <main class="main-game">
       <div class="container">
         <div class="container-buttons">
-          <button>PLAY</button>
-          <button>QUIT</button>
-          <button>LOAD MEDIA</button>
-          <button>DETECT MANUALLY</button>
+          <button id="play_button" name="play_button">PLAY</button>
+          <button id="pause_button" name="pause_button">PAUSE</button>
+          <button id="quit_button" name="quit_button">QUIT</button>
+          <button id="load_image_button" name="load_image_button">
+            LOAD IMAGE
+          </button>
+          <button id="load_video_button" name="load_video_button">
+            LOAD VIDEO
+          </button>
+          <button id="detect_button" name="detect_button">
+            DETECT MANUALLY
+          </button>
+          <button id="webcam_button" name="webcam_button">WEBCAM</button>
         </div>
         <div class="item-list">
           <ul>
@@ -31,19 +42,40 @@
         </div>
       </div>
       <div class="container-image">
+        <!-- Hidden image and video elements used as sources -->
         <img
           id="image-main"
           src="pexels-shkrabaanthony-6266984.jpg"
           alt="Image"
+          style="display: none"
         />
+        <video
+          id="video-main"
+          width="600"
+          height="400"
+          style="display: none"
+          muted
+        ></video>
         <canvas id="canvas-main" width="600" height="400"></canvas>
       </div>
     </main>
     <footer>Thanks for playing the Scavenger Hunt</footer>
 
-    <!-- Load main.js -->
-    <script src="main.js" type="text/javascript"></script>
-    <!-- Load TensorFlow.js. This is required to use coco-ssd model. -->
+    <!-- Hidden file inputs for loading media -->
+    <input
+      type="file"
+      id="image-file-input"
+      accept="image/*"
+      style="display: none"
+    />
+    <input
+      type="file"
+      id="video-file-input"
+      accept="video/*"
+      style="display: none"
+    />
+
+    <!-- Load TensorFlow.js -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <!-- Load the coco-ssd model. -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
