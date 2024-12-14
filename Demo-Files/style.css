@@ -1,51 +1,65 @@
 * {
   box-sizing: border-box;
   margin: 0;
+  padding: 0;
 }
 
 body {
   background-color: #cadfd1;
+  font-family: sans-serif;
+}
+
+header {
+  padding: 1rem;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
 .main-game {
   display: flex;
+  align-items: flex-start; /* Align everything from the top */
   justify-content: center;
+  gap: 2rem;
+  max-width: 90vw;
   margin: 2rem auto;
-  max-width: 800px;
-  width: 800px;
-  flex-direction: row;
 }
 
+/* Left-side container for buttons and items */
 .container {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 1rem auto;
+  flex-direction: column; /* Stack buttons on top, items below */
+  align-items: flex-start;
   width: 200px;
   gap: 1rem;
 }
 
+/* Buttons container at top */
 .container-buttons {
   display: flex;
-  justify-content: center;
-  margin: 1rem auto;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
 }
 
+/* Item list below the buttons */
 .item-list {
   font-size: 1.5rem;
   font-weight: bold;
+  list-style-type: disc;
+  margin-left: 1.5rem;
 }
 
-/* This is the container that holds the image and canvas and is set to relative */
+/* Image/Canvas container on the right */
 .container-image {
   position: relative;
   width: 600px;
   height: 400px;
-  margin-left: 2rem;
+  flex-shrink: 0; /* Prevent this from shrinking */
 }
 
-/* Image should fill the container and be behind the canvas */
+/* Image behind the canvas */
 .container-image img {
   position: absolute;
   top: 0;
@@ -56,7 +70,7 @@ body {
   z-index: 1;
 }
 
-/* Canvas positioned over the image to that it can overlay all our stats and show feedback while it detects the objects */
+/* Canvas on top of the image */
 #canvas-main {
   position: absolute;
   top: 0;
@@ -66,18 +80,47 @@ body {
   z-index: 2;
 }
 
+/* Buttons styling */
 button {
   background-color: #1d2b1d;
+  border: none;
   border-radius: 5px;
   color: white;
   padding: 2px 6px;
   text-align: center;
   font-size: 10px;
-  margin: 4px 2px;
-  cursor: pointer;
   height: 30px;
+  cursor: pointer;
 }
 
 button:hover {
   background-color: #295a2b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .main-game {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container-image,
+  .container {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .container {
+    align-items: center;
+  }
+
+  .container-buttons {
+    justify-content: center;
+  }
+
+  .container-image img,
+  #canvas-main {
+    width: 100%;
+    height: auto;
+  }
 }
