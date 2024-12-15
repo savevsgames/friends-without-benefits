@@ -1,8 +1,9 @@
 import { Outlet, Route, Routes } from 'react-router-dom';
 
 
-import NavBar from './components/NavBar.tsx';
-import Footer from './components/Footer.tsx';
+// import NavBar from './components/NavBar.tsx';
+// import Footer from './components/Footer.tsx';
+import "./index.css"
 import Landing from './pages/Landing.tsx';
 import Error from './pages/Error.tsx';
 import Game from './pages/Game.tsx';
@@ -13,9 +14,9 @@ import Profile from './pages/Profile.tsx';
 function Layout () {
   return (
     <div>
-      <NavBar />
+   
       <Outlet />
-      <Footer />
+
     </div>
 )}
 
