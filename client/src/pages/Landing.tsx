@@ -1,6 +1,16 @@
-
+import { useNavigate } from "react-router-dom";
 
 function Landing() {
+  const navigate = useNavigate();
+
+  const handleSignUp = () => {
+    navigate("/signup");
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
   return (
     <div className="bg-white h-screen flex overflow-hidden">
       {/* Left Section for Text Content */}
@@ -15,14 +25,19 @@ function Landing() {
           Turn your everyday items into a fun game of detection!
         </h2>
         <div className="flex flex-row space-x-4">
-          <button className="rounded-md bg-blue-500 px-6 py-3 text-white font-semibold shadow hover:bg-blue-600 transition">
+          <button
+            className="rounded-md bg-blue-500 px-6 py-3 text-white font-semibold shadow hover:bg-blue-600 transition"
+            onClick={handleSignUp}
+          >
             Get Started
           </button>
-
-          <button className="rounded-md bg-blue-500 px-6 py-3 text-white font-semibold shadow hover:bg-blue-600 transition">
+          <button
+            className="rounded-md bg-blue-500 px-6 py-3 text-white font-semibold shadow hover:bg-blue-600 transition"
+            onClick={handleLogin}
+          >
             Sign In
           </button>
-          <button className="rounded-md bg-transparent-500 px-6 py-3 text-black font-semibold shadow hover:bg-blue-600 transition">
+          <button className="rounded-md bg-white px-6 py-3 text-black font-semibold shadow hover:bg-gray-100 transition">
             Learn More
           </button>
         </div>
@@ -39,4 +54,4 @@ function Landing() {
     </div>
   );
 }
-export default Landing
+export default Landing;
