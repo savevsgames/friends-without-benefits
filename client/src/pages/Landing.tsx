@@ -15,6 +15,11 @@ function Landing() {
     <div className="bg-white h-screen flex overflow-hidden">
       {/* Left Section for Text Content */}
       <div className="w-1/2 flex flex-col justify-center items-start px-12">
+        <div className="absolute top-4 left-4 z-10">
+          <h2 className="text-2xl font-bold text-gray-800 tracking-widest px-7">
+            FWOB
+          </h2>
+        </div>
         <h3 className="text-lg text-gray-600 mb-4 tracking-wider">
           Think fast. Spot faster. Win big.
         </h3>
