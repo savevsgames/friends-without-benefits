@@ -16,7 +16,7 @@ const colorForLabels = (className) => {
     default: red,
   };
   //
-  return colors.className || colors.default;
+  return colors[className] || colors.default;
 };
 
 const drawBoundingBoxes = (predictions, inputImage) => {
@@ -86,19 +86,36 @@ const setupEventListeners = () => {
   document.getElementById("load_image_button").addEventListener("click", () => {
     document.getElementById("image-file-input").click();
   });
-  // Load Image from File
+  // Load Image from File - Hidden Input
   document
     .getElementById("image-file-input")
     .addEventListener("change", (event) => {
       const file = event.target.files[0];
-      if (file) loadImage(file);
+      if (file) {
+        loadImage(file);
+        currentMediaType = "image";
+        console.log("Image loaded and media type set to image");
+      } else {
+        console.log("No image file selected");
+      }
+    });
+
+  // Detect Button
+  document
+    .getElementById("detect_button")
+    .addEventListener("click", async () => {
+      await runDetection();
     });
 };
 
 const runDetection = async () => {
-  if (!model || !currentMediaElement) {
+  if (!model) {
     // Media Element is the img, video or webcam to run detection on
-    console.log("Model or Media Element not ready");
+    console.log("Model not ready");
+    return;
+  }
+  if (!currentMediaElement || !currentMediaType) {
+    console.log("No media element to run detection on. Load an image first.");
     return;
   }
   if (currentMediaType === "image") {
@@ -119,3 +136,12 @@ const runDetection = async () => {
     console.log("Running detection on webcam...");
   }
 };
+
+// Main initialization function
+const init = async () => {
+  await initOpenCvAndModel();
+};
+
+init();
+
+// export { init };
