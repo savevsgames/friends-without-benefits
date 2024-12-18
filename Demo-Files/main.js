@@ -1,44 +1,49 @@
+let currentMediaElement = null;
+let currentMediaType = null;
+let model = null;
+let videoPlaying = false;
+let webcamSteam = null;
+
 const blue = [255, 0, 0, 255];
 const green = [0, 255, 0, 255];
 const red = [0, 0, 255, 255];
 
 function colorForLabels(className) {
-  let color;
-  if (className === "person") {
-    color = blue;
-  } else if (className === "oneoftheitemsinourgame") {
-    color = green;
-  } else {
-    color = red;
-  }
+  const colors = {
+    // Can add more colors to match the classes we want to detect
+    person: blue,
+    bottle: green,
+    default: red,
+  };
+  //
+  return colors.className || colors.default;
 }
 
 function drawBoundingBoxes(predictions, inputImage) {
+  // Grab the canvas
+  const canvas = document.getElementById("canvas-main");
+  const context = canvas.getContext("2d");
+
+  // Loop through the predictions and draw the bounding boxes
   predictions.forEach((prediction) => {
-    const bbox = prediction.bbox;
-    const x = bbox[0];
-    const y = bbox[1];
-    const width = bbox[2];
-    const height = bbox[3];
-    const className = prediction.class;
-    const confScore = prediction.score;
+    const { bbox, class: className, score: confScore } = prediction;
+    const { x, y, width, height } = bbox;
+
     const color = colorForLabels(className);
-    console.log(x, y, width, height, className, confScore);
-    // Draw the bounding box with the label and the confidence score
-    // using points from prediction iterable
-    let point1 = new cv.Point(x, y);
-    let point2 = new cv.Point(x + width, y + height);
-    cv.rectangle(inputImage, point1, point2, color, 2);
-    let text = className + " " + Math.round(confScore * 100) + "%";
-    // Set the font for the box text
-    const font = cv.FONT_HERSHEY_SIMPLEX;
-    const fontSize = 0.7;
-    const thickness = 1;
-    // Grab the canvas
-    const canvas = document.getElementById("canvas-main");
-    const context = canvas.getContext("2d");
+    // console.log(x, y, width, height, className, confScore);
+    const point1 = new cv.Point(x, y);
+    const point2 = new cv.Point(x + width, y + height);
+    // Draw the bounding box (image, top-left, bottom-right, color, thickness)
+    cv.rectangle(inputImage, point1, point2, color, 4);
+    const text = `${className} ${Math.round(confScore * 100)}%`;
     const textMetrics = context.measureText(text);
     const textWidth = textMetrics.width;
+
+    // Set the font for the box text
+    const font = cv.FONT_HERSHEY_SIMPLEX;
+    const fontSize = 1.5;
+    const thickness = 2;
+
     cv.rectangle(
       inputImage,
       new cv.Point(x, y - 20),
@@ -61,31 +66,36 @@ function drawBoundingBoxes(predictions, inputImage) {
 function OpenCVReady() {
   cv["onRuntimeInitialized"] = () => {
     console.log("OpenCV.js is ready");
+
+    // Test OpenCV.js is working on load with a quick image load
     let imageMain = cv.imread("image-main");
     cv.imshow("canvas-main", imageMain);
     imageMain.delete();
 
-    // Oject detection
+    // Functions to add event listeners to the buttons
+    async function addLoadImageEListener() {
+      const loadImageButton = document.getElementById("load_image_button");
+      loadImageButton.addEventListener("click", function () {
+        console.log("Load Image Button Clicked");
+      });
+    }
+    // Object Detection Event Listener
     document
       .getElementById("detect_button")
       .addEventListener("click", function () {
         console.log("Object Detection Image loader...");
         const image = document.getElementById("image-main");
         let inputImage = cv.imread(image);
-        //Load the model then use it to detect objects in the image
+        // Load the cocossd model then use it to detect objects in the image
         cocoSsd.load().then((model) => {
           model.detect(image).then((predictions) => {
             console.log("Predictions: ", predictions);
             console.log("Length of Predictions: ", predictions.length);
             if (predictions.length > 0) {
-              // draw the bounding boxes if there are any predictions
               drawBoundingBoxes(predictions, inputImage);
-              cv.imshow("canvas-main", inputImage);
-              inputImage.delete();
-            } else {
-              cv.imshow("canvas-main", inputImage);
-              inputImage.delete();
             }
+            cv.imshow("canvas-main", inputImage);
+            inputImage.delete();
           });
         });
       });
