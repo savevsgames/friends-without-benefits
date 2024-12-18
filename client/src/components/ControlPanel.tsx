@@ -39,5 +39,6 @@ export const ControlPanel = () => {
         </Button>
       </Card.Footer>
     </Card.Root>
+    
   );
 };
