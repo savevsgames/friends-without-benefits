@@ -65,7 +65,7 @@ const drawBoundingBoxes = (predictions, inputImage) => {
 
 const initOpenCvAndModel = async () => {
   console.log("Initializing OpenCV and Model...");
-  // Load OpenCV.js into memory
+  // Game page will load OpenCV.js into memory and the new Promise will resolve when it's ready
   await new Promise((resolve) => {
     cv["onRuntimeInitialized"] = resolve();
   });
@@ -76,7 +76,7 @@ const initOpenCvAndModel = async () => {
   console.log("Model is ready");
 
   // Add functionality to the buttons
-  // setupEventListeners();
+  setupEventListeners();
 };
 
 const setupEventListeners = () => {
@@ -138,10 +138,8 @@ const runDetection = async () => {
 };
 
 // Main initialization function
-const init = async () => {
+export const initScavengerHunt = async () => {
   await initOpenCvAndModel();
 };
 
-init();
-
-// export { init };
+initScavengerHunt();
