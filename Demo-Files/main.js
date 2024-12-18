@@ -8,6 +8,26 @@ const blue = [255, 0, 0, 255];
 const green = [0, 255, 0, 255];
 const red = [0, 0, 255, 255];
 
+// Using File Reader API to load the image and display it.
+// In the future we may switch to FormData API instead if media is uploaded to the server
+function loadImage(file) {
+  const imageElement = document.getElementById("image-main");
+  const canvasElement = document.getElementById("canvas-main");
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    // In react we will have to use setState to update the image src, currentMediaType and currentMediaElement
+    imageElement.src = event.target.result;
+    currentMediaType = "image";
+    currentMediaElement = imageElement;
+    let imgMat = cv.imread(imageElement);
+    cv.imshow(canvasElement, imgMat);
+    imgMat.delete();
+    console.log("Image Loaded and Displayed");
+  };
+  // For handling binary files
+  reader.readAsDataURL(file);
+}
+
 const colorForLabels = (className) => {
   const colors = {
     // Can add more colors to match the classes we want to detect
@@ -63,7 +83,22 @@ const drawBoundingBoxes = (predictions, inputImage) => {
   });
 };
 
+const waitForCVDef = async () => {
+  console.log("Waiting for cv ...");
+  await new Promise((resolve) => {
+    const interval = setInterval(() => {
+      if (typeof cv !== "undefined") {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100); // check every 100ms for the cv object to be available
+  });
+  console.log("OpenCV is ready");
+};
+
 const initOpenCvAndModel = async () => {
+  console.log("Waiting for cv to be defined...");
+  await waitForCVDef();
   console.log("Initializing OpenCV and Model...");
   // Game page will load OpenCV.js into memory and the new Promise will resolve when it's ready
   await new Promise((resolve) => {
@@ -86,6 +121,7 @@ const setupEventListeners = () => {
   document.getElementById("load_image_button").addEventListener("click", () => {
     document.getElementById("image-file-input").click();
   });
+
   // Load Image from File - Hidden Input
   document
     .getElementById("image-file-input")
@@ -99,6 +135,7 @@ const setupEventListeners = () => {
         console.log("No image file selected");
       }
     });
+  console.log("Load Image Button is set up!");
 
   // Detect Button
   document
@@ -106,6 +143,7 @@ const setupEventListeners = () => {
     .addEventListener("click", async () => {
       await runDetection();
     });
+  console.log("Detect Button is set up!");
 };
 
 const runDetection = async () => {
