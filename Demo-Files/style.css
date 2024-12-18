@@ -67,7 +67,7 @@ header {
   width: 600px;
   height: 400px;
   object-fit: cover;
-  z-index: 1;
+  z-index: -1;
 }
 
 /* Canvas on top of the image */
