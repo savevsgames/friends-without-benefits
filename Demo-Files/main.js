@@ -87,27 +87,35 @@ const setupEventListeners = () => {
     document.getElementById("image-file-input").click();
   });
   // Load Image from File
-  document.getElementById("image-file-input").addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (file) loadImage(file);
-  });
-}
-
-// Object Detection Event Listener
-document.getElementById("detect_button").addEventListener("click", function () {
-  console.log("Object Detection Image loader...");
-  const image = document.getElementById("image-main");
-  let inputImage = cv.imread(image);
-  // Load the cocossd model then use it to detect objects in the image
-  cocoSsd.load().then((model) => {
-    model.detect(image).then((predictions) => {
-      console.log("Predictions: ", predictions);
-      console.log("Length of Predictions: ", predictions.length);
-      if (predictions.length > 0) {
-        drawBoundingBoxes(predictions, inputImage);
-      }
-      cv.imshow("canvas-main", inputImage);
-      inputImage.delete();
+  document
+    .getElementById("image-file-input")
+    .addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) loadImage(file);
     });
-  });
-});
+};
+
+const runDetection = async () => {
+  if (!model || !currentMediaElement) {
+    // Media Element is the img, video or webcam to run detection on
+    console.log("Model or Media Element not ready");
+    return;
+  }
+  if (currentMediaType === "image") {
+    console.log("Running detection on image...");
+    const inputImage = cv.imread(currentMediaElement);
+    const predictions = await model.detect(currentMediaElement);
+
+    console.log("Predictions: ", predictions);
+    if (predictions.length > 0) {
+      drawBoundingBoxes(predictions, inputImage);
+    }
+
+    cv.imshow("canvas-main", inputImage);
+    inputImage.delete();
+  } else if (currentMediaType === "video") {
+    console.log("Running detection on video...");
+  } else if (currentMediaType === "webcam") {
+    console.log("Running detection on webcam...");
+  }
+};
