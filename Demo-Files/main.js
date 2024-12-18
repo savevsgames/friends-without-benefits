@@ -8,7 +8,7 @@ const blue = [255, 0, 0, 255];
 const green = [0, 255, 0, 255];
 const red = [0, 0, 255, 255];
 
-function colorForLabels(className) {
+const colorForLabels = (className) => {
   const colors = {
     // Can add more colors to match the classes we want to detect
     person: blue,
@@ -17,9 +17,9 @@ function colorForLabels(className) {
   };
   //
   return colors.className || colors.default;
-}
+};
 
-function drawBoundingBoxes(predictions, inputImage) {
+const drawBoundingBoxes = (predictions, inputImage) => {
   // Grab the canvas
   const canvas = document.getElementById("canvas-main");
   const context = canvas.getContext("2d");
@@ -61,7 +61,23 @@ function drawBoundingBoxes(predictions, inputImage) {
       thickness
     );
   });
-}
+};
+
+const initOpenCvAndModel = async () => {
+  console.log("Initializing OpenCV and Model...");
+  // Load OpenCV.js into memory
+  await new Promise((resolve) => {
+    cv["onRuntimeInitialized"] = resolve();
+  });
+  console.log("OpenCV is ready");
+  // In the future we can load a custom model here, for MVP we will test with coco-ssd and yolo
+  // TODO: Load the model here
+  model = await cocoSsd.load();
+  console.log("Model is ready");
+
+  // Add functionality to the buttons
+  // setupEventListeners();
+};
 
 function OpenCVReady() {
   cv["onRuntimeInitialized"] = () => {
