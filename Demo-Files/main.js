@@ -79,41 +79,35 @@ const initOpenCvAndModel = async () => {
   // setupEventListeners();
 };
 
-function OpenCVReady() {
-  cv["onRuntimeInitialized"] = () => {
-    console.log("OpenCV.js is ready");
+const setupEventListeners = () => {
+  console.log("Setting up Event Listeners...");
 
-    // Test OpenCV.js is working on load with a quick image load
-    let imageMain = cv.imread("image-main");
-    cv.imshow("canvas-main", imageMain);
-    imageMain.delete();
-
-    // Functions to add event listeners to the buttons
-    async function addLoadImageEListener() {
-      const loadImageButton = document.getElementById("load_image_button");
-      loadImageButton.addEventListener("click", function () {
-        console.log("Load Image Button Clicked");
-      });
-    }
-    // Object Detection Event Listener
-    document
-      .getElementById("detect_button")
-      .addEventListener("click", function () {
-        console.log("Object Detection Image loader...");
-        const image = document.getElementById("image-main");
-        let inputImage = cv.imread(image);
-        // Load the cocossd model then use it to detect objects in the image
-        cocoSsd.load().then((model) => {
-          model.detect(image).then((predictions) => {
-            console.log("Predictions: ", predictions);
-            console.log("Length of Predictions: ", predictions.length);
-            if (predictions.length > 0) {
-              drawBoundingBoxes(predictions, inputImage);
-            }
-            cv.imshow("canvas-main", inputImage);
-            inputImage.delete();
-          });
-        });
-      });
-  };
+  // Load Image Button
+  document.getElementById("load_image_button").addEventListener("click", () => {
+    document.getElementById("image-file-input").click();
+  });
+  // Load Image from File
+  document.getElementById("image-file-input").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) loadImage(file);
+  });
 }
+
+// Object Detection Event Listener
+document.getElementById("detect_button").addEventListener("click", function () {
+  console.log("Object Detection Image loader...");
+  const image = document.getElementById("image-main");
+  let inputImage = cv.imread(image);
+  // Load the cocossd model then use it to detect objects in the image
+  cocoSsd.load().then((model) => {
+    model.detect(image).then((predictions) => {
+      console.log("Predictions: ", predictions);
+      console.log("Length of Predictions: ", predictions.length);
+      if (predictions.length > 0) {
+        drawBoundingBoxes(predictions, inputImage);
+      }
+      cv.imshow("canvas-main", inputImage);
+      inputImage.delete();
+    });
+  });
+});
