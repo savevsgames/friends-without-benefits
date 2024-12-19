@@ -12,6 +12,7 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
+// page navigations
 const navigation = [
   { name: "GameBoard", page: "/Game" },
   { name: "LeaderBoard", page: "/LeaderBoard" },
@@ -21,14 +22,17 @@ const profileNavigation = [
   { name: "Sign Out", page: "/" },
 ];
 
+
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function Header() {
   const location = useLocation();
-  
   console.log("current path:", location.pathname);
+
+
+  // header begins
   return (
     <Disclosure
       as="nav"
@@ -63,8 +67,7 @@ export default function Header() {
                 textTransform="uppercase"
                 letterSpacing="widest"
                 color="cyan.100"
-                textShadow="0 0 8px rgba(0, 255, 255, 0.7), 0 0 12px rgba(0, 255, 255, 0.5), 0 0 16px rgba(0, 255, 255, 0.3)"
-              >
+                textShadow="0 0 8px rgba(0, 255, 255, 0.7), 0 0 12px rgba(0, 255, 255, 0.5), 0 0 16px rgba(0, 255, 255, 0.3)">
                 REPUBLIC OF FWOB
               </Text>
             </div>
