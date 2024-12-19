@@ -44,21 +44,27 @@ export const Items = () => {
         <br></br>
 
         {/* ITEMS FOUND CARD */}
-        <Card.Root>
-          <Card.Body className="text-center text-teal-900 tracking-widest pb-2">
+        <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
+          <Card.Body className="text-center text-gray-900 tracking-widest pb-2 font-bold">
             Items Found
           </Card.Body>
-          <Card.Description className="text-center pb-2">0/4</Card.Description>
+          <Card.Description className="text-center pb-2  text-gray-900">
+            0/4
+          </Card.Description>
         </Card.Root>
 
         <br></br>
         {/* ITEMS CARD */}
-        <ul className="text-center text-teal-900 tracking-widest">
-          Items To find:
-          {items.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ul>
+        <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
+          <ul className="text-center text-gray-900 tracking-widest pb-2 font-bold">
+            Items To find:
+            {items.map((item, i) => (
+              <li className=" text-gray-900 font-normal" key={i}>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Card.Root>
       </div>
     </div>
   );
