@@ -6,9 +6,9 @@
     <title>Object Detection - Scavenger Hunt Testing</title>
     <link href="style.css" rel="stylesheet" />
     <!-- Load main.js -->
-    <script defer src="main.js" type="text/javascript"></script>
+    <script defer src="main.js" type="module"></script>
     <!-- Load OpenCV.js -->
-    <script async src="opencv.js" onload="OpenCVReady()"></script>
+    <script async src="opencv.js""></script>
   </head>
   <body>
     <header>
@@ -61,7 +61,7 @@
     </main>
     <footer>Thanks for playing the Scavenger Hunt</footer>
 
-    <!-- Hidden file inputs for loading media -->
+    <!-- Hidden file inputs for loading media - THESE HAVE TO BE id'd THE SAME IN THE REACT APP AND HIDDEN (accessible to the vdom) -->
     <input
       type="file"
       id="image-file-input"
