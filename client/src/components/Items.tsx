@@ -4,7 +4,7 @@ import { IoIosTimer } from "react-icons/io";
 import Countdown from "react-countdown";
 
 export const Items = () => {
-  const items = ["Item1", "Item2", "Item3", "Item4"];
+  const items = ["Item1", "Item2", "Item3", "Item4", "item5"];
 
   return (
     <div>
@@ -16,13 +16,18 @@ export const Items = () => {
           </Card.Title>
         </Card.Body>
         <Card.Footer justifyContent="center">
-          <Button variant="surface" borderColor="teal.900" className="p-1">
+          <Button
+            id="load_image_button"
+            variant="surface"
+            borderColor="teal.900"
+            className="p-1"
+          >
             Load Image
           </Button>
-          <Button variant="surface" className="p-1">
+          <Button id="load_video_button" variant="surface" className="p-1">
             Load Video
           </Button>
-          <Button variant="surface" className="p-1">
+          <Button id="detect_button" variant="surface" className="p-1">
             Detect
           </Button>
         </Card.Footer>
