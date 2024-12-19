@@ -1,7 +1,6 @@
 import { Card } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
-import React from "react";
-import ReactDOM from "react-dom";
+import { IoIosTimer } from "react-icons/io";
 import Countdown from "react-countdown";
 
 export const Items = () => {
@@ -9,9 +8,10 @@ export const Items = () => {
 
   return (
     <div>
-      <Card.Root>
+      {/* DEVELOPEMENT USE CARD */}
+      <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
         <Card.Body gap="2">
-          <Card.Title className="text-center text-teal-900 tracking-widest">
+          <Card.Title className="text-center text-gray-900 tracking-widest font-bold">
             For development Use
           </Card.Title>
         </Card.Body>
@@ -27,30 +27,38 @@ export const Items = () => {
           </Button>
         </Card.Footer>
       </Card.Root>
+
       <br></br>
-      <ul className="text-center text-teal-900 tracking-widest">
-        Items To find:
-        {items.map((item, i) => (
-          <li key={i}>{item}</li>
-        ))}
-      </ul>
-      <br></br>
+
       <div>
-        <Card.Root>
-          <Card.Body className="text-center text-teal-900 tracking-widest pb-2">
+        {/* TIMER CARD */}
+        <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
+          <Card.Body className="text-center text-gray-900 tracking-widest pb-2 font-bold">
             Game Timer
           </Card.Body>
-          <Card.Description className="text-center pb-2">
+          <Card.Description className="text-center pb-2 text-gray-900">
             <Countdown date={Date.now() + 10000} />
           </Card.Description>
         </Card.Root>
+
         <br></br>
+
+        {/* ITEMS FOUND CARD */}
         <Card.Root>
           <Card.Body className="text-center text-teal-900 tracking-widest pb-2">
             Items Found
           </Card.Body>
           <Card.Description className="text-center pb-2">0/4</Card.Description>
         </Card.Root>
+
+        <br></br>
+        {/* ITEMS CARD */}
+        <ul className="text-center text-teal-900 tracking-widest">
+          Items To find:
+          {items.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );

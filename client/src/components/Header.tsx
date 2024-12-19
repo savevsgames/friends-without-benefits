@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { Text } from "@chakra-ui/react"
 
 import {
   Disclosure,
@@ -29,8 +30,11 @@ export default function Header() {
   
   console.log("current path:", location.pathname);
   return (
-    <Disclosure as="nav" className="bg-teal-950">
-      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+    <Disclosure
+      as="nav"
+      className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100"
+    >
+      <div className="mx-auto max-w-9xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           {/* {responsiveness} */}
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -52,12 +56,17 @@ export default function Header() {
           {/* {Logo and navigation items} */}
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             {/* {Logo} */}
-            <div className="flex shrink-0 items-center">
-              <img
-                alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-8 w-auto"
-              />
+            <div className="flex shrink-0 items-center text-gray-900">
+              {/* chakra text component */}
+              <Text
+                fontWeight="bold"
+                textTransform="uppercase"
+                letterSpacing="widest"
+                color="cyan.100"
+                textShadow="0 0 8px rgba(0, 255, 255, 0.7), 0 0 12px rgba(0, 255, 255, 0.5), 0 0 16px rgba(0, 255, 255, 0.3)"
+              >
+                REPUBLIC OF FWOB
+              </Text>
             </div>
 
             {/* {Navigation items} */}
@@ -70,7 +79,7 @@ export default function Header() {
                     className={classNames(
                       location.pathname === item.page
                         ? "bg-teal-900 text-white" // this is to highlight active
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                        : "text-gray-300 hover:outline-offset-0 hover:text-white",
                       "rounded-md px-3 py-2 text-sm font-medium"
                     )}
                   >

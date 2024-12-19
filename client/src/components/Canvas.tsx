@@ -1,3 +1,3 @@
 export const Canvas = () => {
-  return <div className="text-center">CANVAS/WEBCAM</div>;
+  return <div className="text-center text-white">CANVAS/WEBCAM</div>;
 };

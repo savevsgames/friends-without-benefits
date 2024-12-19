@@ -4,9 +4,9 @@ import { Button } from "@chakra-ui/react";
 
 export const ControlPanel = () => {
   return (
-    <Card.Root>
+    <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
       <Card.Body gap="2">
-        <Card.Title className="text-center text-teal-900 tracking-widest">Control   Panel</Card.Title>
+        <Card.Title className="text-center text-gray-900 tracking-widest font-bold">Control Panel</Card.Title>
       </Card.Body>
       <Card.Footer justifyContent="center">
         <Button
