@@ -46,44 +46,51 @@ const colorForLabels = (className) => {
 };
 
 const drawBoundingBoxes = (predictions, inputImage) => {
+  const canvas = document.getElementById("canvas-main");
+  const context = canvas.getContext("2d");
+
   predictions.forEach((prediction) => {
     const { bbox, class: className, score: confScore } = prediction;
-    const { x, y, width, height } = bbox;
+    const [x, y, width, height] = bbox.map((val) => Math.round(val)); // Ensure all values are integers
 
     const color = colorForLabels(className);
-    const point1 = new cv.Point(Math.round(x), Math.round(y));
-    const point2 = new cv.Point(Math.round(x + width), Math.round(y + height));
+    // Draw bounding box
+    const point1 = new cv.Point(x, y);
+    const point2 = new cv.Point(x + width, y + height);
 
     // Draw the bounding box
-    cv.rectangle(inputImage, point1, point2, color, 2);
-
+    cv.rectangle(inputImage, point1, point2, color, 4);
     // Draw the label background and text
     const text = `${className} ${Math.round(confScore * 100)}%`;
-    const font = cv.FONT_HERSHEY_SIMPLEX;
-    const fontSize = 0.5;
-    const thickness = 1;
+    const fontFace = cv.FONT_HERSHEY_SIMPLEX;
+    const fontSize = 0.8; // Proportional size in rem
+    const thickness = 2;
+    const filled = -1; // Filled rectangle
 
     // Get text size for background rectangle
-    const baseline = new Array(1);
-    const textSize = cv.getTextSize(text, font, fontSize, thickness, baseline);
+    context.font = "20px Arial"; // Use to measure text width and height
+    const textMetrics = context.measureText(text);
+    const textWidth = textMetrics.width;
+    const textHeight = 20; // These are hardcoded for now
+    const textPadding = 15;
 
-    // Draw background rectangle for text
+    // Draw background rectangle for the label
     cv.rectangle(
       inputImage,
-      new cv.Point(Math.round(x), Math.round(y - 20)),
-      new cv.Point(Math.round(x + textSize.width), Math.round(y)),
+      new cv.Point(x, y - textHeight - textPadding),
+      new cv.Point(x + textWidth + textPadding, y),
       color,
-      -1
+      filled
     );
 
-    // Draw text
+    // Draw the text
     cv.putText(
       inputImage,
       text,
-      new cv.Point(Math.round(x), Math.round(y - 5)),
-      font,
+      new cv.Point(x + 5, y - 5), // Adjust text placement
+      fontFace,
       fontSize,
-      new cv.Scalar(255, 255, 255, 255),
+      new cv.Scalar(255, 255, 255, 255), // White text
       thickness
     );
   });
