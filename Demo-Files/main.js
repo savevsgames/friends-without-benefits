@@ -59,20 +59,20 @@ const drawBoundingBoxes = (predictions, inputImage) => {
     const point2 = new cv.Point(x + width, y + height);
 
     // Draw the bounding box
-    cv.rectangle(inputImage, point1, point2, color, 4);
+    cv.rectangle(inputImage, point1, point2, color, 8);
     // Draw the label background and text
     const text = `${className} ${Math.round(confScore * 100)}%`;
     const fontFace = cv.FONT_HERSHEY_SIMPLEX;
     const fontSize = 0.8; // Proportional size in rem
-    const thickness = 2;
+    const thickness = 4;
     const filled = -1; // Filled rectangle
 
     // Get text size for background rectangle
     context.font = "20px Arial"; // Use to measure text width and height
     const textMetrics = context.measureText(text);
     const textWidth = textMetrics.width;
-    const textHeight = 20; // These are hardcoded for now
-    const textPadding = 15;
+    const textHeight = 100; // These are hardcoded for now
+    const textPadding = 150;
 
     // Draw background rectangle for the label
     cv.rectangle(
