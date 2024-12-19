@@ -4,31 +4,37 @@ let model = null;
 let videoPlaying = false;
 let webcamSteam = null;
 
-const blue = [255, 0, 0, 255];
-const green = [0, 255, 0, 255];
-const red = [0, 0, 255, 255];
-
 // Using File Reader API to load the image and display it.
 // In the future we may switch to FormData API instead if media is uploaded to the server
 function loadImage(file) {
-  const imageElement = document.getElementById("image-main");
-  const canvasElement = document.getElementById("canvas-main");
   const reader = new FileReader();
   reader.onload = function (event) {
-    // In react we will have to use setState to update the image src, currentMediaType and currentMediaElement
+    const imageElement = document.getElementById("image-main");
+    const canvasElement = document.getElementById("canvas-main");
     imageElement.src = event.target.result;
-    currentMediaType = "image";
-    currentMediaElement = imageElement;
-    let imgMat = cv.imread(imageElement);
-    cv.imshow(canvasElement, imgMat);
-    imgMat.delete();
-    console.log("Image Loaded and Displayed");
+    // Wait for the image to load
+    imageElement.onload = () => {
+      // Set the canvas width and height to the image width and height (may clash with CSS)
+      canvasElement.width = imageElement.naturalWidth;
+      canvasElement.height = imageElement.naturalHeight;
+      // In react we will have to use setState to update the image src, currentMediaType and currentMediaElement
+      currentMediaType = "image";
+      currentMediaElement = imageElement;
+      let imgMat = cv.imread("image-main");
+      console.log("Image Loaded: ", imgMat);
+      cv.imshow("canvas-main", imgMat);
+      imgMat.delete();
+      console.log("Image Loaded and Displayed");
+    };
   };
   // For handling binary files
   reader.readAsDataURL(file);
 }
 
 const colorForLabels = (className) => {
+  const blue = [255, 0, 0, 255];
+  const green = [0, 255, 0, 255];
+  const red = [0, 0, 255, 255];
   const colors = {
     // Can add more colors to match the classes we want to detect
     person: blue,
@@ -40,44 +46,51 @@ const colorForLabels = (className) => {
 };
 
 const drawBoundingBoxes = (predictions, inputImage) => {
-  // Grab the canvas
   const canvas = document.getElementById("canvas-main");
   const context = canvas.getContext("2d");
 
-  // Loop through the predictions and draw the bounding boxes
   predictions.forEach((prediction) => {
     const { bbox, class: className, score: confScore } = prediction;
-    const { x, y, width, height } = bbox;
+    const [x, y, width, height] = bbox.map((val) => Math.round(val)); // Ensure all values are integers
 
     const color = colorForLabels(className);
-    // console.log(x, y, width, height, className, confScore);
+    // Draw bounding box
     const point1 = new cv.Point(x, y);
     const point2 = new cv.Point(x + width, y + height);
-    // Draw the bounding box (image, top-left, bottom-right, color, thickness)
+
+    // Draw the bounding box
     cv.rectangle(inputImage, point1, point2, color, 4);
+    // Draw the label background and text
     const text = `${className} ${Math.round(confScore * 100)}%`;
+    const fontFace = cv.FONT_HERSHEY_SIMPLEX;
+    const fontSize = 0.8; // Proportional size in rem
+    const thickness = 2;
+    const filled = -1; // Filled rectangle
+
+    // Get text size for background rectangle
+    context.font = "20px Arial"; // Use to measure text width and height
     const textMetrics = context.measureText(text);
     const textWidth = textMetrics.width;
+    const textHeight = 20; // These are hardcoded for now
+    const textPadding = 15;
 
-    // Set the font for the box text
-    const font = cv.FONT_HERSHEY_SIMPLEX;
-    const fontSize = 1.5;
-    const thickness = 2;
-
+    // Draw background rectangle for the label
     cv.rectangle(
       inputImage,
-      new cv.Point(x, y - 20),
-      new cv.Point(x + textWidth + 150, y),
+      new cv.Point(x, y - textHeight - textPadding),
+      new cv.Point(x + textWidth + textPadding, y),
       color,
-      -1
+      filled
     );
+
+    // Draw the text
     cv.putText(
       inputImage,
       text,
-      new cv.Point(x, y - 5),
-      font,
+      new cv.Point(x + 5, y - 5), // Adjust text placement
+      fontFace,
       fontSize,
-      new cv.Scalar(255, 255, 255, 255),
+      new cv.Scalar(255, 255, 255, 255), // White text
       thickness
     );
   });
@@ -158,16 +171,19 @@ const runDetection = async () => {
   }
   if (currentMediaType === "image") {
     console.log("Running detection on image...");
-    const inputImage = cv.imread(currentMediaElement);
-    const predictions = await model.detect(currentMediaElement);
-
-    console.log("Predictions: ", predictions);
-    if (predictions.length > 0) {
-      drawBoundingBoxes(predictions, inputImage);
+    const inputImage = await cv.imread(currentMediaElement);
+    try {
+      const predictions = await model.detect(currentMediaElement);
+      console.log("Predictions: ", predictions);
+      if (predictions.length > 0) {
+        drawBoundingBoxes(predictions, inputImage);
+      }
+      cv.imshow("canvas-main", inputImage);
+    } catch (error) {
+      console.error("Error running detection: ", error);
+    } finally {
+      inputImage.delete(); // Moved to finally block to ensure it's always deleted after use
     }
-
-    cv.imshow("canvas-main", inputImage);
-    inputImage.delete();
   } else if (currentMediaType === "video") {
     console.log("Running detection on video...");
   } else if (currentMediaType === "webcam") {
