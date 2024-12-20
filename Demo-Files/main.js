@@ -39,31 +39,49 @@ const loadVideo = async (file) => {
     const canvasElement = document.getElementById("canvas-main");
     const url = URL.createObjectURL(file);
     videoElement.src = url;
+    videoElement.pause();
+    videoElement.currentTime = 0;
     videoElement.style.display = "block";
     videoElement.onloadedmetadata = () => {
-      // Set canvas dimensions to match video
-      canvasElement.width = videoElement.naturalWidth;
-      canvasElement.height = videoElement.naturalHeight;
+      // Use actual video dimensions to set canvas dimensions
+      const nativeVideoWidth = videoElement.videoWidth;
+      const nativeVideoHeight = videoElement.videoHeight;
+
+      // Set canvas dimensions to match video - CSS may distort the video but the canvas will still be the correct size for processing
+      canvasElement.width = nativeVideoWidth;
+      canvasElement.height = nativeVideoHeight;
       // In react we will have to use setState to update the video src, currentMediaType and currentMediaElement
 
       currentMediaType = "video";
       currentMediaElement = videoElement;
       console.log("Video Loaded: ", videoElement);
+
       videoElement.addEventListener(
         "loadeddata",
         async () => {
-          videoElement.currentTime = 0;
-          //
-          let tempMat = new cv.Mat(
-            videoElement.height,
-            videoElement.width,
-            cv.CV_8UC4
-          );
-          let tempCapture = await new cv.VideoCapture(videoElement);
-          await tempCapture.read(tempMat);
-          console.log("Video Loaded and Displayed");
-          await cv.imshow("canvas-main", tempMat);
-          tempMat.delete();
+          try {
+            const matWidth = nativeVideoWidth;
+            const matHeight = nativeVideoHeight;
+
+            videoElement.currentTime = 0; // Make sure video is at the start and has not autoplayed
+            //
+
+            let tempCapture = await new cv.VideoCapture(videoElement);
+            // create the mat with the native video height and width and the CV_8UC4 color space
+            let tempMat = new cv.Mat(matHeight, matWidth, cv.CV_8UC4);
+            console.log("Mat Statistics: ", {
+              height: tempMat.rows,
+              width: tempMat.cols,
+              type: tempMat.type(),
+            });
+            // read the first video frame into the mat
+            tempCapture.read(tempMat);
+            cv.imshow("canvas-main", tempMat);
+            console.log("First Frame of Video Loaded and Displayed");
+            tempMat.delete();
+          } catch (error) {
+            console.error("Error loading video frame: ", error);
+          }
         },
         { once: true }
       );
@@ -84,7 +102,7 @@ const processVideoFrame = async () => {
   const video = currentMediaElement;
   // video.readyState === 4 means the video has enough data to start playing
   if (video.readyState === 4 && !video.paused && !video.ended) {
-    const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+    const src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
     const capture = new cv.VideoCapture(video);
     capture.read(src);
 
@@ -199,16 +217,16 @@ const initOpenCvAndModel = async () => {
 const setupEventListeners = () => {
   console.log("Setting up Event Listeners...");
   // Play button will start the game / detection loop (and start video if there is one loaded and not playing)
-  document.getElementById("play_button").addEventListener("click", () => {
+  document.getElementById("play_button").addEventListener("click", async () => {
     console.log("Game is Starting...");
     if (currentMediaType === "video") {
       let video = currentMediaElement;
       video.play();
       videoPlaying = true;
-      runDetectionOnCurrentMedia();
-    } else if (currentMediaType === "image" || currentMediaType === "webcam") {
+      //   await runDetection();
+      // } else if (currentMediaType === "image" || currentMediaType === "webcam") {
       // Just run detection once (image) or start webcam loop
-      runDetectionOnCurrentMedia();
+      // await runDetection();
     }
   });
   console.log("Play Button is set up!");

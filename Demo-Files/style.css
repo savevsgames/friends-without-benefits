@@ -75,9 +75,12 @@ header {
   position: absolute;
   top: 0;
   left: 0;
-  width: 600px;
-  height: 400px;
+  width: 100%;
+  height: auto;
   z-index: 2;
+  margin: 0 auto;
+  display: block;
+  object-fit: contain;
 }
 
 /* Buttons styling */
