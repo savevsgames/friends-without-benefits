@@ -2,11 +2,11 @@ let currentMediaElement = null;
 let currentMediaType = null;
 let model = null;
 let videoPlaying = false;
-let webcamSteam = null;
+let webcamStream = null;
 
 // Using File Reader API to load the image and display it.
 // In the future we may switch to FormData API instead if media is uploaded to the server
-function loadImage(file) {
+const loadImage = async (file) => {
   const reader = new FileReader();
   reader.onload = function (event) {
     const imageElement = document.getElementById("image-main");
@@ -29,7 +29,153 @@ function loadImage(file) {
   };
   // For handling binary files
   reader.readAsDataURL(file);
-}
+};
+
+const loadVideo = async (file) => {
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    // video element needs src to be set to a URL
+    const videoElement = document.getElementById("video-main");
+    const canvasElement = document.getElementById("canvas-main");
+    const url = URL.createObjectURL(file);
+    videoElement.src = url;
+    videoElement.pause();
+    videoElement.currentTime = 0;
+    videoElement.style.display = "block";
+    videoElement.onloadedmetadata = () => {
+      // Use actual video dimensions to set canvas dimensions
+      const nativeVideoWidth = videoElement.videoWidth;
+      const nativeVideoHeight = videoElement.videoHeight;
+
+      // Set canvas dimensions to match video - CSS may distort the video but the canvas will still be the correct size for processing
+      canvasElement.width = nativeVideoWidth;
+      canvasElement.height = nativeVideoHeight;
+      // In react we will have to use setState to update the video src, currentMediaType and currentMediaElement
+
+      currentMediaType = "video";
+      currentMediaElement = videoElement;
+      console.log("Video Loaded: ", videoElement);
+
+      videoElement.addEventListener(
+        "loadeddata",
+        async () => {
+          try {
+            videoElement.currentTime = 0; // Make sure video is at the start and has not auto-played
+
+            let tempCapture = await new cv.VideoCapture(videoElement);
+            // create the mat with the native video height and width and the CV_8UC4 color space
+            let tempMat = new cv.Mat(
+              nativeVideoHeight,
+              nativeVideoWidth,
+              cv.CV_8UC4
+            );
+            console.log("Mat Statistics: ", {
+              height: tempMat.rows,
+              width: tempMat.cols,
+              type: tempMat.type(),
+            });
+            // read the first video frame into the mat
+            tempCapture.read(tempMat);
+            cv.imshow("canvas-main", tempMat);
+            console.log("First Frame of Video Loaded and Displayed");
+            tempMat.delete();
+          } catch (error) {
+            console.error("Error loading video frame: ", error);
+          }
+        },
+        { once: true }
+      );
+    };
+  };
+  reader.readAsDataURL(file);
+};
+
+const processVideoFrame = async () => {
+  if (currentMediaType !== "video") {
+    console.log("No video to process");
+    return;
+  }
+  if (!videoPlaying) {
+    console.log("Video is not playing");
+    return;
+  }
+  const video = currentMediaElement;
+  // video.readyState === 4 means the video has enough data to start playing
+  if (video.readyState === 4 && !video.paused && !video.ended) {
+    const src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    const capture = new cv.VideoCapture(video);
+    capture.read(src);
+
+    const predictions = await model.detect(video);
+    console.log("Video Predictions: ", predictions);
+    if (predictions.length > 0) {
+      drawBoundingBoxes(predictions, src);
+    }
+    cv.imshow("canvas-main", src);
+    src.delete();
+    // requestAnimationFrame recursively calls the function until the video ends
+    requestAnimationFrame(processVideoFrame);
+  }
+};
+
+const processWebcamFrame = async () => {
+  if (currentMediaType !== "webcam") {
+    console.log("No webcam to process");
+    return;
+  }
+  if (!webcamStream) {
+    console.log("Webcam stream not available");
+    return;
+  }
+  const video = currentMediaElement;
+
+  if (!videoPlaying) {
+    console.log("Webcam is not playing");
+    return;
+  }
+  const src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+  const capture = new cv.VideoCapture(video);
+  capture.read(src);
+
+  const predictions = await model.detect(video);
+  console.log("Webcam Predictions: ", predictions);
+  if (predictions.length > 0) {
+    drawBoundingBoxes(predictions, src);
+  }
+  cv.imshow("canvas-main", src);
+  src.delete();
+  // requestAnimationFrame recursively calls the function until the webcam stream ends
+  requestAnimationFrame(processWebcamFrame);
+};
+
+const enableWebcam = async () => {
+  const videoElement = document.getElementById("video-main");
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: false,
+  });
+  videoElement.srcObject = stream;
+  videoElement.style.display = "block";
+  webcamStream = stream;
+  try {
+    videoElement.play();
+    currentMediaType = "webcam";
+    currentMediaElement = videoElement;
+    videoPlaying = true;
+    let imgMat = new cv.Mat(
+      videoElement.height,
+      videoElement.width,
+      cv.CV_8UC4
+    );
+    let tempCap = new cv.VideoCapture(videoElement);
+    tempCap.read(imgMat);
+    cv.imshow("canvas-main", imgMat);
+    imgMat.delete();
+    console.log("Webcam enabled");
+  } catch (error) {
+    console.error("Error enabling webcam: ", error);
+  }
+};
 
 const colorForLabels = (className) => {
   const blue = [255, 0, 0, 255];
@@ -59,26 +205,26 @@ const drawBoundingBoxes = (predictions, inputImage) => {
     const point2 = new cv.Point(x + width, y + height);
 
     // Draw the bounding box
-    cv.rectangle(inputImage, point1, point2, color, 4);
+    cv.rectangle(inputImage, point1, point2, color, 8);
     // Draw the label background and text
     const text = `${className} ${Math.round(confScore * 100)}%`;
     const fontFace = cv.FONT_HERSHEY_SIMPLEX;
-    const fontSize = 0.8; // Proportional size in rem
-    const thickness = 2;
+    const fontSize = 1; // Proportional size in rem
+    const thickness = 1;
     const filled = -1; // Filled rectangle
 
     // Get text size for background rectangle
-    context.font = "20px Arial"; // Use to measure text width and height
-    const textMetrics = context.measureText(text);
-    const textWidth = textMetrics.width;
-    const textHeight = 20; // These are hardcoded for now
-    const textPadding = 15;
+    // context.font = "20px Arial"; // Use to measure text width and height
+    // const textMetrics = context.measureText(text);
+    // const textWidth = textMetrics.width;
+    const labelHeight = 50; // These are hardcoded for now
+    const textPadding = 5;
 
     // Draw background rectangle for the label
     cv.rectangle(
       inputImage,
-      new cv.Point(x, y - textHeight - textPadding),
-      new cv.Point(x + textWidth + textPadding, y),
+      new cv.Point(x, y - labelHeight),
+      new cv.Point(x + width, y),
       color,
       filled
     );
@@ -87,7 +233,7 @@ const drawBoundingBoxes = (predictions, inputImage) => {
     cv.putText(
       inputImage,
       text,
-      new cv.Point(x + 5, y - 5), // Adjust text placement
+      new cv.Point(x + textPadding, y - textPadding), // Adjust text placement
       fontFace,
       fontSize,
       new cv.Scalar(255, 255, 255, 255), // White text
@@ -129,6 +275,33 @@ const initOpenCvAndModel = async () => {
 
 const setupEventListeners = () => {
   console.log("Setting up Event Listeners...");
+  // Play button will start the game / detection loop (and start video if there is one loaded and not playing)
+  document.getElementById("play_button").addEventListener("click", async () => {
+    console.log("Game is Starting...");
+    if (currentMediaType === "video") {
+      let video = currentMediaElement;
+      video.play();
+      videoPlaying = true;
+      await runDetection();
+    } else if (currentMediaType === "image" || currentMediaType === "webcam") {
+      // Just run detection once (image) or start webcam loop
+      await runDetection();
+    }
+  });
+  console.log("Play Button is set up!");
+
+  // Pause button
+  document
+    .getElementById("pause_button")
+    .addEventListener("click", function () {
+      console.log("Game is Paused... haha no it is not.");
+      // Only pauses video if it's playing
+      if (currentMediaType === "video" && currentMediaElement) {
+        currentMediaElement.pause();
+        videoPlaying = false;
+      }
+    });
+  console.log("Pause Button is set up!");
 
   // Load Image Button
   document.getElementById("load_image_button").addEventListener("click", () => {
@@ -138,10 +311,10 @@ const setupEventListeners = () => {
   // Load Image from File - Hidden Input
   document
     .getElementById("image-file-input")
-    .addEventListener("change", (event) => {
+    .addEventListener("change", async (event) => {
       const file = event.target.files[0];
       if (file) {
-        loadImage(file);
+        await loadImage(file);
         currentMediaType = "image";
         console.log("Image loaded and media type set to image");
       } else {
@@ -150,6 +323,26 @@ const setupEventListeners = () => {
     });
   console.log("Load Image Button is set up!");
 
+  // Load Video Button
+  document.getElementById("load_video_button").addEventListener("click", () => {
+    document.getElementById("video-file-input").click();
+  });
+
+  // Load Video from File - Hidden Input
+  document
+    .getElementById("video-file-input")
+    .addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        await loadVideo(file);
+        currentMediaType = "video";
+        console.log("Video loaded and media type set to video");
+      } else {
+        console.log("No video file selected");
+      }
+    });
+  console.log("Load Video Button is set up!");
+
   // Detect Button
   document
     .getElementById("detect_button")
@@ -157,6 +350,13 @@ const setupEventListeners = () => {
       await runDetection();
     });
   console.log("Detect Button is set up!");
+
+  // Enable Webcam Button
+  document
+    .getElementById("webcam_button")
+    .addEventListener("click", function () {
+      enableWebcam();
+    });
 };
 
 const runDetection = async () => {
@@ -186,8 +386,20 @@ const runDetection = async () => {
     }
   } else if (currentMediaType === "video") {
     console.log("Running detection on video...");
+    try {
+      // For video we will process frame by frame
+      await processVideoFrame();
+    } catch (error) {
+      console.error("Error running detection on video: ", error);
+    }
   } else if (currentMediaType === "webcam") {
     console.log("Running detection on webcam...");
+    try {
+      // For video we will process frame by frame
+      processWebcamFrame();
+    } catch (error) {
+      console.error("Error running detection on video: ", error);
+    }
   }
 };
 
