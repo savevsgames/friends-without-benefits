@@ -31,6 +31,67 @@ function loadImage(file) {
   reader.readAsDataURL(file);
 }
 
+const loadVideo = async (file) => {
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    // video element needs src to be set to a URL
+    const videoElement = document.getElementById("video-main");
+    const url = URL.createObjectURL(file);
+    videoElement.src = url;
+    videoElement.style.display = "block";
+    videoElement.pause();
+    currentMediaType = "video";
+    currentMediaElement = videoElement;
+    console.log("Video Loaded: ", videoElement);
+    videoElement.addEventListener(
+      "loadeddata",
+      () => {
+        videoElement.currentTime = 0;
+        //
+        let tempMat = new cv.Mat(
+          videoElement.height,
+          videoElement.width,
+          cv.CV_8UC4
+        );
+        let tempCapture = new cv.VideoCapture(videoElement);
+        tempCapture.read(tempMat);
+        console.log("Video Loaded and Displayed");
+        cv.imshow("canvas-main", tempMat);
+        tempMat.delete();
+      },
+      { once: true }
+    );
+  };
+};
+
+const processVideoFrame = async () => {
+  if (currentMediaType !== "video") {
+    console.log("No video to process");
+    return;
+  }
+  if (!videoPlaying) {
+    console.log("Video is not playing");
+    return;
+  }
+  const video = currentMediaElement;
+  // video.readyState === 4 means the video has enough data to start playing
+  if (video.readyState === 4 && !video.paused && !video.ended) {
+    const src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    const capture = new cv.VideoCapture(video);
+    capture.read(src);
+
+    const predictions = await model.detect(video);
+    console.log("Video Predictions: ", predictions);
+    if (predictions.length > 0) {
+      drawBoundingBoxes(predictions, src);
+    }
+    cv.imshow("canvas-main", src);
+    src.delete();
+    // requestAnimationFrame recursively calls the function until the video ends
+    requestAnimationFrame(processVideoFrame);
+  }
+};
+
 const colorForLabels = (className) => {
   const blue = [255, 0, 0, 255];
   const green = [0, 255, 0, 255];
@@ -150,6 +211,21 @@ const setupEventListeners = () => {
     });
   console.log("Load Image Button is set up!");
 
+  // Load Video Button
+  document.getElementById("load_video_button").addEventListener("click", () => {
+    document.getElementById("video-file-input").click();
+
+  // Load Video from File - Hidden Input
+  document.getElementById("video-file-input").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      loadVideo(file);
+      currentMediaType = "video";
+      console.log("Video loaded and media type set to video");
+    } else {
+      console.log("No video file selected");
+    }
+
   // Detect Button
   document
     .getElementById("detect_button")
@@ -186,8 +262,20 @@ const runDetection = async () => {
     }
   } else if (currentMediaType === "video") {
     console.log("Running detection on video...");
+    try {
+      // For video we will process frame by frame
+      processVideoFrame();
+    } catch (error) {
+      console.error("Error running detection on video: ", error);
+    }
   } else if (currentMediaType === "webcam") {
     console.log("Running detection on webcam...");
+    try {
+      // For video we will process frame by frame
+      processWebcamFrame();
+    } catch (error) {
+      console.error("Error running detection on video: ", error);
+    }
   }
 };
 
