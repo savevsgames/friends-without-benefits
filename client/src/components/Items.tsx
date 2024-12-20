@@ -1,6 +1,6 @@
 import { Card } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
-import { IoIosTimer } from "react-icons/io";
+// import { IoIosTimer } from "react-icons/io";
 import Countdown from "react-countdown";
 
 export const Items = () => {
