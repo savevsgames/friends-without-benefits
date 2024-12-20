@@ -1,7 +1,7 @@
 import { Outlet, Route, Routes } from "react-router-dom";
 
 import Header from "./components/Header.tsx";
-import Footer from "./components/Footer.tsx";
+// import Footer from "./components/Footer.tsx";
 import "./index.css";
 import Landing from "./pages/Landing.tsx";
 import Error from "./pages/Error.tsx";
