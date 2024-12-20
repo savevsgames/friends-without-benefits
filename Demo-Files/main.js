@@ -6,7 +6,7 @@ let webcamSteam = null;
 
 // Using File Reader API to load the image and display it.
 // In the future we may switch to FormData API instead if media is uploaded to the server
-function loadImage(file) {
+const loadImage = async (file) => {
   const reader = new FileReader();
   reader.onload = function (event) {
     const imageElement = document.getElementById("image-main");
@@ -29,7 +29,7 @@ function loadImage(file) {
   };
   // For handling binary files
   reader.readAsDataURL(file);
-}
+};
 
 const loadVideo = async (file) => {
   const reader = new FileReader();
@@ -190,6 +190,31 @@ const initOpenCvAndModel = async () => {
 
 const setupEventListeners = () => {
   console.log("Setting up Event Listeners...");
+  // Play button will start the game / detection loop (and start video if there is one loaded and not playing)
+  document.getElementById("play_button").addEventListener("click", () => {
+    console.log("Game is Starting...");
+    if (currentMediaType === "video") {
+      let video = currentMediaElement;
+      video.play();
+      videoPlaying = true;
+      runDetectionOnCurrentMedia();
+    } else if (currentMediaType === "image" || currentMediaType === "webcam") {
+      // Just run detection once (image) or start webcam loop
+      runDetectionOnCurrentMedia();
+    }
+  });
+
+  // Pause button
+  document
+    .getElementById("pause_button")
+    .addEventListener("click", function () {
+      console.log("Game is Paused... haha no it is not.");
+      // Only pauses video if it's playing
+      if (currentMediaType === "video" && currentMediaElement) {
+        currentMediaElement.pause();
+        videoPlaying = false;
+      }
+    });
 
   // Load Image Button
   document.getElementById("load_image_button").addEventListener("click", () => {
@@ -214,25 +239,29 @@ const setupEventListeners = () => {
   // Load Video Button
   document.getElementById("load_video_button").addEventListener("click", () => {
     document.getElementById("video-file-input").click();
+  });
 
   // Load Video from File - Hidden Input
-  document.getElementById("video-file-input").addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      loadVideo(file);
-      currentMediaType = "video";
-      console.log("Video loaded and media type set to video");
-    } else {
-      console.log("No video file selected");
-    }
-
-  // Detect Button
   document
-    .getElementById("detect_button")
-    .addEventListener("click", async () => {
-      await runDetection();
+    .getElementById("video-file-input")
+    .addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        loadVideo(file);
+        currentMediaType = "video";
+        console.log("Video loaded and media type set to video");
+      } else {
+        console.log("No video file selected");
+      }
+
+      // Detect Button
+      document
+        .getElementById("detect_button")
+        .addEventListener("click", async () => {
+          await runDetection();
+        });
+      console.log("Detect Button is set up!");
     });
-  console.log("Detect Button is set up!");
 };
 
 const runDetection = async () => {
