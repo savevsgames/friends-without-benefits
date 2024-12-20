@@ -1,76 +1,48 @@
-import { Card } from "@chakra-ui/react";
-import { Button } from "@chakra-ui/react";
-import { IoIosTimer } from "react-icons/io";
+
+import React from "react";
 import Countdown from "react-countdown";
 
 export const Items = () => {
-  const items = ["Item1", "Item2", "Item3", "Item4", "item5"];
+  const items = ["Item1", "Item2", "Item3", "Item4", "Item5"];
 
   return (
-    <div>
-      {/* DEVELOPEMENT USE CARD */}
-      <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
-        <Card.Body gap="2">
-          <Card.Title className="text-center text-gray-900 tracking-widest font-bold">
-            For development Use
-          </Card.Title>
-        </Card.Body>
-        <Card.Footer justifyContent="center">
-          <Button
-            id="load_image_button"
-            variant="surface"
-            borderColor="teal.900"
-            className="p-1"
-          >
-            Load Image
-          </Button>
-          <Button id="load_video_button" variant="surface" className="p-1">
-            Load Video
-          </Button>
-          <Button id="detect_button" variant="surface" className="p-1">
-            Detect
-          </Button>
-        </Card.Footer>
-      </Card.Root>
+    <div className="bg-gray-100 shadow-lg rounded-lg p-4 text-teal-950 tracking-widest font-bold">
+      {/* Header */}
+      <h1 className="text-2xl mb-4 text-center">Game Dashboard</h1>
 
-      <br></br>
-
-      <div>
-        {/* TIMER CARD */}
-        <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
-          <Card.Body className="text-center text-gray-900 tracking-widest pb-2 font-bold">
-            Game Timer
-          </Card.Body>
-          <Card.Description className="text-center pb-2 text-gray-900">
+      <div className="space-y-6">
+        {/* Timer Section */}
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl text-gray-900 pb-2 font-bold">Game Timer</h2>
+          <div className="text-lg text-teal-800 font-semibold">
             <Countdown date={Date.now() + 10000} />
-          </Card.Description>
-        </Card.Root>
+          </div>
+        </div>
 
-        <br></br>
+        {/* Items Found Section */}
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl text-gray-900 pb-2 font-bold">Items Found</h2>
+          <div className="text-lg text-teal-800 font-semibold">0/5</div>
+        </div>
 
-        {/* ITEMS FOUND CARD */}
-        <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
-          <Card.Body className="text-center text-gray-900 tracking-widest pb-2 font-bold">
-            Items Found
-          </Card.Body>
-          <Card.Description className="text-center pb-2  text-gray-900">
-            0/4
-          </Card.Description>
-        </Card.Root>
-
-        <br></br>
-        {/* ITEMS CARD */}
-        <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
-          <ul className="text-center text-gray-900 tracking-widest pb-2 font-bold">
-            Items To find:
+        {/* Items To Find Section */}
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl text-gray-900 pb-2 font-bold">
+            Items To Find
+          </h2>
+          <ul className="mt-2 space-y-1 text-gray-700">
             {items.map((item, i) => (
-              <li className=" text-gray-900 font-normal" key={i}>
+              <li
+                key={i}
+                className="bg-teal-100 hover:bg-teal-200 transition rounded-md px-2 py-1"
+              >
                 {item}
               </li>
             ))}
           </ul>
-        </Card.Root>
+        </div>
       </div>
     </div>
   );
 };
+

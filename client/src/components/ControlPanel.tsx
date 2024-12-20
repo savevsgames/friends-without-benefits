@@ -1,48 +1,63 @@
-import { Card } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
-
 
 export const ControlPanel = () => {
   return (
-    <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
-      <Card.Body gap="2">
-        <Card.Title className="text-center text-gray-900 tracking-widest font-bold">
-          Control Panel
-        </Card.Title>
-      </Card.Body>
-      <Card.Footer justifyContent="center">
+    <div className="bg-gray-100 shadow-lg rounded-lg p-4 text-teal-950 tracking-widest font-bold">
+      {/* Header */}
+      <h2 className="text-center text-2xl mb-4">Control Panel</h2>
+
+      {/* Buttons Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Button
-          variant="surface"
-          borderColor="teal.900"
-          w={{ base: "10px", md: "60px" }}
+          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition"
+          id="play_button"
+          size="md"
         >
           Play
         </Button>
         <Button
+          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition"
           id="pause_button"
-          variant="surface"
-          className="border-teal-900"
-          w={{ base: "10px", md: "60px" }}
+          size="md"
         >
           Pause
         </Button>
         <Button
+          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition"
           id="webcam_button"
-          variant="surface"
-          className="border-teal-900"
-          w={{ base: "10px", md: "60px" }}
+          size="md"
         >
           Cam
         </Button>
         <Button
+          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition"
           id="quit_button"
-          variant="surface"
-          className="border-teal-900"
-          w={{ base: "10px", md: "60px" }}
+          size="md"
         >
           Quit
         </Button>
-      </Card.Footer>
-    </Card.Root>
+        <Button
+          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition"
+          id="load_image_button"
+          size="md"
+        >
+          Load Image
+        </Button>
+        <Button
+          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition"
+          id="load_video_button"
+          size="md"
+        >
+          Load Video
+        </Button>
+        <Button
+          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition"
+          id="detect_button"
+          size="md"
+        >
+          Detect
+        </Button>
+      </div>
+    </div>
   );
 };
