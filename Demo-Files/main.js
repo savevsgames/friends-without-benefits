@@ -2,7 +2,7 @@ let currentMediaElement = null;
 let currentMediaType = null;
 let model = null;
 let videoPlaying = false;
-let webcamSteam = null;
+let webcamStream = null;
 
 // Using File Reader API to load the image and display it.
 // In the future we may switch to FormData API instead if media is uploaded to the server
@@ -60,15 +60,15 @@ const loadVideo = async (file) => {
         "loadeddata",
         async () => {
           try {
-            const matWidth = nativeVideoWidth;
-            const matHeight = nativeVideoHeight;
-
-            videoElement.currentTime = 0; // Make sure video is at the start and has not autoplayed
-            //
+            videoElement.currentTime = 0; // Make sure video is at the start and has not auto-played
 
             let tempCapture = await new cv.VideoCapture(videoElement);
             // create the mat with the native video height and width and the CV_8UC4 color space
-            let tempMat = new cv.Mat(matHeight, matWidth, cv.CV_8UC4);
+            let tempMat = new cv.Mat(
+              nativeVideoHeight,
+              nativeVideoWidth,
+              cv.CV_8UC4
+            );
             console.log("Mat Statistics: ", {
               height: tempMat.rows,
               width: tempMat.cols,
@@ -118,6 +118,65 @@ const processVideoFrame = async () => {
   }
 };
 
+const processWebcamFrame = async () => {
+  if (currentMediaType !== "webcam") {
+    console.log("No webcam to process");
+    return;
+  }
+  if (!webcamStream) {
+    console.log("Webcam stream not available");
+    return;
+  }
+  const video = currentMediaElement;
+
+  if (!videoPlaying) {
+    console.log("Webcam is not playing");
+    return;
+  }
+  const src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+  const capture = new cv.VideoCapture(video);
+  capture.read(src);
+
+  const predictions = await model.detect(video);
+  console.log("Webcam Predictions: ", predictions);
+  if (predictions.length > 0) {
+    drawBoundingBoxes(predictions, src);
+  }
+  cv.imshow("canvas-main", src);
+  src.delete();
+  // requestAnimationFrame recursively calls the function until the webcam stream ends
+  requestAnimationFrame(processWebcamFrame);
+};
+
+const enableWebcam = async () => {
+  const videoElement = document.getElementById("video-main");
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: false,
+  });
+  videoElement.srcObject = stream;
+  videoElement.style.display = "block";
+  webcamStream = stream;
+  try {
+    videoElement.play();
+    currentMediaType = "webcam";
+    currentMediaElement = videoElement;
+    videoPlaying = true;
+    let imgMat = new cv.Mat(
+      videoElement.height,
+      videoElement.width,
+      cv.CV_8UC4
+    );
+    let tempCap = new cv.VideoCapture(videoElement);
+    tempCap.read(imgMat);
+    cv.imshow("canvas-main", imgMat);
+    imgMat.delete();
+    console.log("Webcam enabled");
+  } catch (error) {
+    console.error("Error enabling webcam: ", error);
+  }
+};
+
 const colorForLabels = (className) => {
   const blue = [255, 0, 0, 255];
   const green = [0, 255, 0, 255];
@@ -150,22 +209,22 @@ const drawBoundingBoxes = (predictions, inputImage) => {
     // Draw the label background and text
     const text = `${className} ${Math.round(confScore * 100)}%`;
     const fontFace = cv.FONT_HERSHEY_SIMPLEX;
-    const fontSize = 0.8; // Proportional size in rem
-    const thickness = 4;
+    const fontSize = 1; // Proportional size in rem
+    const thickness = 1;
     const filled = -1; // Filled rectangle
 
     // Get text size for background rectangle
-    context.font = "20px Arial"; // Use to measure text width and height
-    const textMetrics = context.measureText(text);
-    const textWidth = textMetrics.width;
-    const textHeight = 100; // These are hardcoded for now
-    const textPadding = 150;
+    // context.font = "20px Arial"; // Use to measure text width and height
+    // const textMetrics = context.measureText(text);
+    // const textWidth = textMetrics.width;
+    const labelHeight = 50; // These are hardcoded for now
+    const textPadding = 5;
 
     // Draw background rectangle for the label
     cv.rectangle(
       inputImage,
-      new cv.Point(x, y - textHeight - textPadding),
-      new cv.Point(x + textWidth + textPadding, y),
+      new cv.Point(x, y - labelHeight),
+      new cv.Point(x + width, y),
       color,
       filled
     );
@@ -174,7 +233,7 @@ const drawBoundingBoxes = (predictions, inputImage) => {
     cv.putText(
       inputImage,
       text,
-      new cv.Point(x + 5, y - 5), // Adjust text placement
+      new cv.Point(x + textPadding, y - textPadding), // Adjust text placement
       fontFace,
       fontSize,
       new cv.Scalar(255, 255, 255, 255), // White text
@@ -223,10 +282,10 @@ const setupEventListeners = () => {
       let video = currentMediaElement;
       video.play();
       videoPlaying = true;
-      //   await runDetection();
-      // } else if (currentMediaType === "image" || currentMediaType === "webcam") {
+      await runDetection();
+    } else if (currentMediaType === "image" || currentMediaType === "webcam") {
       // Just run detection once (image) or start webcam loop
-      // await runDetection();
+      await runDetection();
     }
   });
   console.log("Play Button is set up!");
@@ -291,6 +350,13 @@ const setupEventListeners = () => {
       await runDetection();
     });
   console.log("Detect Button is set up!");
+
+  // Enable Webcam Button
+  document
+    .getElementById("webcam_button")
+    .addEventListener("click", function () {
+      enableWebcam();
+    });
 };
 
 const runDetection = async () => {
