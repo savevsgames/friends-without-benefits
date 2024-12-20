@@ -36,32 +36,40 @@ const loadVideo = async (file) => {
   reader.onload = function (event) {
     // video element needs src to be set to a URL
     const videoElement = document.getElementById("video-main");
+    const canvasElement = document.getElementById("canvas-main");
     const url = URL.createObjectURL(file);
     videoElement.src = url;
     videoElement.style.display = "block";
-    videoElement.pause();
-    currentMediaType = "video";
-    currentMediaElement = videoElement;
-    console.log("Video Loaded: ", videoElement);
-    videoElement.addEventListener(
-      "loadeddata",
-      () => {
-        videoElement.currentTime = 0;
-        //
-        let tempMat = new cv.Mat(
-          videoElement.height,
-          videoElement.width,
-          cv.CV_8UC4
-        );
-        let tempCapture = new cv.VideoCapture(videoElement);
-        tempCapture.read(tempMat);
-        console.log("Video Loaded and Displayed");
-        cv.imshow("canvas-main", tempMat);
-        tempMat.delete();
-      },
-      { once: true }
-    );
+    videoElement.onloadedmetadata = () => {
+      // Set canvas dimensions to match video
+      canvasElement.width = videoElement.naturalWidth;
+      canvasElement.height = videoElement.naturalHeight;
+      // In react we will have to use setState to update the video src, currentMediaType and currentMediaElement
+
+      currentMediaType = "video";
+      currentMediaElement = videoElement;
+      console.log("Video Loaded: ", videoElement);
+      videoElement.addEventListener(
+        "loadeddata",
+        async () => {
+          videoElement.currentTime = 0;
+          //
+          let tempMat = new cv.Mat(
+            videoElement.height,
+            videoElement.width,
+            cv.CV_8UC4
+          );
+          let tempCapture = await new cv.VideoCapture(videoElement);
+          await tempCapture.read(tempMat);
+          console.log("Video Loaded and Displayed");
+          await cv.imshow("canvas-main", tempMat);
+          tempMat.delete();
+        },
+        { once: true }
+      );
+    };
   };
+  reader.readAsDataURL(file);
 };
 
 const processVideoFrame = async () => {
@@ -76,7 +84,7 @@ const processVideoFrame = async () => {
   const video = currentMediaElement;
   // video.readyState === 4 means the video has enough data to start playing
   if (video.readyState === 4 && !video.paused && !video.ended) {
-    const src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
     const capture = new cv.VideoCapture(video);
     capture.read(src);
 
@@ -203,6 +211,7 @@ const setupEventListeners = () => {
       runDetectionOnCurrentMedia();
     }
   });
+  console.log("Play Button is set up!");
 
   // Pause button
   document
@@ -215,6 +224,7 @@ const setupEventListeners = () => {
         videoPlaying = false;
       }
     });
+  console.log("Pause Button is set up!");
 
   // Load Image Button
   document.getElementById("load_image_button").addEventListener("click", () => {
@@ -224,10 +234,10 @@ const setupEventListeners = () => {
   // Load Image from File - Hidden Input
   document
     .getElementById("image-file-input")
-    .addEventListener("change", (event) => {
+    .addEventListener("change", async (event) => {
       const file = event.target.files[0];
       if (file) {
-        loadImage(file);
+        await loadImage(file);
         currentMediaType = "image";
         console.log("Image loaded and media type set to image");
       } else {
@@ -244,24 +254,25 @@ const setupEventListeners = () => {
   // Load Video from File - Hidden Input
   document
     .getElementById("video-file-input")
-    .addEventListener("change", (event) => {
+    .addEventListener("change", async (event) => {
       const file = event.target.files[0];
       if (file) {
-        loadVideo(file);
+        await loadVideo(file);
         currentMediaType = "video";
         console.log("Video loaded and media type set to video");
       } else {
         console.log("No video file selected");
       }
-
-      // Detect Button
-      document
-        .getElementById("detect_button")
-        .addEventListener("click", async () => {
-          await runDetection();
-        });
-      console.log("Detect Button is set up!");
     });
+  console.log("Load Video Button is set up!");
+
+  // Detect Button
+  document
+    .getElementById("detect_button")
+    .addEventListener("click", async () => {
+      await runDetection();
+    });
+  console.log("Detect Button is set up!");
 };
 
 const runDetection = async () => {
@@ -293,7 +304,7 @@ const runDetection = async () => {
     console.log("Running detection on video...");
     try {
       // For video we will process frame by frame
-      processVideoFrame();
+      await processVideoFrame();
     } catch (error) {
       console.error("Error running detection on video: ", error);
     }
