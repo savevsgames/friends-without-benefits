@@ -19,3 +19,12 @@ export const GQLQueryError = (queryName: string, error: any) => {
     }
   });
 }
+
+export const GQLMutationError = (mutationName: string, error: any) => {
+  return new GraphQLError(`Failed to run mutation ${mutationName}`, {
+    extensions: {
+      code: 'INTERNAL_SERVER_ERROR',
+      originalError: error
+    }
+  });
+}
