@@ -1,7 +1,11 @@
 {
-  "dependencies": {
-    "@tensorflow-models/coco-ssd": "^2.2.3",
-    "@tensorflow/tfjs-backend-cpu": "^4.22.0",
-    "@tensorflow/tfjs-backend-webgl": "^4.22.0"
-  }
+  "name": "friends-without-benefits",
+  "version": "0.1.0",
+  "description": "Object Recognition Scavenger Hunt",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thomas Stemler, Souad Hassen-Bouzouita, Dario Zambrano, Greg Barker",
+  "license": "MIT"
 }
