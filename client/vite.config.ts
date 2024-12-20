@@ -19,7 +19,7 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
-      external: ["opencv.js", "main.js"], // List files or libraries to exclude from bundling
+      external: ["opencv.js"], // List files or libraries to exclude from bundling
     },
   },
 });
