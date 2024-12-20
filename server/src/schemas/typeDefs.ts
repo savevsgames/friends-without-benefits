@@ -34,10 +34,31 @@ const typeDefs = `
     users: [User]
   }
   
+  type MutateResponse {
+    success: Boolean!
+    message: String
+  }
+  
   type Query {
     users: [User]
     games: [Game]
-    
+    topTen: [User]
+  }
+  
+  type Mutation {
+    addUser(input: AddUserInput): User!
+    addFriend(input: AddFriendInput): MutateResponse!
+  }
+  
+  input AddUserInput {
+    username: String!
+    email: String!
+    password: String!
+  }
+  
+  input AddFriendInput {
+    userID: ID!
+    friendID: ID!
   }
 `
 
