@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware"; // this is a zustand middleware to persist login throughout the app
+import AuthService from "./utils/auth.ts";
 
 interface IGameState {
   gameState: string; // "setup", "playing", "gameover"
@@ -37,23 +38,24 @@ export const useGameStore = create<IGameState>((set) => ({
 // define AuthStore interface to describe the shape of the store from state and actions
 interface AuthStore {
   isLoggedIn: boolean;
-  login: () => void;
+  login: (idToken: string) => void;
   logout: () => void;
 }
-export const useAuthStore = create( // create: defines a store
+export const useAuthStore = create(
+  // create: defines a store
   persist<AuthStore>(
     // set to update the store's state
     (set) => ({
-      isLoggedIn: false,
-      login: () => {
-        const userLocalStorage = localStorage.getItem("Token");
-        if (userLocalStorage) {
-          set({ isLoggedIn: true });
-        }
+      isLoggedIn: AuthService.loggedIn(),
+
+      login: (idToken) => {
+        AuthService.login(idToken);
+        set({ isLoggedIn: true });
       },
+
       logout: () => {
         set({ isLoggedIn: false });
-        localStorage.clear();
+        AuthService.logout();
       },
     }),
     {

@@ -1,12 +1,49 @@
+import { FormEvent, useState } from "react";
+import { userLogin } from "@/interfaces/userLogin.tsx";
+import { useAuthStore } from "@/store.ts";
+import { useNavigate } from "react-router-dom";
+import { LOGIN_USER} from "../utils/mutations";
+import {useMutation } from "@apollo/client";
 
+const Login: React.FC = () => {
+  // define the state variables
+  const navigate = useNavigate();
+  const [form, setForm] = useState<userLogin>({ username: "", password: "" });
+  const [err, setErr] = useState<string | null>(null);
+  const login = useAuthStore((state) => state.login);
 
+  // function handleInputChange for the form inputs
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target; //get the user input
+    setForm({ ...form, [name]: value }); // set the form state
+    // console.log(setForm);
+  };
 
+  // useMutation hook to login a user
+  const [userLogin, { error }] = useMutation(LOGIN_USER);
 
+  // function to handle the form submission
+  const handleFormSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      const { data } = await userLogin({
+        variables: {
+          ...form,
+        },
+      });
+      login(data.login.token); // this will set the isLoggedIn state to true
+      navigate("/game") // once isLogged is is true, it'll navigate to the game page
+    } catch (err) {
+      console.error(error || err);
+      setErr("Error Logging in");
+    }
 
+    setForm({
+      username: "",
+      password: "",
+    });
+  };
 
-
-
-const Login = () => {
   return (
     <div className=" bg-gray-50 h-screen flex overflow-hidden">
       {/* left section: Login form */}
@@ -21,7 +58,10 @@ const Login = () => {
         <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 mb-6">
           Welcome Back!
         </h1>
-        <form className="flex flex-col box-border w-full max-w-sm">
+        <form
+          className="flex flex-col box-border w-full max-w-sm"
+          onSubmit={handleFormSubmit}
+        >
           {/* Username field */}
           <div className="flex flex-col mb-4">
             <label className="text-sm md:text-base text-gray-800 font-medium mb-2">
@@ -30,8 +70,10 @@ const Login = () => {
             <input
               type="text"
               name="username"
+              value={form.username}
               id="username"
               required
+              onChange={handleInputChange}
               className="box-border w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:outline-none"
             />
           </div>
@@ -43,11 +85,14 @@ const Login = () => {
             <input
               type="password"
               name="password"
+              value={form.password}
               id="password"
               required
+              onChange={handleInputChange}
               className="box-border w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:outline-none"
             />
           </div>
+          {err && <p className="text-red-500 text-center">{err}</p>}
           {/* Submit button */}
           <button
             type="submit"
