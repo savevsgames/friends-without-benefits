@@ -1,10 +1,12 @@
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cv: any;
-    Module: OpenCVModule; // Adding `Module` to the window object for openCV.js
-    Prediction: Prediction; // Adding `Prediction` to the window object for prediction
-    Predictions: Prediction[]; // Adding `Predictions` to the window object for predictions
+    cv: any; // Adding `cv` to the window object for OpenCV.js
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cocoSsd: any; // Adding `cocoSsd` to the window object for coco-ssd
+    Module: OpenCVModule; // Adding `Module` to the window object for OpenCV.js initialization
+    Prediction: Prediction; // Adding `Prediction` to the window object
+    Predictions: Prediction[];
   }
 }
 

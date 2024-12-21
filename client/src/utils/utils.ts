@@ -36,15 +36,44 @@ export const loadImageToCanvas = async (file: File): Promise<void> => {
 };
 
 /**
- * Run detection on the current image in the canvas.
+ * Enable the webcam
+ * @param shareMyStream Flag to share the webcam stream for multiplayer games
+ * @returns MediaStream object
  */
-export const runDetection = async (): Promise<void> => {
-  console.log("Running Detection IN UTILS...");
-  const canvasElement = document.getElementById(
-    "canvas-main"
-  ) as HTMLCanvasElement;
-};
+export const enableWebcam = async (
+  shareMyStream = false
+): Promise<MediaStream | null> => {
+  try {
+    const videoElement = document.getElementById(
+      "canvas-main"
+    ) as HTMLVideoElement;
+    if (!videoElement) {
+      console.error("Video element not found.");
+      return null;
+    }
+    // Get the webcam stream
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+    // Set the video element source to the stream
+    videoElement.srcObject = stream;
+    // Play the video
+    videoElement.play();
 
+    console.log("Webcam enabled:", videoElement.srcObject);
+
+    if (shareMyStream) {
+      console.log("Sharing webcam stream for multiplayer game...");
+      //TODO: Add streaming logic here for peer.js
+    }
+
+    return stream;
+  } catch (error) {
+    console.error("Error enabling webcam:", error);
+  }
+  return null;
+};
 /**
  * Maps class names to specific colors for bounding boxes.
  * @param className Class name of the detected object
@@ -125,4 +154,77 @@ export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
       thickness
     );
   });
+};
+
+/**
+ * Run detection on the current image in the canvas.
+ * @param currentMediaType Current media type (image, video, webcam)
+ */
+export const runDetection = async (currentMediaType: string): Promise<void> => {
+  const cv = window.cv;
+  const model = window.cocoSsd;
+  if (!cv || !model) {
+    console.log("OpenCV or model not loaded. Cannot run detection.");
+    return;
+  }
+
+  if (currentMediaType === "image") {
+    const imageElement = document.getElementById(
+      "canvas-main"
+    ) as HTMLCanvasElement;
+    // Get the image data from the canvas
+    const imgMat = cv.imread(imageElement);
+    console.log("Image Mat: ", imgMat);
+    // Run the detection
+    try {
+      const predictions = await model.detect(imageElement);
+
+      // Draw the bounding boxes
+      drawBoundingBoxes(predictions, imgMat);
+      // Show the image with the bounding boxes
+      cv.imshow("canvas-main", imgMat);
+      // Clean up the image data
+      imgMat.delete();
+    } catch (error) {
+      console.error("Error running detection: ", error);
+    }
+  } else if (currentMediaType === "video") {
+    const videoElement = document.getElementById(
+      "video-main"
+    ) as HTMLVideoElement;
+    const videoMat = cv.imread(videoElement);
+    console.log("Video Mat: ", videoMat);
+    // Run the detection
+    try {
+      const predictions = await model.detect(videoElement);
+
+      // Draw the bounding boxes
+      drawBoundingBoxes(predictions, videoMat);
+      // Show the image with the bounding boxes
+      cv.imshow("canvas-main", videoMat);
+      // Clean up the image data
+      videoMat.delete();
+    } catch (error) {
+      console.error("Error running detection: ", error);
+    }
+  } else if (currentMediaType === "webcam") {
+    const videoElement = document.getElementById(
+      "video-main"
+    ) as HTMLVideoElement;
+    const videoMat = cv.imread(videoElement);
+    console.log("Video Mat: ", videoMat);
+    // Run the detection
+    try {
+      const predictions = await model.detect(videoElement);
+
+      // Draw the bounding boxes
+      drawBoundingBoxes(predictions, videoMat);
+      // Show the image with the bounding boxes
+      cv.imshow("canvas-main", videoMat);
+      // Clean up the image data
+      videoMat.delete();
+    } catch (error) {
+      console.error("Error running detection: ", error);
+    }
+  }
 };

@@ -3,7 +3,10 @@ import { useRef } from "react";
 import { useGameStore } from "@/store";
 
 const LoadImageButton = () => {
-  const setCurrentImageRef = useGameStore((state) => state.setCurrentImageRef);
+  const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
+  const setCurrentMediaType = useGameStore(
+    (state) => state.setCurrentMediaType
+  );
   const canvasReady = useGameStore((state) => state.canvasReady);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -20,13 +23,14 @@ const LoadImageButton = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setCurrentImageRef(file.name);
+      setCurrentMediaRef(file.name);
       await handleLoadImage(file);
+      setCurrentMediaType("image");
     }
   };
 
   return (
-    <div>
+    <div className="btn btn-primary">
       {/* disabled when canvas is not ready=true */}
       <button
         className="btn btn-primary"
