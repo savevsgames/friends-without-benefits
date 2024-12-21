@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 const Login = () => {
   return (
     <div className=" bg-gray-50 h-screen flex overflow-hidden">
@@ -10,7 +18,7 @@ const Login = () => {
             <span className="text-teal-950 text-2xl">B</span>
           </h2>
         </div>
-        <h1 className="text-2xl md:text-4xl font-bold text-teal-900 mb-6">
+        <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 mb-6">
           Welcome Back!
         </h1>
         <form className="flex flex-col box-border w-full max-w-sm">
@@ -48,8 +56,16 @@ const Login = () => {
             Sign in
           </button>
         </form>
+        <div className="pt-2 flex flex-row">
+          <p className="text-l text-gray-700 font-small pr-2">
+            Don't have an account?
+          </p>
+          <button className="underline text-teal-900 font-small">
+            Sign Up
+          </button>
+        </div>
       </div>
-      {/* Right section: Image */}
+      {/* Right section: Mainpic */}
       <div className="w-3/5 hidden md:block relative">
         <img
           className="h-screen w-full object-cover"
