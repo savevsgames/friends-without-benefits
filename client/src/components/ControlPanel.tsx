@@ -1,5 +1,4 @@
 import { Button } from "@chakra-ui/react";
-import LoadImageButton from "./buttons/LoadImageButton";
 
 interface ControlPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -14,7 +13,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = (props) => {
 
       {/* Buttons Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <LoadImageButton />
         {[
           "Play",
           "Pause",

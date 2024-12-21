@@ -16,6 +16,7 @@ const LoadImageButton = () => {
     fileInputRef.current?.click();
   };
 
+  // Once the file is selected with ref to the file input, set the reference to the current image and load it
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -26,6 +27,7 @@ const LoadImageButton = () => {
 
   return (
     <div>
+      {/* disabled when canvas is not ready=true */}
       <button
         className="btn btn-primary"
         type="button"
@@ -36,12 +38,13 @@ const LoadImageButton = () => {
       >
         Load Image
       </button>
+      {/* Hidden input */}
       <input
-        ref="{fileInputRef}"
+        ref={fileInputRef}
         type="file"
         accept="image/*"
-        id="file-input"
-        name="file-input"
+        id="image-file-input"
+        name="image-file-input"
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
