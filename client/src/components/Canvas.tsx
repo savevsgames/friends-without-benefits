@@ -97,20 +97,21 @@ export const Canvas = () => {
 
       // Update Zustand state to indicate the canvas is ready
       setCanvasReady(true);
+      console.log("Game State: ");
     };
 
     loadOpenCV();
   }, [setCanvasReady]);
 
   return (
-    <div className="text-center text-white">
-      <canvas
-        id="canvas-main"
-        ref={canvasRef}
-        width="640"
-        height="480"
-      ></canvas>
-    </div>
+    <canvas
+      id="canvas-main"
+      ref={canvasRef}
+      width="100%"
+      height="100%"
+      max-width="100%"
+      max-height="100%"
+    ></canvas>
   );
 };
 
