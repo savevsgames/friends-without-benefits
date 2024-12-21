@@ -17,7 +17,7 @@ function Game() {
       </div>
       {/* Canvas Section */}
       <div className="col-span-1 md:col-span-2 m-1 bg-slate-50 border border-teal-900 rounded">
-        <Canvas id="canvas-main" style={{ width: "100%", height: "100%" }} />
+        <Canvas />
       </div>
     </div>
   );

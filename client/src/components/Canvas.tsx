@@ -97,7 +97,7 @@ export const Canvas = () => {
 
       // Update Zustand state to indicate the canvas is ready
       setCanvasReady(true);
-      console.log("Game State: ")
+      console.log("Game State: ");
     };
 
     loadOpenCV();
@@ -108,8 +108,8 @@ export const Canvas = () => {
       <canvas
         id="canvas-main"
         ref={canvasRef}
-        width="640"
-        height="480"
+        width="100%"
+        height="100%"
       ></canvas>
     </div>
   );
