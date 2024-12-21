@@ -159,6 +159,50 @@ export const processVideoFrame = async (
 };
 
 /**
+ * Process the webcam frame for object detection.
+ * @param videoPlaying Flag to check if the video is playing
+ * @param currentMediaType Current media type (image, video, webcam)
+ */
+export const processWebcamFrame = async (
+  videoPlaying: boolean,
+  currentMediaType: string
+) => {
+  if (currentMediaType !== "webcam") {
+    console.log("Not a webcam. Cannot process webcam frame.");
+    return;
+  }
+  const webcamElement = document.getElementById(
+    "canvas-main"
+  ) as HTMLVideoElement;
+  if (!webcamElement || !videoPlaying) {
+    console.error("Video element not found or video is not playing.");
+    return;
+  }
+  const cv = window.cv;
+  const model = window.cocoSsd;
+  if (!cv || !model) {
+    console.log("OpenCV or model not loaded. Cannot run detection.");
+    return;
+  }
+  //
+  const videoMat = cv.imread(webcamElement);
+  console.log("Video Mat: ", videoMat);
+  const capture = new cv.VideoCapture(webcamElement);
+
+  const processFrame = async () => {
+    capture.read(videoMat);
+    const predictions = await model.detect(webcamElement);
+    drawBoundingBoxes(predictions, videoMat);
+    cv.imshow("canvas-main", videoMat);
+    videoMat.delete();
+
+    // requestAnimationFrame recursively calls the function until the video ends
+    requestAnimationFrame(processFrame);
+  };
+  processFrame(); // Start processing the video frames
+};
+
+/**
  * Maps class names to specific colors for bounding boxes.
  * @param className Class name of the detected object
  * @returns RGBA color array
