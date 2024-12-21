@@ -3,6 +3,7 @@ import Canvas from "../components/Canvas.tsx";
 import { Dashboard } from "../components/Dashboard.tsx";
 
 import LoadImageButton from "../components/buttons/LoadImageButton.tsx";
+import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
 
 function Game() {
   return (
@@ -11,6 +12,7 @@ function Game() {
         {/* Control Panel */}
         <div className="row-span-1 bg-slate-100 p-4 border border-teal-900 rounded">
           <LoadImageButton />
+          <RunDetectionButton />
           <ControlPanel />
         </div>
         {/* Dashboard Section */}

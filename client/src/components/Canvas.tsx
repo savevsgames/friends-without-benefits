@@ -104,14 +104,14 @@ export const Canvas = () => {
   }, [setCanvasReady]);
 
   return (
-    <div className="text-center text-white">
-      <canvas
-        id="canvas-main"
-        ref={canvasRef}
-        width="100%"
-        height="100%"
-      ></canvas>
-    </div>
+    <canvas
+      id="canvas-main"
+      ref={canvasRef}
+      width="100%"
+      height="100%"
+      max-width="100%"
+      max-height="100%"
+    ></canvas>
   );
 };
 
