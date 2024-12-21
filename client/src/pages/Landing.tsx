@@ -14,7 +14,7 @@ function Landing() {
   return (
     <div className="bg-white h-screen flex overflow-hidden">
       {/* Left Section for Text Content */}
-      <div className="w-1/2 flex flex-col justify-center items-start px-12">
+      <div className="w-2/5 flex flex-col justify-center items-start px-12">
         <div className="absolute top-4 left-4 z-10">
           <h2 className="font-bold tracking-widest px-7 flex flex-row">
             <span className="text-teal-950 text-2xl">F</span>
@@ -25,7 +25,7 @@ function Landing() {
         <h3 className="text-lg text-teal-900 mb-4 tracking-wider">
           Think fast. Spot faster. Win big.
         </h3>
-        <h1 className="text-5xl font-extrabold text-teal-950 mb-6 tracking-wide leading-snug">
+        <h1 className="lg:text-4xl md:text-3xl sm:text-xl font-extrabold text-teal-950 mb-6 tracking-wide leading-snug">
           FIND OBJECTS USING YOUR CAMERA
         </h1>
         <h2 className="text-lg text-teal-900 mb-8 tracking-wider">
@@ -51,10 +51,11 @@ function Landing() {
       </div>
 
       {/* Right Section for Image */}
-      <div className="w-1/2">
+      <div className="w-3/5">
         <img
           className="h-screen w-full object-cover"
-          src="https://i.pinimg.com/736x/b2/22/2d/b2222d5d8422bf18c2c8fb524ca63c31.jpg"
+          style={{ clipPath: "polygon(10% 0, 100% 0, 100% 100%, 0% 100%)" }}
+          src="../../assets/mainPic.png"
           alt="objectsPicture"
         />
       </div>
