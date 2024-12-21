@@ -1,8 +1,4 @@
 export const loadImageToCanvas = async (file: File): Promise<void> => {
-
-// In order to load an image we need a ref to an input element of type file
-const fileInputRef = useRef<HTMLInputElement>(null);
-
   const reader = new FileReader();
   reader.onload = (event: ProgressEvent<FileReader>) => {
     const imageElement = document.createElement("img");

@@ -2,21 +2,28 @@ import { loadImageToCanvas } from "@/utils/utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 
-const setCurrentImageRef = useGameStore((state) => state.setCurrentImageRef);
-
-const handleLoadImage = async (file: File) => {
-  await loadImageToCanvas(file);
-};
-
-const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (file) {
-    setCurrentImageRef(file.name);
-    await handleLoadImage(file);
-  }
-};
-
 const LoadImageButton = () => {
+  const setCurrentImageRef = useGameStore((state) => state.setCurrentImageRef);
+  const canvasReady = useGameStore((state) => state.canvasReady);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // loadImageToCanvas is a utility function in utils.ts using cv
+  const handleLoadImage = async (file: File) => {
+    await loadImageToCanvas(file);
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCurrentImageRef(file.name);
+      await handleLoadImage(file);
+    }
+  };
+
   return (
     <div>
       <button
@@ -24,13 +31,8 @@ const LoadImageButton = () => {
         type="button"
         id="load-image"
         name="load-image"
-        onClick={(e) => {
-          // Load image from file input
-          const input = e.target as HTMLInputElement;
-          if (input.files && input.files[0]) {
-            handleLoadImage(input.files[0]);
-          }
-        }}
+        disabled={!canvasReady}
+        onClick={handleButtonClick}
       >
         Load Image
       </button>
