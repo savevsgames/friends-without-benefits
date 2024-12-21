@@ -8,7 +8,7 @@ function Landing() {
   };
 
   const handleLogin = () => {
-    navigate("/game");
+    navigate("/login");
   };
 
   return (

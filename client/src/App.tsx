@@ -8,6 +8,7 @@ import Error from "./pages/Error.tsx";
 import Game from "./pages/Game.tsx";
 import LeaderBoard from "./pages/LeaderBoard";
 import Profile from "./pages/Profile.tsx";
+import Login from "./pages/Login.tsx";
 
 function Layout() {
   return (
@@ -25,8 +26,10 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
       <Route element={<Layout />}>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/leaderboard" element={<LeaderBoard />} />
         <Route path="/game" element={<Game />} />
         <Route path="*" element={<Error />} />
