@@ -36,6 +36,44 @@ export const loadImageToCanvas = async (file: File): Promise<void> => {
 };
 
 /**
+ * Load a given video file into the canvas.
+ * @param file File object to load
+ */
+export const loadVideoToCanvas = async (file: File): Promise<void> => {
+  const reader = new FileReader();
+  reader.onload = (event: ProgressEvent<FileReader>) => {
+    const videoElement = document.createElement("video");
+    const canvasElement = document.getElementById(
+      "canvas-main"
+    ) as HTMLCanvasElement;
+    if (!canvasElement) {
+      console.log("Canvas element not found");
+      return;
+    }
+
+    // Once the reader.onload event is triggered and file is read as a string
+    videoElement.src = event.target?.result as string;
+    videoElement.autoplay = true;
+    videoElement.loop = true;
+    videoElement.muted = true;
+    videoElement.onloadedmetadata = () => {
+      // Canvas needs to match video dimensions
+      canvasElement.width = videoElement.videoWidth;
+      canvasElement.height = videoElement.videoHeight;
+
+      // Read the video and show it on the canvas then delete it to clean up memory
+      const videoMat = window.cv.imread(videoElement);
+      console.log("Video Mat: ", videoMat);
+      window.cv.imshow("canvas-main", videoMat);
+      videoMat.delete();
+    };
+  };
+  // call the reader to read file
+  console.log("File: ", file);
+  reader.readAsDataURL(file);
+};
+
+/**
  * Enable the webcam
  * @param shareMyStream Flag to share the webcam stream for multiplayer games
  * @returns MediaStream object
@@ -74,6 +112,52 @@ export const enableWebcam = async (
   }
   return null;
 };
+
+/**
+ * Process the video frame for object detection.
+ * @param videoPlaying Flag to check if the video is playing
+ * @param currentMediaType Current media type (image, video, webcam)
+ */
+export const processVideoFrame = async (
+  videoPlaying: boolean,
+  currentMediaType: string
+) => {
+  if (currentMediaType !== "video") {
+    console.log("Not a video. Cannot process video frame.");
+    return;
+  }
+  const videoElement = document.getElementById(
+    "canvas-main"
+  ) as HTMLVideoElement;
+  if (!videoElement || !videoPlaying) {
+    console.error("Video element not found or video is not playing.");
+    return;
+  }
+
+  const cv = window.cv;
+  const model = window.cocoSsd;
+  if (!cv || !model) {
+    console.log("OpenCV or model not loaded. Cannot run detection.");
+    return;
+  }
+  //
+  const videoMat = cv.imread(videoElement);
+  console.log("Video Mat: ", videoMat);
+  const capture = new cv.VideoCapture(videoElement);
+
+  const processFrame = async () => {
+    capture.read(videoMat);
+    const predictions = await model.detect(videoElement);
+    drawBoundingBoxes(predictions, videoMat);
+    cv.imshow("canvas-main", videoMat);
+    videoMat.delete();
+
+    // requestAnimationFrame recursively calls the function until the video ends
+    requestAnimationFrame(processFrame);
+  };
+  processFrame(); // Start processing the video frames
+};
+
 /**
  * Maps class names to specific colors for bounding boxes.
  * @param className Class name of the detected object
