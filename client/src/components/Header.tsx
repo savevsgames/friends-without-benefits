@@ -36,7 +36,7 @@ export default function Header() {
   return (
     <Disclosure
       as="nav"
-      className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100"
+      className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100 border-b-2"
     >
       <div className="mx-auto max-w-9xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
@@ -74,7 +74,7 @@ export default function Header() {
 
             {/* {Navigation items} */}
             <div className="hidden sm:ml-6 sm:block">
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 tracking-widest">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}

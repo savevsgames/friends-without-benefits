@@ -1,48 +1,36 @@
-import { Card } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
 
+interface ControlPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export const ControlPanel = () => {
+export const ControlPanel: React.FC<ControlPanelProps> = (props) => {
   return (
-    <Card.Root className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
-      <Card.Body gap="2">
-        <Card.Title className="text-center text-gray-900 tracking-widest font-bold">
-          Control Panel
-        </Card.Title>
-      </Card.Body>
-      <Card.Footer justifyContent="center">
-        <Button
-          variant="surface"
-          borderColor="teal.900"
-          w={{ base: "10px", md: "60px" }}
-        >
-          Play
-        </Button>
-        <Button
-          id="pause_button"
-          variant="surface"
-          className="border-teal-900"
-          w={{ base: "10px", md: "60px" }}
-        >
-          Pause
-        </Button>
-        <Button
-          id="webcam_button"
-          variant="surface"
-          className="border-teal-900"
-          w={{ base: "10px", md: "60px" }}
-        >
-          Cam
-        </Button>
-        <Button
-          id="quit_button"
-          variant="surface"
-          className="border-teal-900"
-          w={{ base: "10px", md: "60px" }}
-        >
-          Quit
-        </Button>
-      </Card.Footer>
-    </Card.Root>
+    <div
+      {...props}
+      className="bg-gray-100 shadow-lg rounded-lg p-4 text-teal-950 tracking-widest font-bold max-h-full overflow-auto"
+    >
+      {/* Header */}
+      <h2 className="text-center text-xl sm:text-2xl mb-4">Control Panel</h2>
+
+      {/* Buttons Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {[
+          "Play",
+          "Pause",
+          "Cam",
+          "Quit",
+          "Load Image",
+          "Load Video",
+          "Detect",
+        ].map((label, i) => (
+          <Button
+            key={i}
+            className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition text-sm sm:text-base md:text-lg w-full"
+            size="md"
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+    </div>
   );
 };
