@@ -63,3 +63,43 @@ export const useAuthStore = create(
     }
   )
 );
+
+type User = {
+  username: string;
+  email: string;
+  password: string;
+  avatar: string;
+  friends: string[];
+  createdAt: string;
+  shortestRound: string;
+};
+
+type SessionState = {
+  user: User | null;
+  UserDataFromToken: () => void;
+  clearUser: () => void;
+};
+
+export const useUserSession = create(
+  persist<SessionState>(
+    (set) => ({
+      // our main state
+      user: null,
+
+      // action to retrieve user from token
+      UserDataFromToken: () => {
+        const token = AuthService.getToken();
+        if (token) {
+          const decodedUser = AuthService.getProfile() as User;
+          set({ user: decodedUser });
+        }
+      },
+
+      // action to cleat the user
+      clearUser: () => set({ user: null }),
+    }),
+    {
+      name: "user-session", // the key used in localStorage to store the session
+    }
+  )
+);
