@@ -1,15 +1,15 @@
 import { FormEvent, useState } from "react";
-import { UserLogin } from "../interfaces/UserLogin.tsx"
+import { SignUpData } from "../interfaces/SignUpData.tsx";
 import { useAuthStore } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
-import { LOGIN_USER} from "../utils/mutations"; 
+import { ADD_USER } from "../utils/mutations";
 import { useMutation } from "@apollo/client";
 
-const Login: React.FC = () => {
+const SignUp: React.FC = () => {
   const navigate = useNavigate();
 
   // define the state variables
-  const [form, setForm] = useState<UserLogin>({ username: "", password: "" });
+  const [form, setForm] = useState<SignUpData>({ username: "", password: "", email: "",  });
   const [err, setErr] = useState<string | null>(null);
   const login = useAuthStore((state) => state.login);
 
@@ -21,28 +21,28 @@ const Login: React.FC = () => {
   };
 
   // useMutation hook to login a user
-  const [userLogin, { error }] = useMutation(LOGIN_USER);
+  const [addUser, { error }] = useMutation(ADD_USER);
 
   // function to handle the form submission
   const handleFormSubmit = async (event: FormEvent) => {
     event.preventDefault();
-
     try {
-      const { data } = await userLogin({
+      const { data } = await addUser({
         variables: {
           ...form,
         },
       });
       login(data.login.token); // this will set the isLoggedIn state to true
-      navigate("/game"); // once isLogged is is true, it'll navigate to the game page
+      navigate("/login"); // once isLogged is is true, it'll navigate to the game page
     } catch (err) {
       console.error(error || err);
-      setErr("Error Logging in");
+      setErr("Error Signing in");
     }
 
     setForm({
       username: "",
       password: "",
+      email: ""
     });
   };
 
@@ -58,7 +58,7 @@ const Login: React.FC = () => {
           </h2>
         </div>
         <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 mb-6">
-          Welcome Back!
+          Let's get started!
         </h1>
         <form
           className="flex flex-col box-border w-full max-w-sm"
@@ -72,7 +72,22 @@ const Login: React.FC = () => {
             <input
               type="text"
               name="username"
-              value={form.username}
+              value={form.username || ''}
+              id="username"
+              required
+              onChange={handleInputChange}
+              className="box-border w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:outline-none"
+            />
+          </div>
+          {/* Username field */}
+          <div className="flex flex-col mb-4">
+            <label className="text-sm md:text-base text-gray-800 font-medium mb-2">
+              Email Address:
+            </label>
+            <input
+              type="text"
+              name="email"
+              value={form.email as string || ""}
               id="username"
               required
               onChange={handleInputChange}
@@ -87,7 +102,7 @@ const Login: React.FC = () => {
             <input
               type="password"
               name="password"
-              value={form.password}
+              value={form.password || ''}
               id="password"
               required
               onChange={handleInputChange}
@@ -125,4 +140,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default SignUp;
