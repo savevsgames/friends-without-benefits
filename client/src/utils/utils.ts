@@ -63,11 +63,30 @@ export const loadVideoToCanvas = async (file: File): Promise<void> => {
     canvasElement.width = videoElement.videoWidth;
     canvasElement.height = videoElement.videoHeight;
 
-    // Read the video and show it on the canvas then delete it to clean up memory
-    const videoMat = window.cv.imread(videoElement);
+    const ctx = canvasElement.getContext("2d");
+    if (!ctx) {
+      console.error("Failed to get canvas context.");
+    }
+
+    ctx?.drawImage(
+      videoElement,
+      0,
+      0,
+      canvasElement.width,
+      canvasElement.height
+    );
+
+    // Read the video frame drawn on the canvas
+    const videoMat = window.cv.imread(canvasElement);
     console.log("Video Mat: ", videoMat);
     window.cv.imshow("canvas-main", videoMat);
+    // play the video here?
     videoMat.delete();
+    // Play the video element
+    videoElement.play();
+  };
+  videoElement.onerror = (error) => {
+    console.error("Error loading video file:", error);
   };
 };
 
