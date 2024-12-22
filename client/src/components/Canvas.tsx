@@ -134,18 +134,7 @@ export const Canvas = () => {
         muted
         crossOrigin="anonymous"
       ></video>
-      <image
-        id="captured-image"
-        style={{
-          display: "none",
-          position: "absolute",
-          top: "0",
-          left: "0",
-          width: "100%",
-          height: "100%",
-        }}
-        crossOrigin="anonymous"
-      />
+     
     </div>
   );
 };

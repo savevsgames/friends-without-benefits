@@ -1,4 +1,4 @@
-import { enableWebcam } from "@/utils/utils";
+import { toggleWebcam } from "@/utils/utils";
 import { useGameStore } from "@/store";
 
 const LoadWebcamButton = () => {
@@ -8,21 +8,25 @@ const LoadWebcamButton = () => {
   const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
   const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
   const canvasReady = useGameStore((state) => state.canvasReady);
+  const videoPlaying = useGameStore((state) => state.videoPlaying);
 
   /***
    * On button click -> enables webcam if stream is available
    */
-  const handleEnableWebcam = async () => {
-    // Utility function sets webcam to canvas-main
-    const stream = await enableWebcam();
-    // If a stream is achieved we can update the store
-    if (stream) {
+  const handleWebcamToggle = async () => {
+    // webcamOn will be true if the webcam becomes available
+    const webcamOn = await toggleWebcam(!videoPlaying);
+
+    if (webcamOn) {
       setCurrentMediaType("webcam");
       setCurrentMediaRef("webcam-stream");
       setVideoPlaying(true);
       console.log("Webcam is enabled and the context has been updated.");
     } else {
       console.error("Failed to load webcam stream.");
+      setCurrentMediaType(null);
+      setCurrentMediaRef(null);
+      setVideoPlaying(false);
     }
   };
 
@@ -34,9 +38,9 @@ const LoadWebcamButton = () => {
         id="enable-webcam"
         name="enable-webcam"
         disabled={!canvasReady}
-        onClick={handleEnableWebcam}
+        onClick={handleWebcamToggle}
       >
-        Enable Webcam
+        {videoPlaying ? "Enable Webcam" : "Disable Webcam"}
       </button>
       {/* Hidden video element for capturing webcam stream */}
       <video

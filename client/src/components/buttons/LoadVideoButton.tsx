@@ -1,7 +1,4 @@
-import {
-  loadVideoToVideoOutput,
-  loadVideoFrameToCapturedImageElementAtInterval,
-} from "@/utils/utils";
+import { loadVideoToVideoOutput } from "@/utils/utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 
@@ -11,24 +8,27 @@ const LoadVideoButton = () => {
     (state) => state.setCurrentMediaType
   );
   const canvasReady = useGameStore((state) => state.canvasReady);
+  const videoPlaying = useGameStore((state) => state.videoPlaying);
+  const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // LoadVideoToCanvas is a utility function in utils.ts using cv
   const handleLoadVideo = async (file: File) => {
     await loadVideoToVideoOutput(file);
-    /**
-     * @param interval: number - The interval in milliseconds to update the canvas
-     */
-    loadVideoFrameToCapturedImageElementAtInterval(100);
   };
 
   const handleButtonClick = () => {
+    if (videoPlaying) {
+      setVideoPlaying(false);
+      return;
+    }
     fileInputRef.current?.click();
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setVideoPlaying(true);
       setCurrentMediaRef(file.name);
       await handleLoadVideo(file);
       setCurrentMediaType("video");

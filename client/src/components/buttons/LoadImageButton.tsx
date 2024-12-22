@@ -1,4 +1,4 @@
-import { loadImageToCanvas } from "@/utils/utils";
+import { loadImageToVideoElementAsPoster } from "@/utils/utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 
@@ -12,7 +12,7 @@ const LoadImageButton = () => {
 
   // loadImageToCanvas is a utility function in utils.ts using cv
   const handleLoadImage = async (file: File) => {
-    await loadImageToCanvas(file);
+    await loadImageToVideoElementAsPoster(file);
   };
 
   const handleButtonClick = () => {

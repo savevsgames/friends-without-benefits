@@ -13,8 +13,8 @@ interface IGameState {
   setGameState: (newState: string) => void;
   setCanvasReady: (ready: boolean) => void;
   setVideoPlaying: (playing: boolean) => void;
-  setCurrentMediaRef: (ref: string) => void;
-  setCurrentMediaType: (type: "image" | "video" | "webcam") => void;
+  setCurrentMediaRef: (ref: string | null) => void;
+  setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   addPlayer: (player: string) => void;
 }
 
