@@ -1,4 +1,5 @@
 // Note: Utility functions for the application
+import { useGameStore } from "@/store";
 
 /**
  * Load a given image file into the canvas.
@@ -114,95 +115,6 @@ export const enableWebcam = async (
 };
 
 /**
- * Process the video frame for object detection.
- * @param videoPlaying Flag to check if the video is playing
- * @param currentMediaType Current media type (image, video, webcam)
- */
-export const processVideoFrame = async (
-  videoPlaying: boolean,
-  currentMediaType: string
-) => {
-  if (currentMediaType !== "video") {
-    console.log("Not a video. Cannot process video frame.");
-    return;
-  }
-  const videoElement = document.getElementById(
-    "canvas-main"
-  ) as HTMLVideoElement;
-  if (!videoElement || !videoPlaying) {
-    console.error("Video element not found or video is not playing.");
-    return;
-  }
-
-  const cv = window.cv;
-  const model = window.cocoSsd;
-  if (!cv || !model) {
-    console.log("OpenCV or model not loaded. Cannot run detection.");
-    return;
-  }
-  //
-  const videoMat = cv.imread(videoElement);
-  console.log("Video Mat: ", videoMat);
-  const capture = new cv.VideoCapture(videoElement);
-
-  const processFrame = async () => {
-    capture.read(videoMat);
-    const predictions = await model.detect(videoElement);
-    drawBoundingBoxes(predictions, videoMat);
-    cv.imshow("canvas-main", videoMat);
-    videoMat.delete();
-
-    // requestAnimationFrame recursively calls the function until the video ends
-    requestAnimationFrame(processFrame);
-  };
-  processFrame(); // Start processing the video frames
-};
-
-/**
- * Process the webcam frame for object detection.
- * @param videoPlaying Flag to check if the video is playing
- * @param currentMediaType Current media type (image, video, webcam)
- */
-export const processWebcamFrame = async (
-  videoPlaying: boolean,
-  currentMediaType: string
-) => {
-  if (currentMediaType !== "webcam") {
-    console.log("Not a webcam. Cannot process webcam frame.");
-    return;
-  }
-  const webcamElement = document.getElementById(
-    "canvas-main"
-  ) as HTMLVideoElement;
-  if (!webcamElement || !videoPlaying) {
-    console.error("Video element not found or video is not playing.");
-    return;
-  }
-  const cv = window.cv;
-  const model = window.cocoSsd;
-  if (!cv || !model) {
-    console.log("OpenCV or model not loaded. Cannot run detection.");
-    return;
-  }
-  //
-  const videoMat = cv.imread(webcamElement);
-  console.log("Video Mat: ", videoMat);
-  const capture = new cv.VideoCapture(webcamElement);
-
-  const processFrame = async () => {
-    capture.read(videoMat);
-    const predictions = await model.detect(webcamElement);
-    drawBoundingBoxes(predictions, videoMat);
-    cv.imshow("canvas-main", videoMat);
-    videoMat.delete();
-
-    // requestAnimationFrame recursively calls the function until the video ends
-    requestAnimationFrame(processFrame);
-  };
-  processFrame(); // Start processing the video frames
-};
-
-/**
  * Maps class names to specific colors for bounding boxes.
  * @param className Class name of the detected object
  * @returns RGBA color array
@@ -286,26 +198,26 @@ export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
 
 /**
  * Run detection on the current media in the canvas.
- * @param currentMediaType Current media type (image, video, webcam)
+ * Uses the store to access the current media type and video playing status.
  */
-export const runDetectionOnCurrentMedia = async (
-  currentMediaType: string,
-  videoPlaying: boolean
-): Promise<void> => {
+export const runDetectionOnCurrentMedia = async (): Promise<void> => {
+  // Access the store for the current media type by name
+  const { currentMediaType } = useGameStore.getState();
+
+  if (!currentMediaType) {
+    console.log(
+      "Invalid media type or no media type selected. Cannot run detection."
+    );
+    return;
+  }
+
   const cv = window.cv;
   const model = window.cocoSsd;
   if (!cv || !model) {
     console.log("OpenCV or model not loaded. Cannot run detection.");
     return;
   }
-  if (
-    currentMediaType !== "image" &&
-    currentMediaType !== "video" &&
-    currentMediaType !== "webcam"
-  ) {
-    console.log("Invalid media type. Cannot run detection.");
-    return;
-  }
+
   const canvasElement = document.getElementById(
     "canvas-main"
   ) as HTMLCanvasElement;
@@ -330,19 +242,18 @@ export const runDetectionOnCurrentMedia = async (
     // Add GAME logic to process the predictions
     //
 
-    if (currentMediaType === "video" && videoPlaying) {
+    if (
+      (currentMediaType === "video" || currentMediaType === "webcam") &&
+      // Check state of video playing
+      useGameStore.getState().videoPlaying
+    ) {
       // Process the next frame
-      requestAnimationFrame(() =>
-        runDetectionOnCurrentMedia(currentMediaType, videoPlaying)
-      );
-    } else if (currentMediaType === "webcam" && videoPlaying) {
-      // Process the next frame
-      requestAnimationFrame(() =>
-        runDetectionOnCurrentMedia(currentMediaType, videoPlaying)
+      requestAnimationFrame(() => runDetectionOnCurrentMedia());
+    } else {
+      console.log(
+        `Detection complete. ${currentMediaType} has been processed.`
       );
     }
-
-    console.log(`Detection complete. ${currentMediaType} has been processed.`);
   } catch (error) {
     console.error(`Error running detection on ${currentMediaType}:`, error);
   }

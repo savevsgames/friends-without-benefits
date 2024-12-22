@@ -7,14 +7,14 @@ interface IGameState {
   canvasReady: boolean;
   videoPlaying: boolean;
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
-  currentMediaType: ["image", "video", "webcam"] | null;
+  currentMediaType: "image" | "video" | "webcam" | null;
   players: string[]; // Stores our user_id strings for player(s)
   // State Setters
   setGameState: (newState: string) => void;
   setCanvasReady: (ready: boolean) => void;
   setVideoPlaying: (playing: boolean) => void;
   setCurrentMediaRef: (ref: string) => void;
-  setCurrentMediaType: (type: ["image", "video", "webcam"]) => void;
+  setCurrentMediaType: (type: "image" | "video" | "webcam") => void;
   addPlayer: (player: string) => void;
 }
 

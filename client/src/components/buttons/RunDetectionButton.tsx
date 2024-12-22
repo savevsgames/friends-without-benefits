@@ -1,5 +1,5 @@
 import { useGameStore } from "@/store";
-import { runDetection } from "@/utils/utils";
+import { runDetectionOnCurrentMedia } from "@/utils/utils";
 
 const RunDetectionButton = () => {
   const canvasReady = useGameStore((state) => state.canvasReady);
@@ -7,7 +7,7 @@ const RunDetectionButton = () => {
 
   const handleDetection = () => {
     console.log(`Running Detection on ${currentMediaType}...`);
-    if (currentMediaType) runDetection(currentMediaType);
+    if (currentMediaType) runDetectionOnCurrentMedia();
   };
 
   return (
