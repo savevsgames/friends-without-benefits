@@ -1,8 +1,8 @@
 import { FormEvent, useState } from "react";
-import { UserLogin } from "../interfaces/UserLogin.tsx"
+import { UserLogin } from "../interfaces/UserLogin.tsx";
 import { useAuthStore } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
-import { LOGIN_USER} from "../utils/mutations"; 
+import { LOGIN_USER } from "../utils/mutations";
 import { useMutation } from "@apollo/client";
 
 const Login: React.FC = () => {
@@ -33,7 +33,7 @@ const Login: React.FC = () => {
           ...form,
         },
       });
-      login(data.login.token); // this will set the isLoggedIn state to true
+      login(data.userLogin.token); // if the token is valid it'll set isLoggedIn to true
       navigate("/game"); // once isLogged is is true, it'll navigate to the game page
     } catch (err) {
       console.error(error || err);
