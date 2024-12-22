@@ -1,6 +1,6 @@
 import {
-  loadVideoToHiddenVideoInput,
-  loadHiddenVideoToCanvasAtInterval,
+  loadVideoToVideoOutput,
+  loadVideoFrameToCapturedImageElementAtInterval,
 } from "@/utils/utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
@@ -15,11 +15,11 @@ const LoadVideoButton = () => {
 
   // LoadVideoToCanvas is a utility function in utils.ts using cv
   const handleLoadVideo = async (file: File) => {
-    await loadVideoToHiddenVideoInput(file);
+    await loadVideoToVideoOutput(file);
     /**
      * @param interval: number - The interval in milliseconds to update the canvas
      */
-    loadHiddenVideoToCanvasAtInterval(100);
+    loadVideoFrameToCapturedImageElementAtInterval(100);
   };
 
   const handleButtonClick = () => {

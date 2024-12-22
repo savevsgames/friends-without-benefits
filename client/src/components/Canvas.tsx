@@ -88,7 +88,8 @@ export const Canvas = () => {
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.fillStyle = "black";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 0.7; // Set transparency to 70%
           ctx.fillStyle = "white";
           ctx.font = "20px Arial";
           ctx.fillText("SCAVENGER HUNT!", 10, 30);
@@ -104,21 +105,47 @@ export const Canvas = () => {
   }, [setCanvasReady]);
 
   return (
-    <div id="canvas-container" className="w-full h-full">
+    <div id="canvas-container" className="relative w-full h-full">
       <canvas
         id="canvas-main"
         ref={canvasRef}
-        width="100%"
-        height="100%"
-        max-width="100%"
-        max-height="100%"
+        style={{
+          display: "block",
+          position: "absolute",
+          top: "0",
+          left: "0",
+          width: "100%",
+          height: "100%",
+          zIndex: 10,
+        }}
       ></canvas>
       <video
         id="video-output"
-        style={{ display: "none" }}
+        style={{
+          display: "block",
+          position: "absolute",
+          top: "0",
+          left: "0",
+          width: "100%",
+          height: "100%",
+          zIndex: 1,
+        }}
         playsInline
         muted
+        crossOrigin="anonymous"
       ></video>
+      <image
+        id="captured-image"
+        style={{
+          display: "none",
+          position: "absolute",
+          top: "0",
+          left: "0",
+          width: "100%",
+          height: "100%",
+        }}
+        crossOrigin="anonymous"
+      />
     </div>
   );
 };

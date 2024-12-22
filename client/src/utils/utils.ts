@@ -40,13 +40,11 @@ export const loadImageToCanvas = async (file: File): Promise<void> => {
  * Load a given video file into the canvas.
  * @param file File object to load
  */
-export const loadVideoToHiddenVideoInput = async (
-  file: File
-): Promise<void> => {
-  const hiddenVideoElement = document.getElementById(
+export const loadVideoToVideoOutput = async (file: File): Promise<void> => {
+  const videoElement = document.getElementById(
     "video-output"
   ) as HTMLVideoElement;
-  if (!hiddenVideoElement) {
+  if (!videoElement) {
     console.log("Hidden video element not found.");
     return;
   }
@@ -55,41 +53,49 @@ export const loadVideoToHiddenVideoInput = async (
   const url = URL.createObjectURL(file);
   console.log("Video URL: ", url);
 
-  hiddenVideoElement.src = url;
-  hiddenVideoElement.autoplay = true;
-  hiddenVideoElement.loop = true;
-  hiddenVideoElement.muted = true;
+  videoElement.src = url;
+  videoElement.autoplay = true;
+  videoElement.loop = true;
+  videoElement.muted = true;
 
   // Wait for metadata to load
   await new Promise<void>((resolve) => {
-    hiddenVideoElement.onloadedmetadata = () => {
+    videoElement.onloadedmetadata = () => {
       console.log(
-        `Video dimensions: ${hiddenVideoElement.videoWidth}x${hiddenVideoElement.videoHeight}`
+        `Video dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`
       );
       resolve();
     };
   });
   // Play the video and wait for it to load
   try {
-    await hiddenVideoElement.play();
+    await videoElement.play();
     console.log("Video loaded and playing.");
   } catch (error) {
     console.error("Error playing video:", error);
   }
 
-  hiddenVideoElement.onerror = (error) => {
+  videoElement.onerror = (error) => {
     console.error("Error loading video file:", error);
   };
 };
 
-export const loadHiddenVideoToCanvasAtInterval = async (
+export const loadVideoFrameToCapturedImageElementAtInterval = async (
   intervalTime: number = 100
 ): Promise<void> => {
-  const hiddenVideoElement = document.getElementById(
+  const videoElement = document.getElementById(
     "video-output"
   ) as HTMLVideoElement;
-  if (!hiddenVideoElement) {
-    console.log("Canvas element not found");
+  if (!videoElement) {
+    console.log("Video element not found");
+    return;
+  }
+
+  const capturedImageElement = document.getElementById(
+    "captured-image"
+  ) as HTMLImageElement;
+  if (!capturedImageElement) {
+    console.log("Hidden Captured-Image element not found");
     return;
   }
 
@@ -102,93 +108,69 @@ export const loadHiddenVideoToCanvasAtInterval = async (
   }
 
   // Wait for video to be ready -> readyState of 1 or less means metadata is still loading
-  if (hiddenVideoElement.readyState < 2) {
+  if (videoElement.readyState < 2) {
     await new Promise<void>((resolve) => {
-      hiddenVideoElement.oncanplay = () => resolve();
+      videoElement.oncanplay = () => resolve();
     });
   }
 
   // Set canvas dimensions to match video dimensions
-  canvasElement.width = hiddenVideoElement.videoWidth;
-  canvasElement.height = hiddenVideoElement.videoHeight;
+  capturedImageElement.width = videoElement.videoWidth;
+  capturedImageElement.height = videoElement.videoHeight;
   console.log(
-    `Canvas has been resized to: ${canvasElement.width}x${canvasElement.height}`
+    `Canvas has been resized to: ${capturedImageElement.width}x${capturedImageElement.height}`
   );
-
-  let lastFrameTime = 0;
-  let isRunning = true;
-  let frameId: number | null = null;
 
   /**
    * Draw frames from the video to the canvas at a "throttled" interval.
    */
-  const loadSingleFrame = async (timestamp: number) => {
+  const loadSingleFrame = async () => {
     // Draw a single frame from the video to the canvas if the video is not paused or ended
-    if (!isRunning || hiddenVideoElement.paused || hiddenVideoElement.ended) {
+    if (videoElement.paused || videoElement.ended) {
       console.log("Video is paused or ended. Cannot draw frame.");
       return;
     }
+    // Draw the video frame to the "capture-image" element
+    const image = videoElement.toImage();
 
-    // Draw the frame if the interval has passed
-    if (timestamp - lastFrameTime >= intervalTime) {
-      try {
-        // Get canvas context
-        const ctx = canvasElement.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(
-            hiddenVideoElement,
-            0,
-            0,
-            hiddenVideoElement.width,
-            hiddenVideoElement.height
-          );
+      if (window.cv) {
+        const videoMat = window.cv.imread("captured-image");
+        // TODO: Comment this log out in production
+        // Log the video mat properties for debugging only
+        console.log("VideoMat Properties:", {
+          rows: videoMat.rows,
+          cols: videoMat.cols,
+          type: videoMat.type(),
+          channels: videoMat.channels(),
+          empty: videoMat.empty(),
+          size: videoMat.size(),
+        });
+
+        if (videoMat.empty() || videoMat.rows === 0 || videoMat.cols === 0) {
+          console.error("VideoMat is empty or invalid. Cannot draw frame.");
+          videoMat.delete();
+          return;
         }
-        if (window.cv) {
-          const videoMat = await window.cv.imread(canvasElement);
-          console.log("Video Mat: ", videoMat);
-          //   Check to make sure mat is not empty
-          if (videoMat.rows > 0 && videoMat.cols > 0) {
-            // Display the video frame on the canvas
-            window.cv.imshow("canvas-main", videoMat);
-            videoMat.delete();
-          }
-          // Update the last frame time
-          lastFrameTime = timestamp;
+
+        console.log("VideoMat dimensions:", videoMat.rows, "x", videoMat.cols);
+        console.log("VideoMat data sample:", videoMat.data.slice(0, 10));
+        //   Check to make sure mat is not empty
+        if (videoMat.rows > 0 && videoMat.cols > 0) {
+          console.log("Video frame ready for detection...");
         }
-      } catch (error) {
-        console.error("Error drawing video frame:", error);
+      } else {
+        console.error("OpenCV not loaded. Cannot draw video frame.");
       }
+    } catch (error) {
+      console.error("Error drawing video frame:", error);
     }
-    // Request the next frame
-    frameId = requestAnimationFrame(loadSingleFrame);
   };
 
-  const stopRenderingToCanvas = () => {
-    if (frameId !== null) {
-      cancelAnimationFrame(frameId);
-      frameId = null;
-    }
-    isRunning = false;
-    console.log("Video rendering to canvas stopped.");
-  };
-
-  hiddenVideoElement.onplay = () => {
-    console.log("Video started playing.");
-    console.log(`Drawing video frames every ${intervalTime}ms.`);
-    isRunning = true;
-    // returns a requestID to be used with cancelAnimationFrame
-    frameId = requestAnimationFrame(loadSingleFrame);
-  };
-
-  hiddenVideoElement.onpause = () => {
-    console.log("Video paused.");
-    stopRenderingToCanvas();
-  };
-
-  hiddenVideoElement.onended = () => {
-    console.log("Video ended.");
-    stopRenderingToCanvas();
-  };
+  loadSingleFrame();
+  //   If the video is playing, draw the next frame
+  if (!videoElement.paused && !videoElement.ended) {
+    setInterval(loadSingleFrame, intervalTime);
+  }
 };
 
 /**
@@ -256,14 +238,30 @@ export const colorForLabels = (className: string) => {
  * @param inputImage Input image to draw bounding boxes on
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
-  //   const canvas = document.getElementById("canvas-main");
-  //   const context = canvas.getContext("2d");
-  if (!window.cv) {
-    console.log("OpenCV is not loaded. Cannot draw bounding boxes.");
+export const drawBoundingBoxes = (predictions: any) => {
+  const canvas = document.getElementById("canvas-main") as HTMLCanvasElement;
+  if (!canvas) {
+    console.error("Canvas element not found.");
+    return;
+  }
+  const context = canvas.getContext("2d");
+  if (!context) {
+    console.error("Canvas context not found.");
     return;
   }
   const cv = window.cv;
+  if (!cv) {
+    console.log("OpenCV is not loaded. Cannot draw bounding boxes.");
+    return;
+  }
+
+  // Create a transparent Mat for drawing
+  const transparentCanvasMat = new cv.Mat(
+    canvas.height,
+    canvas.width,
+    cv.CV_8UC4
+  );
+  transparentCanvasMat.setTo(new cv.Scalar(0, 0, 0, 0));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   predictions.forEach((prediction: any) => {
@@ -276,7 +274,7 @@ export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
     const point2 = new cv.Point(x + width, y + height);
 
     // Draw the bounding box
-    cv.rectangle(inputImage, point1, point2, color, 8);
+    cv.rectangle(transparentCanvasMat, point1, point2, color, 8);
     // Draw the label background and text
     const text = `${className} ${Math.round(confScore * 100)}%`;
     const fontFace = cv.FONT_HERSHEY_SIMPLEX;
@@ -284,7 +282,7 @@ export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
     const thickness = 1;
     const filled = -1; // Filled rectangle
 
-    // Get text size for background rectangle
+    // Get text size for background rectangle through context - not used for now
     // context.font = "20px Arial"; // Use to measure text width and height
     // const textMetrics = context.measureText(text);
     // const textWidth = textMetrics.width;
@@ -293,16 +291,16 @@ export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
 
     // Draw background rectangle for the label
     cv.rectangle(
-      inputImage,
+      transparentCanvasMat,
       new cv.Point(x, y - labelHeight),
       new cv.Point(x + width, y),
       color,
       filled
     );
 
-    // Draw the text
+    // Draw the text over the background rectangle
     cv.putText(
-      inputImage,
+      transparentCanvasMat,
       text,
       new cv.Point(x + textPadding, y - textPadding), // Adjust text placement
       fontFace,
@@ -335,23 +333,27 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
     return;
   }
 
-  const canvasElement = document.getElementById(
-    "canvas-main"
-  ) as HTMLCanvasElement;
-  if (!canvasElement) {
+  const capturedImageElement = document.getElementById(
+    "captured-image"
+  ) as HTMLImageElement;
+  if (!capturedImageElement) {
     console.error("Canvas element not found.");
     return;
   }
 
   // Process a single frame, grabbed from the canvas displaying the media
   try {
-    const mediaMat = cv.imread(canvasElement);
+    const mediaMat = cv.imread("captured-image");
     console.log(`${currentMediaType} Mat: `, mediaMat);
 
-    const predictions = await model.detect(canvasElement);
-    drawBoundingBoxes(predictions, mediaMat);
+    const predictions = await model.detect(mediaMat);
+    if (!predictions) {
+      console.log("No predictions found.");
+      mediaMat.delete();
+      return;
+    }
+    drawBoundingBoxes(predictions);
 
-    cv.imshow("canvas-main", mediaMat);
     // clean the memory by deleting the Mat with the copy of the media data
     mediaMat.delete();
 
@@ -364,8 +366,8 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
       // Check state of video playing
       useGameStore.getState().videoPlaying
     ) {
-      // Process the next frame
-      requestAnimationFrame(() => runDetectionOnCurrentMedia());
+      // Run detection on the currently displayed frame
+      runDetectionOnCurrentMedia();
     } else {
       console.log(
         `Detection complete. ${currentMediaType} has been processed.`
