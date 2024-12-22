@@ -9,16 +9,40 @@ import Game from "./pages/Game.tsx";
 import LeaderBoard from "./pages/LeaderBoard";
 import Profile from "./pages/Profile.tsx";
 import Login from "./pages/Login.tsx";
+import {
+  ApolloProvider, 
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+} from "@apollo/client";
+import {setContext} from "@apollo/client/Link/context";
+
+const httpLink = createHttpLink({uri: '/graphql'})
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem("id_token")
+  return {
+    ...headers,
+    Authorization: token ? `bEARER ${token}` : ""
+  }
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache(),
+});
+
 
 function Layout() {
   return (
-    <div>
-      <Header />
-      <main>
-        <Outlet />
-      </main>
-      {/* <Footer /> */}
-    </div>
+    <ApolloProvider client={client}>
+      <>
+        <Header />
+        <main>
+          <Outlet />
+        </main>
+      </>
+    </ApolloProvider>
   );
 }
 
