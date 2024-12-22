@@ -285,74 +285,65 @@ export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
 };
 
 /**
- * Run detection on the current image in the canvas.
+ * Run detection on the current media in the canvas.
  * @param currentMediaType Current media type (image, video, webcam)
  */
-export const runDetection = async (currentMediaType: string): Promise<void> => {
+export const runDetectionOnCurrentMedia = async (
+  currentMediaType: string,
+  videoPlaying: boolean
+): Promise<void> => {
   const cv = window.cv;
   const model = window.cocoSsd;
   if (!cv || !model) {
     console.log("OpenCV or model not loaded. Cannot run detection.");
     return;
   }
+  if (
+    currentMediaType !== "image" &&
+    currentMediaType !== "video" &&
+    currentMediaType !== "webcam"
+  ) {
+    console.log("Invalid media type. Cannot run detection.");
+    return;
+  }
+  const canvasElement = document.getElementById(
+    "canvas-main"
+  ) as HTMLCanvasElement;
+  if (!canvasElement) {
+    console.error("Canvas element not found.");
+    return;
+  }
 
-  if (currentMediaType === "image") {
-    const imageElement = document.getElementById(
-      "canvas-main"
-    ) as HTMLCanvasElement;
-    // Get the image data from the canvas
-    const imgMat = cv.imread(imageElement);
-    console.log("Image Mat: ", imgMat);
-    // Run the detection
-    try {
-      const predictions = await model.detect(imageElement);
+  // Process a single frame, grabbed from the canvas displaying the media
+  try {
+    const mediaMat = cv.imread(canvasElement);
+    console.log(`${currentMediaType} Mat: `, mediaMat);
 
-      // Draw the bounding boxes
-      drawBoundingBoxes(predictions, imgMat);
-      // Show the image with the bounding boxes
-      cv.imshow("canvas-main", imgMat);
-      // Clean up the image data
-      imgMat.delete();
-    } catch (error) {
-      console.error("Error running detection: ", error);
+    const predictions = await model.detect(canvasElement);
+    drawBoundingBoxes(predictions, mediaMat);
+
+    cv.imshow("canvas-main", mediaMat);
+    // clean the memory by deleting the Mat with the copy of the media data
+    mediaMat.delete();
+
+    // TODO:
+    // Add GAME logic to process the predictions
+    //
+
+    if (currentMediaType === "video" && videoPlaying) {
+      // Process the next frame
+      requestAnimationFrame(() =>
+        runDetectionOnCurrentMedia(currentMediaType, videoPlaying)
+      );
+    } else if (currentMediaType === "webcam" && videoPlaying) {
+      // Process the next frame
+      requestAnimationFrame(() =>
+        runDetectionOnCurrentMedia(currentMediaType, videoPlaying)
+      );
     }
-  } else if (currentMediaType === "video") {
-    const videoElement = document.getElementById(
-      "video-main"
-    ) as HTMLVideoElement;
-    const videoMat = cv.imread(videoElement);
-    console.log("Video Mat: ", videoMat);
-    // Run the detection
-    try {
-      const predictions = await model.detect(videoElement);
 
-      // Draw the bounding boxes
-      drawBoundingBoxes(predictions, videoMat);
-      // Show the image with the bounding boxes
-      cv.imshow("canvas-main", videoMat);
-      // Clean up the image data
-      videoMat.delete();
-    } catch (error) {
-      console.error("Error running detection: ", error);
-    }
-  } else if (currentMediaType === "webcam") {
-    const videoElement = document.getElementById(
-      "video-main"
-    ) as HTMLVideoElement;
-    const videoMat = cv.imread(videoElement);
-    console.log("Video Mat: ", videoMat);
-    // Run the detection
-    try {
-      const predictions = await model.detect(videoElement);
-
-      // Draw the bounding boxes
-      drawBoundingBoxes(predictions, videoMat);
-      // Show the image with the bounding boxes
-      cv.imshow("canvas-main", videoMat);
-      // Clean up the image data
-      videoMat.delete();
-    } catch (error) {
-      console.error("Error running detection: ", error);
-    }
+    console.log(`Detection complete. ${currentMediaType} has been processed.`);
+  } catch (error) {
+    console.error(`Error running detection on ${currentMediaType}:`, error);
   }
 };
