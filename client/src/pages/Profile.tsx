@@ -1,26 +1,35 @@
 import Header from "../components/Header.tsx";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
+import { getUserIdFromToken } from "@/utils/userToken.ts";
+import UserData from "@/interfaces/UserData.ts";
+
+// import queries here once done
+import { QUERY_ME } from "@/utils/queries.ts";
 
 function Profile() {
-  const [file, setFile] = useState<string>();
+
+  // set a default profile picture placeholder until changed by the user
+  const [picture, setPicture] = useState<string>(
+    "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
+  );
+
+  
 
   const handleChange = (event: React.ChangeEvent) => {
     const target = event.target as HTMLInputElement;
-    const newFile: File = (target.files as FileList)[0];
-    const stringFile: string = URL.createObjectURL(newFile); // convert from File to String
-    if (stringFile) {
-      setFile(stringFile)
+    const newFile: File | undefined = (target.files as FileList)[0]; // get the selected file
+    if (newFile) {
+      const stringFile: string = URL.createObjectURL(newFile); // convert from File to String
+      console.log(stringFile);
+      setPicture(stringFile);
     }
-      setFile("https://avatar.iran.liara.run/public/50")
-   
+      console.log("failed uploading profile image");
   };
-  // this just for now until we tie to an actual user data
-  useEffect(() => {
 
-    const placeholder =
-      "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541";
-    setFile(placeholder)
-  }, [])
+
+
+
+
 
   return (
     <>
@@ -36,7 +45,7 @@ function Profile() {
             <img
               className="rounded-full w-34 h-34 object-cover mb-4 border-4 border-teal-900"
               alt="profile pic"
-              src={file}
+              src={picture}
             />
             <label
               htmlFor="img-upload"
@@ -45,7 +54,7 @@ function Profile() {
               Upload a Profile picture
             </label>
             <input
-              id='img-upload'
+              id="img-upload"
               type="file"
               onChange={handleChange}
               className="hidden"
@@ -53,36 +62,26 @@ function Profile() {
           </div>
 
           {/* Right Section: Player Details */}
-          <div className="md:w-3/5 flex flex-col justify-center p-6 ">
+          <div className="md:w-3/5 flex flex-col justify-center p-6">
             <ul className="text-gray-700 text-sm space-y-2">
-              <li>
-                <span className="font-medium tracking-widest">Player Username:</span>{" "}
-                Player Username
-              </li>
-              <li>
-                <span className="font-medium tracking-widest">Player Email:</span>{" "}
-                Player Email
-              </li>
-              <li>
-                <span className="font-medium tracking-widest">Started On:</span>{" "}
-                Started On
-              </li>
-              <li>
-                <span className="font-medium tracking-widest">Player ID:</span>{" "}
-                Player ID
-              </li>
-              <li>
-                <span className="font-medium tracking-widest">
-                  Shortest Round:
-                </span>{" "}
-                Shortest Round
-              </li>
-              <li>
-                <span className="font-medium tracking-widest">
-                  Rounds Played:
-                </span>{" "}
-                Rounds Played
-              </li>
+              {[
+                { label: "Username:", value: "Player Username" },
+                { label: "Email:", value: "Player Email" },
+                { label: "Started On:", value: "Started On" },
+                { label: "Player ID:", value: "Player ID" },
+                { label: "Shortest Round:", value: "Shortest Round" },
+                { label: "Rounds Played:", value: "Rounds Played" },
+              ].map((item, index) => (
+                <li
+                  key={index}
+                  className="grid grid-cols-3 gap-x-2 text-left"
+                >
+                  <span className="font-medium tracking-widest">
+                    {item.label}
+                  </span>
+                  <span>{item.value}</span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

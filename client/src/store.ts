@@ -63,3 +63,26 @@ export const useAuthStore = create(
     }
   )
 );
+
+interface UserData {
+  username: string;
+  email: string;
+  password: string;
+  avatar: string;
+  friends: string[];
+  createdAt: string;
+  shortestRound: string;
+}
+
+export const useUserStore = create<UserData>((set) => ({
+  username: "",
+  email: "",
+  password: "",
+  avatar: "",
+  friends: [],
+  createdAt: ""
+  shortesRound: ""
+  setUsername: 
+})
+
+)
