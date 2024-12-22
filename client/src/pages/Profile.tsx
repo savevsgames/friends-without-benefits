@@ -1,10 +1,9 @@
 import Header from "../components/Header.tsx";
 import {  useState } from "react";
-import { getUserIdFromToken } from "@/utils/userToken.ts";
-import UserData from "@/interfaces/UserData.ts";
 
 // import queries here once done
-import { QUERY_ME } from "@/utils/queries.ts";
+// import { QUERY_ME } from "@/utils/queries.ts";
+// import { useUserSession } from "@/store.ts";
 
 function Profile() {
 
@@ -13,7 +12,9 @@ function Profile() {
     "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
   );
 
-  
+  // get the user data from the store
+  // const userId = useUserSession(state => (state.user))
+
 
   const handleChange = (event: React.ChangeEvent) => {
     const target = event.target as HTMLInputElement;
@@ -26,11 +27,6 @@ function Profile() {
       console.log("failed uploading profile image");
   };
 
-
-
-
-
-
   return (
     <>
       <Header />
@@ -39,7 +35,7 @@ function Profile() {
         <h1 className="text-teal-900 font-bold text-3xl mb-6 tracking-widest">
           Player Profile
         </h1>
-        <div className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg w-11/12 max-w-4xl border border-teal-100 border-4">
+        <div className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg w-11/12 max-w-4xl border-teal-100 border-4">
           {/* Left Section: Profile Image */}
           <div className="md:w-2/5 flex flex-col items-center justify-center p-6 border-b md:border-b-0 md:border-r">
             <img
