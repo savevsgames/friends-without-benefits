@@ -56,12 +56,6 @@ const LoadVideoButton = () => {
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      <video
-        id="video-output"
-        style={{ display: "none" }}
-        playsInline
-        muted
-      ></video>
     </div>
   );
 };

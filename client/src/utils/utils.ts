@@ -60,12 +60,22 @@ export const loadVideoToHiddenVideoInput = async (
   hiddenVideoElement.loop = true;
   hiddenVideoElement.muted = true;
 
-  hiddenVideoElement.onloadedmetadata = () => {
-    // Canvas needs to match video dimensions
-    console.log(
-      `Video metadata loaded:\n width: ${hiddenVideoElement.videoWidth}\n height: ${hiddenVideoElement.videoHeight}`
-    );
-  };
+  // Wait for metadata to load
+  await new Promise<void>((resolve) => {
+    hiddenVideoElement.onloadedmetadata = () => {
+      console.log(
+        `Video dimensions: ${hiddenVideoElement.videoWidth}x${hiddenVideoElement.videoHeight}`
+      );
+      resolve();
+    };
+  });
+  // Play the video and wait for it to load
+  try {
+    await hiddenVideoElement.play();
+    console.log("Video loaded and playing.");
+  } catch (error) {
+    console.error("Error playing video:", error);
+  }
 
   hiddenVideoElement.onerror = (error) => {
     console.error("Error loading video file:", error);
@@ -91,59 +101,93 @@ export const loadHiddenVideoToCanvasAtInterval = async (
     return;
   }
 
-  // Get canvas context
-  const ctx = canvasElement.getContext("2d");
-  if (!ctx) {
-    console.error("Canvas context not found.");
-    return;
+  // Wait for video to be ready -> readyState of 1 or less means metadata is still loading
+  if (hiddenVideoElement.readyState < 2) {
+    await new Promise<void>((resolve) => {
+      hiddenVideoElement.oncanplay = () => resolve();
+    });
   }
 
   // Set canvas dimensions to match video dimensions
   canvasElement.width = hiddenVideoElement.videoWidth;
   canvasElement.height = hiddenVideoElement.videoHeight;
+  console.log(
+    `Canvas has been resized to: ${canvasElement.width}x${canvasElement.height}`
+  );
 
-  let intervalId: NodeJS.Timeout | null = null;
+  let lastFrameTime = 0;
+  let isRunning = true;
+  let frameId: number | null = null;
 
-  hiddenVideoElement.play();
+  /**
+   * Draw frames from the video to the canvas at a "throttled" interval.
+   */
+  const loadSingleFrame = async (timestamp: number) => {
+    // Draw a single frame from the video to the canvas if the video is not paused or ended
+    if (!isRunning || hiddenVideoElement.paused || hiddenVideoElement.ended) {
+      console.log("Video is paused or ended. Cannot draw frame.");
+      return;
+    }
 
-  // Draw a single frame from the video to the canvas if the video is not paused or ended
-  if (hiddenVideoElement.paused || hiddenVideoElement.ended) {
-    console.log("Video is paused or ended. Cannot draw frame.");
-    return;
-  }
-  // Read the video and show it on the canvas every 100ms
-  const loadSingleFrame = async () => {
-    ctx.drawImage(
-      hiddenVideoElement,
-      0,
-      0,
-      hiddenVideoElement.width,
-      hiddenVideoElement.height
-    );
-    const videoMat = await window.cv.imread(canvasElement);
-    console.log("Video Mat: ", videoMat);
-    window.cv.imshow("canvas-main", videoMat);
-    videoMat.delete();
+    // Draw the frame if the interval has passed
+    if (timestamp - lastFrameTime >= intervalTime) {
+      try {
+        // Get canvas context
+        const ctx = canvasElement.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(
+            hiddenVideoElement,
+            0,
+            0,
+            hiddenVideoElement.width,
+            hiddenVideoElement.height
+          );
+        }
+        if (window.cv) {
+          const videoMat = await window.cv.imread(canvasElement);
+          console.log("Video Mat: ", videoMat);
+          //   Check to make sure mat is not empty
+          if (videoMat.rows > 0 && videoMat.cols > 0) {
+            // Display the video frame on the canvas
+            window.cv.imshow("canvas-main", videoMat);
+            videoMat.delete();
+          }
+          // Update the last frame time
+          lastFrameTime = timestamp;
+        }
+      } catch (error) {
+        console.error("Error drawing video frame:", error);
+      }
+    }
+    // Request the next frame
+    frameId = requestAnimationFrame(loadSingleFrame);
+  };
+
+  const stopRenderingToCanvas = () => {
+    if (frameId !== null) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+    isRunning = false;
+    console.log("Video rendering to canvas stopped.");
   };
 
   hiddenVideoElement.onplay = () => {
     console.log("Video started playing.");
     console.log(`Drawing video frames every ${intervalTime}ms.`);
-    intervalId = setInterval(loadSingleFrame, intervalTime);
+    isRunning = true;
+    // returns a requestID to be used with cancelAnimationFrame
+    frameId = requestAnimationFrame(loadSingleFrame);
   };
 
   hiddenVideoElement.onpause = () => {
     console.log("Video paused.");
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
+    stopRenderingToCanvas();
   };
 
   hiddenVideoElement.onended = () => {
     console.log("Video ended.");
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
+    stopRenderingToCanvas();
   };
 };
 

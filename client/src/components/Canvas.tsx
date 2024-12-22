@@ -104,14 +104,22 @@ export const Canvas = () => {
   }, [setCanvasReady]);
 
   return (
-    <canvas
-      id="canvas-main"
-      ref={canvasRef}
-      width="100%"
-      height="100%"
-      max-width="100%"
-      max-height="100%"
-    ></canvas>
+    <div id="canvas-container" className="w-full h-full">
+      <canvas
+        id="canvas-main"
+        ref={canvasRef}
+        width="100%"
+        height="100%"
+        max-width="100%"
+        max-height="100%"
+      ></canvas>
+      <video
+        id="video-output"
+        style={{ display: "none" }}
+        playsInline
+        muted
+      ></video>
+    </div>
   );
 };
 
