@@ -1,8 +1,8 @@
 import { FormEvent, useState } from "react";
-import { UserLogin } from "../interfaces/UserLogin.tsx";
+import { UserLogin } from "../interfaces/UserLogin.tsx"
 import { useAuthStore } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
-import { LOGIN_USER } from "../utils/mutations";
+import { LOGIN_USER} from "../utils/mutations"; 
 import { useMutation } from "@apollo/client";
 
 const Login: React.FC = () => {
