@@ -36,88 +36,115 @@ export const loadImageToCanvas = async (file: File): Promise<void> => {
   reader.readAsDataURL(file);
 };
 
-export const loadMediaToCanvas = async (
-  source: File | MediaStream,
-  type: "video" | "webcam"
+/**
+ * Load a given video file into the canvas.
+ * @param file File object to load
+ */
+export const loadVideoToHiddenVideoInput = async (
+  file: File
 ): Promise<void> => {
-  const videoElement = document.createElement("video");
+  const hiddenVideoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!hiddenVideoElement) {
+    console.log("Hidden video element not found.");
+    return;
+  }
+
+  // Create a blob URL for the video file - plain src will fail detection
+  const url = URL.createObjectURL(file);
+  console.log("Video URL: ", url);
+
+  hiddenVideoElement.src = url;
+  hiddenVideoElement.autoplay = true;
+  hiddenVideoElement.loop = true;
+  hiddenVideoElement.muted = true;
+
+  hiddenVideoElement.onloadedmetadata = () => {
+    // Canvas needs to match video dimensions
+    console.log(
+      `Video metadata loaded:\n width: ${hiddenVideoElement.videoWidth}\n height: ${hiddenVideoElement.videoHeight}`
+    );
+  };
+
+  hiddenVideoElement.onerror = (error) => {
+    console.error("Error loading video file:", error);
+  };
+};
+
+export const loadHiddenVideoToCanvasAtInterval = async (
+  intervalTime: number = 100
+): Promise<void> => {
+  const hiddenVideoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!hiddenVideoElement) {
+    console.log("Canvas element not found");
+    return;
+  }
+
   const canvasElement = document.getElementById(
     "canvas-main"
   ) as HTMLCanvasElement;
-
   if (!canvasElement) {
     console.log("Canvas element not found");
     return;
   }
-  // Get the canvas element context with getContext("2d")
-  // because it allows us to paint a single video frame
-  // into the canvas context and then read the pixel data
-  try {
-    const getContextAndRenderFrame = () => {
-      // Get the canvas context
-      const ctx = canvasElement.getContext("2d");
-      if (!ctx) {
-        console.error("Failed to get canvas context.");
-      }
 
-      // Render the next frame of the video
-      if (!videoElement.paused && !videoElement.ended) {
-        ctx?.drawImage(
-          videoElement,
-          0,
-          0,
-          canvasElement.width,
-          canvasElement.height
-        );
-
-        // Read the video frame drawn on the canvas and show it
-        try {
-          const videoMat = window.cv.imread(canvasElement);
-          console.log("Video Mat: ", videoMat);
-          window.cv.imshow("canvas-main", videoMat);
-          videoMat.delete(); // Clean up memory
-
-          // requestAnimationFrame will ask the browser for the next frame of the videoElement
-          requestAnimationFrame(getContextAndRenderFrame);
-        } catch (error) {
-          console.log("Error rendering frame with openCV: ", error);
-        }
-      }
-    };
-
-    // Handle stream differently for webcam
-    if (type === "video") {
-      const url = URL.createObjectURL(source as File);
-      videoElement.src = url;
-      videoElement.loop = true;
-    } else if (type === "webcam") {
-      videoElement.srcObject = source as MediaStream;
-    }
-
-    videoElement.autoplay = true;
-    // Possibly changing in the future with multiplayer
-    videoElement.muted = true;
-    videoElement.playsInline = true; // For mobile devices (mobile-friendly)
-
-    videoElement.onloadedmetadata = () => {
-      console.log(`Video metadata loaded for ${type}`);
-
-      // Set canvas dimensions to match video dimensions
-      canvasElement.width = videoElement.videoWidth;
-      canvasElement.height = videoElement.videoHeight;
-
-      getContextAndRenderFrame();
-    };
-
-    videoElement.onerror = (error) => {
-      console.error("Error loading video file:", error);
-    };
-    videoElement.play();
-    console.log(`Playing ${type}...`);
-    getContextAndRenderFrame();
-  } catch (error) {
-    console.error(`Error loading ${type} file:`, error);
+  // Get canvas context
+  const ctx = canvasElement.getContext("2d");
+  if (!ctx) {
+    console.error("Canvas context not found.");
+    return;
   }
+
+  // Set canvas dimensions to match video dimensions
+  canvasElement.width = hiddenVideoElement.videoWidth;
+  canvasElement.height = hiddenVideoElement.videoHeight;
+
+  let intervalId: NodeJS.Timeout | null = null;
+
+  hiddenVideoElement.play();
+
+  // Draw a single frame from the video to the canvas if the video is not paused or ended
+  if (hiddenVideoElement.paused || hiddenVideoElement.ended) {
+    console.log("Video is paused or ended. Cannot draw frame.");
+    return;
+  }
+  // Read the video and show it on the canvas every 100ms
+  const loadSingleFrame = async () => {
+    ctx.drawImage(
+      hiddenVideoElement,
+      0,
+      0,
+      hiddenVideoElement.width,
+      hiddenVideoElement.height
+    );
+    const videoMat = await window.cv.imread(canvasElement);
+    console.log("Video Mat: ", videoMat);
+    window.cv.imshow("canvas-main", videoMat);
+    videoMat.delete();
+  };
+
+  hiddenVideoElement.onplay = () => {
+    console.log("Video started playing.");
+    console.log(`Drawing video frames every ${intervalTime}ms.`);
+    intervalId = setInterval(loadSingleFrame, intervalTime);
+  };
+
+  hiddenVideoElement.onpause = () => {
+    console.log("Video paused.");
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
+  };
+
+  hiddenVideoElement.onended = () => {
+    console.log("Video ended.");
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
+  };
 };
 
 /**
@@ -147,9 +174,6 @@ export const enableWebcam = async (
     videoElement.play();
 
     console.log("Webcam enabled:", videoElement.srcObject);
-
-    // Load the webcam stream into the canvas
-    await loadMediaToCanvas(stream, "webcam");
 
     if (shareMyStream) {
       console.log("Sharing webcam stream for multiplayer game...");
