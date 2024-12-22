@@ -41,37 +41,34 @@ export const loadImageToCanvas = async (file: File): Promise<void> => {
  * @param file File object to load
  */
 export const loadVideoToCanvas = async (file: File): Promise<void> => {
-  const reader = new FileReader();
-  reader.onload = (event: ProgressEvent<FileReader>) => {
-    const videoElement = document.createElement("video");
-    const canvasElement = document.getElementById(
-      "canvas-main"
-    ) as HTMLCanvasElement;
-    if (!canvasElement) {
-      console.log("Canvas element not found");
-      return;
-    }
+  const videoElement = document.createElement("video");
+  const canvasElement = document.getElementById(
+    "canvas-main"
+  ) as HTMLCanvasElement;
+  if (!canvasElement) {
+    console.log("Canvas element not found");
+    return;
+  }
 
-    // Once the reader.onload event is triggered and file is read as a string
-    videoElement.src = event.target?.result as string;
-    videoElement.autoplay = true;
-    videoElement.loop = true;
-    videoElement.muted = true;
-    videoElement.onloadedmetadata = () => {
-      // Canvas needs to match video dimensions
-      canvasElement.width = videoElement.videoWidth;
-      canvasElement.height = videoElement.videoHeight;
+  // Create a blob URL for the video file - plain src will fail detection
+  const url = URL.createObjectURL(file);
 
-      // Read the video and show it on the canvas then delete it to clean up memory
-      const videoMat = window.cv.imread(videoElement);
-      console.log("Video Mat: ", videoMat);
-      window.cv.imshow("canvas-main", videoMat);
-      videoMat.delete();
-    };
+  videoElement.src = url;
+  videoElement.autoplay = true;
+  videoElement.loop = true;
+  videoElement.muted = true;
+
+  videoElement.onloadedmetadata = () => {
+    // Canvas needs to match video dimensions
+    canvasElement.width = videoElement.videoWidth;
+    canvasElement.height = videoElement.videoHeight;
+
+    // Read the video and show it on the canvas then delete it to clean up memory
+    const videoMat = window.cv.imread(videoElement);
+    console.log("Video Mat: ", videoMat);
+    window.cv.imshow("canvas-main", videoMat);
+    videoMat.delete();
   };
-  // call the reader to read file
-  console.log("File: ", file);
-  reader.readAsDataURL(file);
 };
 
 /**

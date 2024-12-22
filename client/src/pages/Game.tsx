@@ -7,6 +7,8 @@ import { Dashboard } from "../components/Dashboard.tsx";
 import { useGameStore } from "@/store";
 import LoadImageButton from "../components/buttons/LoadImageButton.tsx";
 import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
+import LoadVideoButton from "@/components/buttons/LoadVideoButton.tsx";
+import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
 
 function Game() {
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
@@ -39,6 +41,8 @@ function Game() {
           <div className="row-span-1 bg-slate-100 p-4 border border-teal-900 rounded">
             <LoadImageButton />
             <RunDetectionButton />
+            <LoadVideoButton />
+            <LoadWebcamButton />
             <ControlPanel />
           </div>
           {/* Dashboard Section */}
