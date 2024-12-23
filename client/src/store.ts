@@ -56,6 +56,7 @@ export const useAuthStore = create(
       logout: () => {
         set({ isLoggedIn: false });
         AuthService.logout();
+        useUserSession.getState().clearUser()
       },
     }),
     {
@@ -65,6 +66,7 @@ export const useAuthStore = create(
 );
 
 type User = {
+  id: string;
   username: string;
   email: string;
   password: string;
