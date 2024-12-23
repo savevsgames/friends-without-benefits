@@ -68,7 +68,7 @@ const LoadImageButton = () => {
         disabled={!canvasReady}
         onClick={handleButtonClick}
       >
-        🔃 IMAGE
+        📂 IMAGE
       </button>
       {/* Hidden input */}
       <input

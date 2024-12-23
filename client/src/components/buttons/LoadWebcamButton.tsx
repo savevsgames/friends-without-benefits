@@ -56,7 +56,7 @@ const LoadWebcamButton = () => {
         disabled={!canvasReady}
         onClick={handleWebcamToggle}
       >
-        {!videoPlaying ? "WEBCAM 🎦" : "WEBCAM 🚫"}
+        {!videoPlaying ? "WEBCAM ON 🎦" : "WEBCAM OFF 🚫"}
       </button>
       {/* Hidden video element for capturing webcam stream */}
       <video

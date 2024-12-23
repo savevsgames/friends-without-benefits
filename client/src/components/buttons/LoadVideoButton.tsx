@@ -61,7 +61,7 @@ const LoadVideoButton = () => {
         disabled={!canvasReady}
         onClick={handleButtonClick}
       >
-        🔃 VIDEO
+        📂 VIDEO
       </button>
       <input
         ref={fileInputRef}

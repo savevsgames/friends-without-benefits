@@ -1,5 +1,5 @@
 import { useGameStore } from "@/store";
-import { pauseMedia, playMedia, stopMedia } from "@/utils/utils";
+import { pauseMedia, stopMedia } from "@/utils/utils";
 
 const PauseVideoButton = () => {
   // Button Styling - TEMPORARY STYLING BEGINS
@@ -34,13 +34,8 @@ const PauseVideoButton = () => {
       if (!videoElement.paused && !videoElement.ended) {
         pauseMedia();
       } else {
-        console.log("Video is already paused or ended. Resuming video...");
-        if (!videoElement.ended) {
-          playMedia();
-        } else {
-          console.log("Video has ended. Stopping video...");
-          stopMedia();
-        }
+        console.log("Video is already paused or ended. Stopping video...");
+        stopMedia();
       }
     } catch (error) {
       console.error("Failed to pause video. Error: ", error);
@@ -57,7 +52,7 @@ const PauseVideoButton = () => {
       disabled={!canvasReady}
       onClick={handleButtonClick}
     >
-      {videoPlaying ? "⏸ PAUSE" : "⏯ RESUME"}
+      {videoPlaying ? "⏸ PAUSE" : "🤚 PAUSED"}
     </button>
   );
 };

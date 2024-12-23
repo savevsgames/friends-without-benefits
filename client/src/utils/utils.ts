@@ -327,29 +327,42 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
   // Set up canvas dimensions
   canvasElement.width = videoElement.videoWidth;
   canvasElement.height = videoElement.videoHeight;
-  console.log("Video Element : ", videoElement);
 
+  // If the current media type is image, we need to set up the canvas differently
+  if (currentMediaType === "image") {
+    if (!videoElement.poster) {
+      console.error("No poster image found in video element.");
+      return;
+    }
+    // Create a temporary image object to load the poster image
+    const image = new Image();
+    image.src = videoElement.poster;
+    await new Promise<void>((resolve) => {
+      image.onload = () => {
+        canvasElement.width = image.width;
+        canvasElement.height = image.height;
+        resolve();
+      };
+    });
+  } else {
+    if (!videoElement.videoWidth || !videoElement.videoHeight) {
+      console.error("Video dimensions not found.");
+      return;
+    }
+    canvasElement.width = videoElement.videoWidth;
+    canvasElement.height = videoElement.videoHeight;
+  }
   // Process a single frame, grabbed from the canvas displaying the media
-  try {
-    const detectFrame = async () => {
+  const detectFrame = async () => {
+    try {
       // Use the cocoSsd model to detect objects in the video frame
       const predictions = await model.detect(videoElement);
       if (!predictions || predictions.length === 0) {
-        console.log("No predictions found.");
-        return;
+        console.log("No predictions found in frame.");
+      } else {
+        drawBoundingBoxes(predictions);
       }
 
-      const context = canvasElement.getContext("2d");
-      if (!context) {
-        console.error("Canvas context not found. Cannot draw bounding boxes.");
-        return;
-      }
-
-      // Clear the canvas before drawing new bounding boxes
-      context.clearRect(0, 0, canvasElement.width, canvasElement.height);
-      //   context.globalAlpha = 0.7; // Set transparency to 70%
-
-      drawBoundingBoxes(predictions);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       //   predictions.forEach((prediction: any) => {
       //     const [x, y, width, height] = prediction.bbox;
@@ -368,18 +381,20 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
       //     context.fillStyle = "#000000";
       //     context.fillText(label, x + 5, y - 8);
       //   });
-      //   context.globalAlpha = 1.0; // Reset transparency
 
-      // Continue detection if video is playing
-      if (!videoElement.paused && useGameStore.getState().videoPlaying) {
+      // Continue detection if video is playing/webcam is enabled
+      if (
+        currentMediaType !== "image" &&
+        !videoElement.paused &&
+        useGameStore.getState().videoPlaying
+      ) {
         requestAnimationFrame(detectFrame);
       }
-    };
-    // Start recursive detection
-    detectFrame();
-  } catch (error) {
-    console.error(`Error running detection on ${currentMediaType}:`, error);
-  }
+    } catch (error) {
+      console.error(`Error running detection on ${currentMediaType}:`, error);
+      stopDetection();
+    }
+  };
 };
 
 /**
@@ -422,7 +437,20 @@ export const pauseMedia = (): void => {
     "video-output"
   ) as HTMLVideoElement;
   if (!videoElement) return;
-
+  //  Try to clear the canvas to stop detection
+  try {
+    const canvasElement = document.getElementById(
+      "canvas-main"
+    ) as HTMLCanvasElement;
+    if (!canvasElement) return console.error("Canvas element not found.");
+    const context = canvasElement.getContext("2d");
+    if (!context) return console.error("Canvas context not found.");
+    // Clear the canvas
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  } catch (error) {
+    console.error("Error clearing canvas:", error);
+  }
+  // Pause the video and update the store
   videoElement.pause();
   useGameStore.getState().setVideoPlaying(false);
 };
@@ -435,6 +463,19 @@ export const stopMedia = (): void => {
     "video-output"
   ) as HTMLVideoElement;
   if (!videoElement) return;
+  //   Try to clear the canvas and reset the video
+  try {
+    const canvasElement = document.getElementById(
+      "canvas-main"
+    ) as HTMLCanvasElement;
+    if (!canvasElement) return console.error("Canvas element not found.");
+    const context = canvasElement.getContext("2d");
+    if (!context) return console.error("Canvas context not found.");
+    // Clear the canvas
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  } catch (error) {
+    console.error("Error clearing canvas:", error);
+  }
 
   videoElement.pause();
   videoElement.currentTime = 0;
