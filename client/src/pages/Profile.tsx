@@ -32,6 +32,8 @@ function Profile() {
 
   const user = data?.me || null;
 
+  // TODO: this will have to change to update the user's avatar, and the save the avatar to the backend
+  // I think I need a mutation to be able to do a post request to the db
   const handleChange = (event: React.ChangeEvent) => {
     const target = event.target as HTMLInputElement;
     const newFile: File | undefined = (target.files as FileList)[0]; // get the selected file
