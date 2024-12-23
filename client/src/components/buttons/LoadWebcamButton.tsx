@@ -2,6 +2,22 @@ import { toggleWebcam } from "@/utils/utils";
 import { useGameStore } from "@/store";
 
 const LoadWebcamButton = () => {
+  // Button Styling - TEMPORARY STYLING BEGINS
+  const testButtons = {
+    padding: "0.25em 0.5em",
+    margin: "0.25em",
+    border: "3px solid #333",
+    boxShadow: "0 0 0.5em #333",
+    borderRadius: "0.5em",
+    backgroundColor: "#069069",
+    color: "#f8f8f8",
+    textDecoration: "none",
+    fontWeight: "bold",
+    cursor: "pointer",
+    width: "100%",
+    height: "100%",
+  };
+  // END OF TEMPORARY STYLING
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
   );
@@ -33,14 +49,14 @@ const LoadWebcamButton = () => {
   return (
     <div>
       <button
-        className="btn btn-primary"
+        style={testButtons}
         type="button"
         id="enable-webcam"
         name="enable-webcam"
         disabled={!canvasReady}
         onClick={handleWebcamToggle}
       >
-        {videoPlaying ? "Enable Webcam" : "Disable Webcam"}
+        {!videoPlaying ? "WEBCAM 🎦" : "WEBCAM 🚫"}
       </button>
       {/* Hidden video element for capturing webcam stream */}
       <video

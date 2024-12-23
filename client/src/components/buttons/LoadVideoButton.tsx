@@ -3,6 +3,22 @@ import { useRef } from "react";
 import { useGameStore } from "@/store";
 
 const LoadVideoButton = () => {
+  // Button Styling - TEMPORARY STYLING BEGINS
+  const testButtons = {
+    padding: "0.25em 0.5em",
+    margin: "0.25em",
+    border: "3px solid #333",
+    boxShadow: "0 0 0.5em #333",
+    borderRadius: "0.5em",
+    backgroundColor: "#069069",
+    color: "#f8f8f8",
+    textDecoration: "none",
+    fontWeight: "bold",
+    cursor: "pointer",
+    width: "100%",
+    height: "100%",
+  };
+  // END OF TEMPORARY STYLING
   const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
@@ -38,14 +54,14 @@ const LoadVideoButton = () => {
   return (
     <div className="btn btn-primary">
       <button
-        className="btn btn-primary"
+        style={testButtons}
         type="button"
         id="load-video"
         name="load-video"
         disabled={!canvasReady}
         onClick={handleButtonClick}
       >
-        Load Video
+        🔃 VIDEO
       </button>
       <input
         ref={fileInputRef}

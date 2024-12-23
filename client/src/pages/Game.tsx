@@ -41,12 +41,14 @@ function Game() {
         <div className="col-span-1 md:col-span-1 grid grid-rows-4 gap-1 p-1">
           {/* Control Panel */}
           <div className="row-span-1 bg-slate-100 p-4 border border-teal-900 rounded">
-            <PlayStopVideoButton />
-            <PauseVideoButton />
-            <LoadImageButton />
-            <RunDetectionButton />
-            <LoadVideoButton />
-            <LoadWebcamButton />
+            <div className="grid grid-cols-2 gap-2 grid-rows-3">
+              <LoadImageButton />
+              <LoadVideoButton />
+              <PlayStopVideoButton />
+              <PauseVideoButton />
+              <LoadWebcamButton />
+              <RunDetectionButton />
+            </div>
             <ControlPanel />
           </div>
           {/* Dashboard Section */}
