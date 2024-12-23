@@ -396,3 +396,47 @@ export const stopDetection = (): void => {
     ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
   }
 };
+
+/**
+ * Play the currently loaded media and update the store
+ */
+export const playMedia = async (): Promise<void> => {
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement || !videoElement.src) return;
+
+  try {
+    await videoElement.play();
+    useGameStore.getState().setVideoPlaying(true);
+  } catch (error) {
+    console.error("Error playing media:", error);
+  }
+};
+
+/**
+ * Pause the currently playing media and update the store
+ */
+export const pauseMedia = (): void => {
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement) return;
+
+  videoElement.pause();
+  useGameStore.getState().setVideoPlaying(false);
+};
+
+/**
+ * Stop and reset the currently media playing time to 0 and update the store
+ */
+export const stopMedia = (): void => {
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement) return;
+
+  videoElement.pause();
+  videoElement.currentTime = 0;
+  useGameStore.getState().setVideoPlaying(false);
+};

@@ -9,10 +9,21 @@ const LoadImageButton = () => {
   );
   const canvasReady = useGameStore((state) => state.canvasReady);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
   // loadImageToCanvas is a utility function in utils.ts using cv
   const handleLoadImage = async (file: File) => {
-    await loadImageToVideoElementAsPoster(file);
+    try {
+      // If video is playing, stop it then load the image to the video element
+      setVideoPlaying(false);
+      await loadImageToVideoElementAsPoster(file);
+      setCurrentMediaRef(file.name);
+      setCurrentMediaType("image");
+    } catch (error) {
+      console.error("Failed to load image. Error: ", error);
+      // Clear the current media reference and type
+      setCurrentMediaType(null);
+      setCurrentMediaRef(null);
+    }
   };
 
   const handleButtonClick = () => {
@@ -55,4 +66,5 @@ const LoadImageButton = () => {
     </div>
   );
 };
+
 export default LoadImageButton;
