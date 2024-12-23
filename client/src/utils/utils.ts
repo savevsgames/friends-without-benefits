@@ -8,27 +8,43 @@ import { useGameStore } from "@/store";
 export const loadImageToVideoElementAsPoster = async (
   file: File
 ): Promise<void> => {
-  const reader = new FileReader();
-  reader.onload = (event: ProgressEvent<FileReader>) => {
-    const videoElement = document.getElementById(
-      "video-output"
-    ) as HTMLVideoElement;
+  // Add promise to create poster for dimensions before setting src
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+      const videoElement = document.getElementById(
+        "video-output"
+      ) as HTMLVideoElement;
 
-    if (!videoElement) {
-      console.log("Canvas or source element not found");
-      return;
-    }
-
-    // Store the image data in the video element as a poster
-    videoElement.style.display = "block";
-    // Poster is a static image displayed when the video is paused
-    // Allows us to place the image file into the video element
-    videoElement.poster = event.target?.result as string;
-    videoElement.pause();
-  };
-  // call the reader to read file
-  console.log("File: ", file);
-  reader.readAsDataURL(file);
+      if (!videoElement) {
+        reject(new Error("Canvas or source element not found"));
+        return;
+      }
+      // Create an image object to get dimensions
+      // needed to load the file data
+      const image = new Image();
+      image.onload = () => {
+        videoElement.style.display = "block";
+        // Poster is a static image displayed when the video is paused
+        // Allows us to place the image file into the video element
+        videoElement.poster = event.target?.result as string;
+        videoElement.pause();
+        // Once the video element is loaded we know the image is ready to be displayed
+        resolve();
+      };
+      image.onerror = (error) => {
+        reject(new Error("Error loading image file: " + error));
+      };
+      // We know the video element is ready / reader has loaded the file
+      image.src = event.target?.result as string;
+    };
+    reader.onerror = (error) => {
+      reject(new Error("Error reading file: " + error));
+    };
+    // call the reader to read file
+    console.log("File: ", file);
+    reader.readAsDataURL(file);
+  });
 };
 
 /**
@@ -233,6 +249,9 @@ export const drawBoundingBoxes = (predictions: any) => {
       const { bbox, class: className, score: confScore } = prediction;
       const [x, y, width, height] = bbox.map((val: number) => Math.round(val)); // Ensure all values are integers
 
+      //   Get the class label: Class & Score
+      const label = `${className} ${Math.round(confScore * 100)}%`;
+      // Get the class color
       const color = colorForLabels(className);
       // Draw bounding box
       const point1 = new cv.Point(x, y);
@@ -241,16 +260,11 @@ export const drawBoundingBoxes = (predictions: any) => {
       // Draw the bounding box into the destination Mat
       cv.rectangle(dstMat, point1, point2, color, 8);
       // Draw the label background and text
-      const text = `${className} ${Math.round(confScore * 100)}%`;
+      const text = label;
       const fontFace = cv.FONT_HERSHEY_SIMPLEX;
-      const fontSize = 1; // Proportional size in rem
-      const thickness = 1;
+      const fontSize = 3; // Proportional size in rem
+      const thickness = 2;
       const filled = -1; // Filled rectangle
-
-      // Get text size for background rectangle through context - not used for now
-      // context.font = "20px Arial"; // Use to measure text width and height
-      // const textMetrics = context.measureText(text);
-      // const textWidth = textMetrics.width;
       const labelHeight = 50; // These are hardcoded for now
       const textPadding = 5;
 
@@ -395,6 +409,8 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
       stopDetection();
     }
   };
+  // Start recursive detectFrame call for video or webcam
+  await detectFrame();
 };
 
 /**
