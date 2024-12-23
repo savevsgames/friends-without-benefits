@@ -1,7 +1,7 @@
 import { useGameStore } from "@/store";
-import { playMedia, stopMedia } from "@/utils/utils";
+import { pauseMedia, stopMedia } from "@/utils/utils";
 
-const PlayStopVideoButton = () => {
+const PauseVideoButton = () => {
   const canvasReady = useGameStore((state) => state.canvasReady);
   const videoPlaying = useGameStore((state) => state.videoPlaying);
 
@@ -14,15 +14,14 @@ const PlayStopVideoButton = () => {
         throw new Error("Video element not found.");
       }
 
-      // If video is stopped or ended, play it
-      // TODO: Game Logic for ending game if video/stream ends > game ends
-      if (videoElement.paused || videoElement.ended) {
-        playMedia();
-      } else {
-        stopMedia();
+      // If video is playing, pause it
+      if (!videoElement.paused) {
+        pauseMedia();
+      } else if (!videoPlaying) {
+        console.log("Video is already paused or ended.");
       }
     } catch (error) {
-      console.error("Failed to play/stop video. Error: ", error);
+      console.error("Failed to pause video. Error: ", error);
       stopMedia();
     }
   };
@@ -31,13 +30,13 @@ const PlayStopVideoButton = () => {
     <button
       className="btn btn-primary"
       type="button"
-      id="play-button"
-      name="play-button"
+      id="pause-button"
+      name="pause-button"
       disabled={!canvasReady}
       onClick={handleButtonClick}
     >
-      {videoPlaying ? "Stop Video" : "Play Video"}
+      Load Image
     </button>
   );
 };
-export default PlayStopVideoButton;
+export default PauseVideoButton;
