@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { Text } from "@chakra-ui/react"
+import { Text } from "@chakra-ui/react";
+import { Avatar } from "./ui/avatar";
 
 import {
   Disclosure,
@@ -18,10 +19,9 @@ const navigation = [
   { name: "LeaderBoard", page: "/LeaderBoard" },
 ];
 const profileNavigation = [
-  { name: "Your Profile", page: "Profile" },
+  { name: "Your Profile", page: "/Profile" },
   { name: "Sign Out", page: "/" },
 ];
-
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -30,7 +30,6 @@ function classNames(...classes: string[]) {
 export default function Header() {
   const location = useLocation();
   console.log("current path:", location.pathname);
-
 
   // header begins
   return (
@@ -67,7 +66,8 @@ export default function Header() {
                 textTransform="uppercase"
                 letterSpacing="widest"
                 color="cyan.100"
-                textShadow="0 0 8px rgba(0, 255, 255, 0.7), 0 0 12px rgba(0, 255, 255, 0.5), 0 0 16px rgba(0, 255, 255, 0.3)">
+                textShadow="0 0 8px rgba(0, 255, 255, 0.7), 0 0 12px rgba(0, 255, 255, 0.5), 0 0 16px rgba(0, 255, 255, 0.3)"
+              >
                 REPUBLIC OF FWOB
               </Text>
             </div>
@@ -101,11 +101,13 @@ export default function Header() {
                 <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                   <span className="absolute -inset-1.5" />
                   <span className="sr-only">Open user menu</span>
-                  <img
-                    alt="User Avatar"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    className="size-8 rounded-full"
-                  />
+                  <HStack>
+                    <Avatar
+                      name="Souad Hassen"
+                      src="https://bit.ly/broken-link"
+                      colorPalette="teal"
+                    ></Avatar>
+                  </HStack>
                 </MenuButton>
               </div>
               <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5">
@@ -150,3 +152,4 @@ export default function Header() {
     </Disclosure>
   );
 }
+import { HStack } from "@chakra-ui/react";

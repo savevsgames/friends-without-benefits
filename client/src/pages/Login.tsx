@@ -33,7 +33,7 @@ const Login: React.FC = () => {
           ...form,
         },
       });
-      login(data.login.token); // this will set the isLoggedIn state to true
+      login(data.userLogin.token); // if the token is valid it'll set isLoggedIn to true
       navigate("/game"); // once isLogged is is true, it'll navigate to the game page
     } catch (err) {
       console.error(error || err);

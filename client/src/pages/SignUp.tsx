@@ -9,7 +9,11 @@ const SignUp: React.FC = () => {
   const navigate = useNavigate();
 
   // define the state variables
-  const [form, setForm] = useState<SignUpData>({ username: "", password: "", email: "",  });
+  const [form, setForm] = useState<SignUpData>({
+    username: "",
+    password: "",
+    email: "",
+  });
   const [err, setErr] = useState<string | null>(null);
   const login = useAuthStore((state) => state.login);
 
@@ -32,8 +36,8 @@ const SignUp: React.FC = () => {
           ...form,
         },
       });
-      login(data.login.token); // this will set the isLoggedIn state to true
-      navigate("/login"); // once isLogged is is true, it'll navigate to the game page
+      login(data.addUser.token); // this will set the isLoggedIn state to true once the token is valid
+      navigate("/login"); // once isLogged is is true, it'll navigate to the login page
     } catch (err) {
       console.error(error || err);
       setErr("Error Signing in");
@@ -42,7 +46,7 @@ const SignUp: React.FC = () => {
     setForm({
       username: "",
       password: "",
-      email: ""
+      email: "",
     });
   };
 
@@ -72,7 +76,7 @@ const SignUp: React.FC = () => {
             <input
               type="text"
               name="username"
-              value={form.username || ''}
+              value={form.username || ""}
               id="username"
               required
               onChange={handleInputChange}
@@ -87,7 +91,7 @@ const SignUp: React.FC = () => {
             <input
               type="text"
               name="email"
-              value={form.email as string || ""}
+              value={(form.email as string) || ""}
               id="username"
               required
               onChange={handleInputChange}
@@ -102,7 +106,7 @@ const SignUp: React.FC = () => {
             <input
               type="password"
               name="password"
-              value={form.password || ''}
+              value={form.password || ""}
               id="password"
               required
               onChange={handleInputChange}
@@ -110,23 +114,23 @@ const SignUp: React.FC = () => {
             />
           </div>
           {err && <p className="text-red-500 text-center">{err}</p>}
+          
           {/* Submit button */}
           <button
             type="submit"
             className="bg-teal-900 hover:bg-teal-800 text-white font-semibold transition duration-200 text-sm sm:text-base md:text-lg w-full py-3 rounded-lg shadow-md"
           >
-            Sign in
+            Sign Up
           </button>
         </form>
         <div className="pt-2 flex flex-row">
           <p className="text-l text-gray-700 font-small pr-2">
-            Don't have an account?
+            Already have an account?
           </p>
-          <button className="underline text-teal-900 font-small">
-            Sign Up
-          </button>
+          <button className="underline text-teal-900 font-small">Log in</button>
         </div>
       </div>
+
       {/* Right section: Mainpic */}
       <div className="w-3/5 hidden md:block relative">
         <img
