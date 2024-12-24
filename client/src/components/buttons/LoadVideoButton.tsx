@@ -1,8 +1,8 @@
-import { loadImageToCanvas } from "@/utils/utils";
+import { loadVideoToVideoOutput } from "@/utils/utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 
-const LoadImageButton = () => {
+const LoadVideoButton = () => {
   // Button Styling - TEMPORARY STYLING BEGINS
   const testButtons = {
     padding: "0.25em 0.5em",
@@ -19,72 +19,60 @@ const LoadImageButton = () => {
     height: "100%",
   };
   // END OF TEMPORARY STYLING
-
   const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
   );
   const canvasReady = useGameStore((state) => state.canvasReady);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const videoPlaying = useGameStore((state) => state.videoPlaying);
   const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
-  // loadImageToCanvas is a utility function in utils.ts using cv
-  const handleLoadImage = async (file: File) => {
-    try {
-      // If video is playing, stop it then load the image to the video element
-      if (videoPlaying) {
-        setVideoPlaying(false);
-      }
-      await loadImageToCanvas(file);
-      setCurrentMediaRef(file.name);
-      setCurrentMediaType("image");
-    } catch (error) {
-      console.error("Failed to load image. Error: ", error);
-      // Clear the current media reference and type
-      setCurrentMediaType(null);
-      setCurrentMediaRef(null);
-    }
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // LoadVideoToCanvas is a utility function in utils.ts using cv
+  const handleLoadVideo = async (file: File) => {
+    await loadVideoToVideoOutput(file);
   };
 
   const handleButtonClick = () => {
+    if (videoPlaying) {
+      setVideoPlaying(false);
+      return;
+    }
     fileInputRef.current?.click();
   };
 
-  // Once the file is selected with ref to the file input, set the reference to the current image and load it
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setVideoPlaying(true);
       setCurrentMediaRef(file.name);
-      await handleLoadImage(file);
-      setCurrentMediaType("image");
+      await handleLoadVideo(file);
+      setCurrentMediaType("video");
     }
   };
 
   return (
     <div className="btn btn-primary">
-      {/* disabled when canvas is not ready=true */}
       <button
         style={testButtons}
         type="button"
-        id="load-image"
-        name="load-image"
+        id="load-video"
+        name="load-video"
         disabled={!canvasReady}
         onClick={handleButtonClick}
       >
-        📂 IMAGE
+        📂 VIDEO
       </button>
-      {/* Hidden input */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
-        id="image-file-input"
-        name="image-file-input"
+        accept="video/*"
+        id="video-file-input"
+        name="video-file-input"
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
     </div>
   );
 };
-
-export default LoadImageButton;
+export default LoadVideoButton;
