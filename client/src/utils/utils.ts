@@ -7,35 +7,48 @@ import { useGameStore } from "@/store";
  */
 export const loadImageToCanvas = async (file: File): Promise<void> => {
   const reader = new FileReader();
-  reader.onload = async (event: ProgressEvent<FileReader>) => {
+
+  reader.onload = (event: ProgressEvent<FileReader>) => {
     const imageElement = document.getElementById(
       "image-output"
     ) as HTMLImageElement;
+
     const canvasElement = document.getElementById(
       "canvas-main"
     ) as HTMLCanvasElement;
-    if (!canvasElement || !imageElement) {
-      console.log("Canvas or image element not found");
+
+    if (!imageElement || !canvasElement) {
+      console.error("Required element image-output - not found.");
       return;
     }
-
-    // Once the reader.onload event is triggered and file is read as a string
     imageElement.src = event.target?.result as string;
-    if (!imageElement.src) {
-      console.error("Image source not found.");
-    }
     imageElement.onload = () => {
-      // Canvas needs to match image dimensions
-      canvasElement.width = imageElement.naturalWidth;
-      canvasElement.height = imageElement.naturalHeight;
-      console.log("Image loaded into image-output:", imageElement.src);
+      try {
+        // Set image source to the loaded image
+        canvasElement.width = imageElement.naturalWidth;
+        canvasElement.height = imageElement.naturalWidth;
+        console.log(
+          "Image loaded into #image-output. Canvas Dimensions & Image Dimensions: ",
+          {
+            Cwidth: canvasElement.width,
+            Cheight: canvasElement.height,
+          },
+          {
+            Iwidth: imageElement.naturalWidth,
+            Iheight: imageElement.naturalHeight,
+          }
+        );
+      } catch (error) {
+        console.error("OpenCV Error: ", error);
+      }
     };
+
     imageElement.onerror = () => {
-      console.error("Error loading image file.");
+      console.error("Failed to load image into #image-output");
     };
   };
-  // call the reader to read file
-  console.log("File: ", file);
+
+  console.log("File loaded: ", file);
   reader.readAsDataURL(file);
 };
 
@@ -356,16 +369,57 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
     const imageElement = document.getElementById(
       "image-output"
     ) as HTMLImageElement;
-    if (!imageElement) {
-      console.error("Image element not found.");
+    const canvasElement = document.getElementById(
+      "canvas-main"
+    ) as HTMLCanvasElement;
+
+    if (!imageElement || !canvasElement) {
+      console.error(
+        "Required elements (image-output or canvas-main) not found."
+      );
       return;
     }
-    // IMAGE DETECTION
-    const predictions = await model.detect(imageElement);
-    if (!predictions || predictions.length === 0) {
-      console.log("No predictions found in image.");
-    } else {
-      drawBoundingBoxes(predictions);
+
+    // Sync canvas dimensions with the image
+    canvasElement.width = imageElement.naturalWidth;
+    canvasElement.height = imageElement.naturalHeight;
+
+    console.log(
+      "Canvas dimensions:",
+      canvasElement.width,
+      "x",
+      canvasElement.height
+    );
+
+    // Draw the image onto the canvas with context and run detection
+    const context = canvasElement.getContext("2d");
+    if (!context) {
+      console.error("Failed to get canvas 2D context.");
+      return;
+    }
+
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    context.fillStyle = "black";
+    context.font = "20px Arial";
+    context.fillText("SCAVENGER HUNT 2025", 10, 30);
+    // context.drawImage(
+    //   imageElement,
+    //   0,
+    //   0,
+    //   canvasElement.width,
+    //   canvasElement.height
+    // );
+
+    // Run predictions on the canvas
+    try {
+      const predictions = await model.detect(imageElement);
+      if (!predictions || predictions.length === 0) {
+        console.log("No predictions found in image.");
+      } else {
+        drawBoundingBoxes(predictions);
+      }
+    } catch (error) {
+      console.error("Error running predictions on image:", error);
     }
   } else {
     if (!videoElement.videoWidth || !videoElement.videoHeight) {
@@ -399,6 +453,9 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
     }
   };
   // Start recursive detectFrame call for video or webcam
+  if (currentMediaType === "image") {
+    return;
+  }
   await detectFrame();
 };
 
@@ -443,9 +500,15 @@ export const pauseMedia = (): void => {
   ) as HTMLVideoElement;
   if (!videoElement) return;
 
-  // Pause the video and update the store
-  videoElement.pause();
-  useGameStore.getState().setVideoPlaying(false);
+  try {
+    console.log("Pausing video...", videoElement.paused);
+    // Pause the video and update the store
+    videoElement.pause();
+    useGameStore.getState().setVideoPlaying(false);
+    console.log("Video paused: ", videoElement.paused);
+  } catch (error) {
+    console.error("Error pausing media:", error);
+  }
 };
 
 /**
@@ -475,10 +538,13 @@ export const stopMedia = (): void => {
   } catch (error) {
     console.error("Error clearing canvas:", error);
   }
-
-  videoElement.pause();
-  videoElement.currentTime = 0;
-  useGameStore.getState().setVideoPlaying(false);
-  // Reset the video element
-  videoElement.src = "";
+  try {
+    videoElement.pause();
+    videoElement.currentTime = 0;
+    useGameStore.getState().setVideoPlaying(false);
+    // Reset the video element
+    videoElement.src = "";
+  } catch (error) {
+    console.error("Error stopping media:", error);
+  }
 };
