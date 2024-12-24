@@ -1,4 +1,5 @@
 // Note: Utility functions for the application
+import { useGameStore } from "@/store";
 
 /**
  * Load a given image file into the canvas.
@@ -6,28 +7,31 @@
  */
 export const loadImageToCanvas = async (file: File): Promise<void> => {
   const reader = new FileReader();
-  reader.onload = (event: ProgressEvent<FileReader>) => {
-    const imageElement = document.createElement("img");
+  reader.onload = async (event: ProgressEvent<FileReader>) => {
+    const imageElement = document.getElementById(
+      "image-output"
+    ) as HTMLImageElement;
     const canvasElement = document.getElementById(
       "canvas-main"
     ) as HTMLCanvasElement;
-    if (!canvasElement) {
-      console.log("Canvas element not found");
+    if (!canvasElement || !imageElement) {
+      console.log("Canvas or image element not found");
       return;
     }
 
     // Once the reader.onload event is triggered and file is read as a string
     imageElement.src = event.target?.result as string;
+    if (!imageElement.src) {
+      console.error("Image source not found.");
+    }
     imageElement.onload = () => {
       // Canvas needs to match image dimensions
       canvasElement.width = imageElement.naturalWidth;
       canvasElement.height = imageElement.naturalHeight;
-
-      // Read the image and show it on the canvas then delete it to clean up memory
-      const imgMat = window.cv.imread(imageElement);
-      console.log("Image Mat: ", imgMat);
-      window.cv.imshow("canvas-main", imgMat);
-      imgMat.delete();
+      console.log("Image loaded into image-output:", imageElement.src);
+    };
+    imageElement.onerror = () => {
+      console.error("Error loading image file.");
     };
   };
   // call the reader to read file
@@ -39,38 +43,44 @@ export const loadImageToCanvas = async (file: File): Promise<void> => {
  * Load a given video file into the canvas.
  * @param file File object to load
  */
-export const loadVideoToCanvas = async (file: File): Promise<void> => {
-  const reader = new FileReader();
-  reader.onload = (event: ProgressEvent<FileReader>) => {
-    const videoElement = document.createElement("video");
-    const canvasElement = document.getElementById(
-      "canvas-main"
-    ) as HTMLCanvasElement;
-    if (!canvasElement) {
-      console.log("Canvas element not found");
-      return;
-    }
+export const loadVideoToVideoOutput = async (file: File): Promise<void> => {
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement) {
+    console.log("Hidden video element not found.");
+    return;
+  }
 
-    // Once the reader.onload event is triggered and file is read as a string
-    videoElement.src = event.target?.result as string;
-    videoElement.autoplay = true;
-    videoElement.loop = true;
-    videoElement.muted = true;
+  // Create a blob URL for the video file - plain src will fail detection
+  const url = URL.createObjectURL(file);
+  console.log("Video URL: ", url);
+
+  videoElement.src = url;
+  videoElement.autoplay = true;
+  videoElement.loop = true;
+  videoElement.muted = true;
+
+  // Wait for metadata to load
+  await new Promise<void>((resolve) => {
     videoElement.onloadedmetadata = () => {
-      // Canvas needs to match video dimensions
-      canvasElement.width = videoElement.videoWidth;
-      canvasElement.height = videoElement.videoHeight;
-
-      // Read the video and show it on the canvas then delete it to clean up memory
-      const videoMat = window.cv.imread(videoElement);
-      console.log("Video Mat: ", videoMat);
-      window.cv.imshow("canvas-main", videoMat);
-      videoMat.delete();
+      console.log(
+        `Video dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`
+      );
+      resolve();
     };
+  });
+  // Play the video and wait for it to load
+  try {
+    await videoElement.play();
+    console.log("Video loaded and playing.");
+  } catch (error) {
+    console.error("Error playing video:", error);
+  }
+
+  videoElement.onerror = (error) => {
+    console.error("Error loading video file:", error);
   };
-  // call the reader to read file
-  console.log("File: ", file);
-  reader.readAsDataURL(file);
 };
 
 /**
@@ -83,12 +93,20 @@ export const enableWebcam = async (
 ): Promise<MediaStream | null> => {
   try {
     const videoElement = document.getElementById(
-      "canvas-main"
+      "video-output"
     ) as HTMLVideoElement;
     if (!videoElement) {
       console.error("Video element not found.");
       return null;
     }
+    // Stop any existing streams
+    if (videoElement.srcObject) {
+      const existingStream = videoElement.srcObject as MediaStream;
+      existingStream.getTracks().forEach((track) => track.stop());
+      videoElement.srcObject = null;
+    }
+
+    //
     // Get the webcam stream
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -96,8 +114,9 @@ export const enableWebcam = async (
     });
     // Set the video element source to the stream
     videoElement.srcObject = stream;
-    // Play the video
-    videoElement.play();
+    videoElement.autoplay = true;
+    videoElement.muted = true; // UPDATE FOR MULTIPLAYER
+    videoElement.playsInline = true;
 
     console.log("Webcam enabled:", videoElement.srcObject);
 
@@ -105,6 +124,17 @@ export const enableWebcam = async (
       console.log("Sharing webcam stream for multiplayer game...");
       //TODO: Add streaming logic here for peer.js
     }
+
+    await new Promise<void>((resolve) => {
+      videoElement.onloadedmetadata = () => {
+        console.log(
+          `Webcam dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`
+        );
+        resolve();
+      };
+    });
+    // Play the video
+    await videoElement.play();
 
     return stream;
   } catch (error) {
@@ -114,92 +144,33 @@ export const enableWebcam = async (
 };
 
 /**
- * Process the video frame for object detection.
- * @param videoPlaying Flag to check if the video is playing
- * @param currentMediaType Current media type (image, video, webcam)
+ * Disable the webcam
  */
-export const processVideoFrame = async (
-  videoPlaying: boolean,
-  currentMediaType: string
-) => {
-  if (currentMediaType !== "video") {
-    console.log("Not a video. Cannot process video frame.");
-    return;
-  }
+export const disableWebcam = (): void => {
   const videoElement = document.getElementById(
-    "canvas-main"
+    "video-output"
   ) as HTMLVideoElement;
-  if (!videoElement || !videoPlaying) {
-    console.error("Video element not found or video is not playing.");
-    return;
-  }
+  if (!videoElement || !videoElement.srcObject) return;
 
-  const cv = window.cv;
-  const model = window.cocoSsd;
-  if (!cv || !model) {
-    console.log("OpenCV or model not loaded. Cannot run detection.");
-    return;
-  }
-  //
-  const videoMat = cv.imread(videoElement);
-  console.log("Video Mat: ", videoMat);
-  const capture = new cv.VideoCapture(videoElement);
-
-  const processFrame = async () => {
-    capture.read(videoMat);
-    const predictions = await model.detect(videoElement);
-    drawBoundingBoxes(predictions, videoMat);
-    cv.imshow("canvas-main", videoMat);
-    videoMat.delete();
-
-    // requestAnimationFrame recursively calls the function until the video ends
-    requestAnimationFrame(processFrame);
-  };
-  processFrame(); // Start processing the video frames
+  // Stop all tracks (video and audio) in the stream
+  const stream = videoElement.srcObject as MediaStream;
+  stream.getTracks().forEach((track) => track.stop());
+  videoElement.srcObject = null;
 };
 
 /**
- * Process the webcam frame for object detection.
- * @param videoPlaying Flag to check if the video is playing
- * @param currentMediaType Current media type (image, video, webcam)
+ * Toggle the webcam on or off
+ * @param isEnabled Flag to enable or disable the webcam
+ * @returns Flag indicating if the webcam is enabled
  */
-export const processWebcamFrame = async (
-  videoPlaying: boolean,
-  currentMediaType: string
-) => {
-  if (currentMediaType !== "webcam") {
-    console.log("Not a webcam. Cannot process webcam frame.");
-    return;
+export const toggleWebcam = async (isEnabled: boolean): Promise<boolean> => {
+  if (isEnabled) {
+    const stream = await enableWebcam();
+    return stream !== null;
+  } else {
+    disableWebcam();
+    return false;
   }
-  const webcamElement = document.getElementById(
-    "canvas-main"
-  ) as HTMLVideoElement;
-  if (!webcamElement || !videoPlaying) {
-    console.error("Video element not found or video is not playing.");
-    return;
-  }
-  const cv = window.cv;
-  const model = window.cocoSsd;
-  if (!cv || !model) {
-    console.log("OpenCV or model not loaded. Cannot run detection.");
-    return;
-  }
-  //
-  const videoMat = cv.imread(webcamElement);
-  console.log("Video Mat: ", videoMat);
-  const capture = new cv.VideoCapture(webcamElement);
-
-  const processFrame = async () => {
-    capture.read(videoMat);
-    const predictions = await model.detect(webcamElement);
-    drawBoundingBoxes(predictions, videoMat);
-    cv.imshow("canvas-main", videoMat);
-    videoMat.delete();
-
-    // requestAnimationFrame recursively calls the function until the video ends
-    requestAnimationFrame(processFrame);
-  };
-  processFrame(); // Start processing the video frames
 };
 
 /**
@@ -222,73 +193,141 @@ export const colorForLabels = (className: string) => {
 };
 
 /**
- * Draws bounding boxes around detected objects on the input image.
+ * Draws bounding boxes around detected objects on the media source.
  * @param predictions Array of predictions from the model
- * @param inputImage Input image to draw bounding boxes on
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const drawBoundingBoxes = (predictions: any, inputImage: any) => {
-  //   const canvas = document.getElementById("canvas-main");
-  //   const context = canvas.getContext("2d");
-  if (!window.cv) {
-    console.log("OpenCV is not loaded. Cannot draw bounding boxes.");
-    return;
-  }
+export const drawBoundingBoxes = (predictions: any): void => {
+  const canvasElement = document.getElementById(
+    "canvas-main"
+  ) as HTMLCanvasElement;
+  const imageElement = document.getElementById(
+    "image-output"
+  ) as HTMLImageElement;
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  const context = canvasElement?.getContext("2d");
+
+  if (!canvasElement || !context) return;
+
   const cv = window.cv;
+  if (!cv) return;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  predictions.forEach((prediction: any) => {
-    const { bbox, class: className, score: confScore } = prediction;
-    const [x, y, width, height] = bbox.map((val: number) => Math.round(val)); // Ensure all values are integers
+  try {
+    const currentMediaType = useGameStore.getState().currentMediaType;
+    // Create one source element (img or video) based on the current media type
+    const sourceElement =
+      currentMediaType === "image" ? imageElement : videoElement;
 
-    const color = colorForLabels(className);
-    // Draw bounding box
-    const point1 = new cv.Point(x, y);
-    const point2 = new cv.Point(x + width, y + height);
+    if (!sourceElement) return;
 
-    // Draw the bounding box
-    cv.rectangle(inputImage, point1, point2, color, 8);
-    // Draw the label background and text
-    const text = `${className} ${Math.round(confScore * 100)}%`;
-    const fontFace = cv.FONT_HERSHEY_SIMPLEX;
-    const fontSize = 1; // Proportional size in rem
-    const thickness = 1;
-    const filled = -1; // Filled rectangle
+    // Get the actual dimensions of the source media
+    const sourceWidth =
+      currentMediaType === "image"
+        ? imageElement.naturalWidth
+        : videoElement.videoWidth;
+    const sourceHeight =
+      currentMediaType === "image"
+        ? imageElement.naturalHeight
+        : videoElement.videoHeight;
 
-    // Get text size for background rectangle
-    // context.font = "20px Arial"; // Use to measure text width and height
-    // const textMetrics = context.measureText(text);
-    // const textWidth = textMetrics.width;
-    const labelHeight = 50; // These are hardcoded for now
-    const textPadding = 5;
-
-    // Draw background rectangle for the label
-    cv.rectangle(
-      inputImage,
-      new cv.Point(x, y - labelHeight),
-      new cv.Point(x + width, y),
-      color,
-      filled
+    // Set canvas to match source dimensions, not display dimensions
+    canvasElement.width = sourceWidth;
+    canvasElement.height = sourceHeight;
+    console.log(
+      "Canvas dimensions:",
+      canvasElement.width,
+      "x",
+      canvasElement.height
     );
 
-    // Draw the text
-    cv.putText(
-      inputImage,
-      text,
-      new cv.Point(x + textPadding, y - textPadding), // Adjust text placement
-      fontFace,
-      fontSize,
-      new cv.Scalar(255, 255, 255, 255), // White text
-      thickness
+    // Create transparent Mat at source dimensions
+    const dstMat = new cv.Mat(
+      canvasElement.height,
+      canvasElement.width,
+      cv.CV_8UC4
     );
-  });
+    dstMat.setTo(new cv.Scalar(0, 0, 0, 0));
+
+    // Calculate scaling for Bounding Box dynamically based on source dimensions
+    const minDimension = Math.min(canvasElement.height, canvasElement.width);
+    const boxThickness = Math.max(2, Math.floor(minDimension * 0.003));
+    const fontSize = Math.max(0.7, minDimension * 0.001);
+    const labelHeight = 50;
+    const textPadding = 10;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    predictions.forEach((prediction: any) => {
+      const { bbox, class: className, score: confScore } = prediction;
+      // Use raw coordinates from prediction - they're already in source dimensions
+      const [x, y, width, height] = bbox.map((val: number) => val);
+      const color = colorForLabels(className);
+
+      // Draw bounding box and label box
+      cv.rectangle(
+        dstMat,
+        new cv.Point(x, y),
+        new cv.Point(x + width, y + height),
+        color,
+        boxThickness
+      );
+
+      cv.rectangle(
+        dstMat,
+        new cv.Point(x, y - labelHeight),
+        new cv.Point(x + width, y),
+        color,
+        -1
+      );
+      // Draw label text
+      const text = `${className} ${Math.round(confScore * 100)}%`;
+      cv.putText(
+        dstMat,
+        text,
+        new cv.Point(x + textPadding, y - textPadding),
+        cv.FONT_HERSHEY_DUPLEX,
+        fontSize,
+        new cv.Scalar(255, 255, 255, 255),
+        Math.max(1, Math.floor(fontSize / 2))
+      );
+    });
+
+    // Draw to canvas at source dimensions
+    const imageData = new ImageData(dstMat.cols, dstMat.rows);
+    const data = dstMat.data;
+    // Swtich BGRA to RGBA
+    for (let i = 0; i < data.length; i += 4) {
+      imageData.data[i] = data[i + 2];
+      imageData.data[i + 1] = data[i + 1];
+      imageData.data[i + 2] = data[i];
+      imageData.data[i + 3] = data[i + 3];
+    }
+    // console.log("Drawing boxes on canvas...", imageData);
+    context.putImageData(imageData, 0, 0);
+    console.log("Boxes drawn on canvas.");
+    // Clean up
+    dstMat.delete();
+  } catch (error) {
+    console.error("Error drawing boxes:", error);
+  }
 };
 
 /**
- * Run detection on the current image in the canvas.
- * @param currentMediaType Current media type (image, video, webcam)
+ * Run detection on the current media in the canvas.
+ * Uses the store to access the current media type and video playing status.
  */
-export const runDetection = async (currentMediaType: string): Promise<void> => {
+export const runDetectionOnCurrentMedia = async (): Promise<void> => {
+  // Access the store for the current media type by name
+  const { currentMediaType } = useGameStore.getState();
+
+  if (!currentMediaType) {
+    console.log(
+      "Invalid media type or no media type selected. Cannot run detection."
+    );
+    return;
+  }
+
   const cv = window.cv;
   const model = window.cocoSsd;
   if (!cv || !model) {
@@ -296,63 +335,150 @@ export const runDetection = async (currentMediaType: string): Promise<void> => {
     return;
   }
 
+  const canvasElement = document.getElementById(
+    "canvas-main"
+  ) as HTMLCanvasElement;
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+
+  if (!videoElement) {
+    console.error("Video element not found.");
+    return;
+  }
+  if (!canvasElement) {
+    console.error("Canvas element not found.");
+    return;
+  }
+
+  // If the current media type is image, we need to set up the canvas differently
   if (currentMediaType === "image") {
     const imageElement = document.getElementById(
+      "image-output"
+    ) as HTMLImageElement;
+    if (!imageElement) {
+      console.error("Image element not found.");
+      return;
+    }
+    // IMAGE DETECTION
+    const predictions = await model.detect(imageElement);
+    if (!predictions || predictions.length === 0) {
+      console.log("No predictions found in image.");
+    } else {
+      drawBoundingBoxes(predictions);
+    }
+  } else {
+    if (!videoElement.videoWidth || !videoElement.videoHeight) {
+      console.error("Video dimensions not found.");
+      return;
+    }
+    canvasElement.width = videoElement.videoWidth;
+    canvasElement.height = videoElement.videoHeight;
+  }
+  // Process a single frame, grabbed from the canvas displaying the media
+  const detectFrame = async () => {
+    try {
+      // Use the cocoSsd model to detect objects in the video frame
+      const predictions = await model.detect(videoElement);
+      if (!predictions || predictions.length === 0) {
+        console.log("No predictions found in frame.");
+      } else {
+        drawBoundingBoxes(predictions);
+      }
+      // Continue detection if video is playing/webcam is enabled
+      if (
+        currentMediaType !== "image" &&
+        !videoElement.paused &&
+        useGameStore.getState().videoPlaying
+      ) {
+        requestAnimationFrame(detectFrame);
+      }
+    } catch (error) {
+      console.error(`Error running detection on ${currentMediaType}:`, error);
+      stopDetection();
+    }
+  };
+  // Start recursive detectFrame call for video or webcam
+  await detectFrame();
+};
+
+/**
+ * Stop detection and clear canvas
+ */
+export const stopDetection = (): void => {
+  const canvasElement = document.getElementById(
+    "canvas-main"
+  ) as HTMLCanvasElement;
+  if (!canvasElement) return;
+
+  const ctx = canvasElement.getContext("2d");
+  if (ctx) {
+    ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  }
+};
+
+/**
+ * Play the currently loaded media and update the store
+ */
+export const playMedia = async (): Promise<void> => {
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement || !videoElement.src) return;
+
+  try {
+    await videoElement.play();
+    useGameStore.getState().setVideoPlaying(true);
+  } catch (error) {
+    console.error("Error playing media:", error);
+  }
+};
+
+/**
+ * Pause the currently playing media and update the store
+ */
+export const pauseMedia = (): void => {
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement) return;
+
+  // Pause the video and update the store
+  videoElement.pause();
+  useGameStore.getState().setVideoPlaying(false);
+};
+
+/**
+ * Stop and reset the currently media playing time to 0 and update the store
+ */
+export const stopMedia = (): void => {
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement) return;
+  //   Try to clear the canvas and reset the video
+  try {
+    const videoElement = document.getElementById(
+      "video-output"
+    ) as HTMLVideoElement;
+    if (!videoElement) return console.error("Video element not found.");
+
+    const canvasElement = document.getElementById(
       "canvas-main"
     ) as HTMLCanvasElement;
-    // Get the image data from the canvas
-    const imgMat = cv.imread(imageElement);
-    console.log("Image Mat: ", imgMat);
-    // Run the detection
-    try {
-      const predictions = await model.detect(imageElement);
+    if (!canvasElement) return console.error("Canvas element not found.");
 
-      // Draw the bounding boxes
-      drawBoundingBoxes(predictions, imgMat);
-      // Show the image with the bounding boxes
-      cv.imshow("canvas-main", imgMat);
-      // Clean up the image data
-      imgMat.delete();
-    } catch (error) {
-      console.error("Error running detection: ", error);
-    }
-  } else if (currentMediaType === "video") {
-    const videoElement = document.getElementById(
-      "video-main"
-    ) as HTMLVideoElement;
-    const videoMat = cv.imread(videoElement);
-    console.log("Video Mat: ", videoMat);
-    // Run the detection
-    try {
-      const predictions = await model.detect(videoElement);
-
-      // Draw the bounding boxes
-      drawBoundingBoxes(predictions, videoMat);
-      // Show the image with the bounding boxes
-      cv.imshow("canvas-main", videoMat);
-      // Clean up the image data
-      videoMat.delete();
-    } catch (error) {
-      console.error("Error running detection: ", error);
-    }
-  } else if (currentMediaType === "webcam") {
-    const videoElement = document.getElementById(
-      "video-main"
-    ) as HTMLVideoElement;
-    const videoMat = cv.imread(videoElement);
-    console.log("Video Mat: ", videoMat);
-    // Run the detection
-    try {
-      const predictions = await model.detect(videoElement);
-
-      // Draw the bounding boxes
-      drawBoundingBoxes(predictions, videoMat);
-      // Show the image with the bounding boxes
-      cv.imshow("canvas-main", videoMat);
-      // Clean up the image data
-      videoMat.delete();
-    } catch (error) {
-      console.error("Error running detection: ", error);
-    }
+    const context = canvasElement.getContext("2d");
+    if (!context) return console.error("Canvas context not found.");
+    // Clear the canvas
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  } catch (error) {
+    console.error("Error clearing canvas:", error);
   }
+
+  videoElement.pause();
+  videoElement.currentTime = 0;
+  useGameStore.getState().setVideoPlaying(false);
+  // Reset the video element
+  videoElement.src = "";
 };
