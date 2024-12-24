@@ -118,7 +118,7 @@ const Login: React.FC = () => {
         <img
           className="h-screen w-full object-cover"
           style={{ clipPath: "polygon(10% 0, 100% 0, 100% 100%, 0% 100%)" }}
-          src="../../assets/mainPic.png"
+          src="../../assets/pic2-c.png"
           alt="objectsPicture"
         />
       </div>

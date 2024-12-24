@@ -5,16 +5,9 @@ export default {
     "./components/**/*.{html,js,jsx,ts,tsx}",
     "./index.html",
   ],
+  darkMode: ["selector", '[data-mode="dark"]'], // tailwind doesnt support class anymore
+  plugins: [],
   theme: {
     extend: {},
-    theme: {
-      colors: {
-        color0: "#052e16", //teal
-        color1: "#14532d", // light teal
-        color2: "#f1f5f9", // light gray
-      },
-    },
   },
-  plugins: [],
 };
-
