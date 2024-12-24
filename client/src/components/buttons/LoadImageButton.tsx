@@ -26,15 +26,31 @@ const LoadImageButton = () => {
   );
   const canvasReady = useGameStore((state) => state.canvasReady);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoPlaying = useGameStore((state) => state.videoPlaying);
   const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
+  const currentMediaType = useGameStore((state) => state.currentMediaType);
+
   // loadImageToCanvas is a utility function in utils.ts using cv
   const handleLoadImage = async (file: File) => {
     try {
-      // If video is playing, stop it then load the image to the video element
-      if (videoPlaying) {
+      // If video or webcam is enabled, stop it then load the image to the video element
+      if (currentMediaType === "video" || currentMediaType === "webcam") {
+        const videoElement = document.getElementById(
+          "video-output"
+        ) as HTMLVideoElement;
+        const canvas = document.getElementById(
+          "canvas-main"
+        ) as HTMLCanvasElement;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          throw new Error("Canvas context not found.");
+        }
         setVideoPlaying(false);
+        // Clear the canvas (should have same height and width as video/webcam)
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        // Remove src from video element
+        videoElement.src = "";
       }
+
       await loadImageToCanvas(file);
       setCurrentMediaRef(file.name);
       setCurrentMediaType("image");

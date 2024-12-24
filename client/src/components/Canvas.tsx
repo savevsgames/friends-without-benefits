@@ -95,6 +95,8 @@ export const Canvas = () => {
     loadOpenCV();
   }, [setCanvasReady]);
 
+  // Return the canvas component when currentMediaRef changes and type is set to an image or video
+
   return (
     <div id="canvas-container" className="relative w-auto h-auto m-0">
       <canvas
@@ -105,7 +107,7 @@ export const Canvas = () => {
           position: "absolute",
           top: "0",
           left: "0",
-          width: "auto",
+          width: "100%",
           height: "auto",
           zIndex: 10,
         }}
@@ -117,7 +119,7 @@ export const Canvas = () => {
           position: "absolute",
           top: "0",
           left: "0",
-          width: "auto",
+          width: "100%",
           height: "auto",
           zIndex: 2,
         }}
@@ -125,14 +127,14 @@ export const Canvas = () => {
         muted
         crossOrigin="anonymous"
       ></video>
-      <image
+      <img
         id="image-output"
         style={{
           display: "block",
           position: "absolute",
           top: "0",
           left: "0",
-          width: "auto",
+          width: "100%",
           height: "auto",
           zIndex: 1,
         }}
