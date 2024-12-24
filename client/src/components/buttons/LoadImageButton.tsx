@@ -1,4 +1,4 @@
-import { loadImageToVideoElementAsPoster } from "@/utils/utils";
+import { loadImageToCanvas } from "@/utils/utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 
@@ -9,8 +9,8 @@ const LoadImageButton = () => {
     margin: "0.25em",
     border: "3px solid #333",
     boxShadow: "0 0 0.5em #333",
-    borderRadius: "0.5em",
-    backgroundColor: "#069069",
+    borderRadius: "0.25em",
+    backgroundColor: "#10343D",
     color: "#f8f8f8",
     textDecoration: "none",
     fontWeight: "bold",
@@ -26,13 +26,16 @@ const LoadImageButton = () => {
   );
   const canvasReady = useGameStore((state) => state.canvasReady);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoPlaying = useGameStore((state) => state.videoPlaying);
   const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
   // loadImageToCanvas is a utility function in utils.ts using cv
   const handleLoadImage = async (file: File) => {
     try {
       // If video is playing, stop it then load the image to the video element
-      setVideoPlaying(false);
-      await loadImageToVideoElementAsPoster(file);
+      if (videoPlaying) {
+        setVideoPlaying(false);
+      }
+      await loadImageToCanvas(file);
       setCurrentMediaRef(file.name);
       setCurrentMediaType("image");
     } catch (error) {

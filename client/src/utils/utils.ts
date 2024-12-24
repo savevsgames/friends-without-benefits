@@ -5,46 +5,38 @@ import { useGameStore } from "@/store";
  * Load a given image file into the canvas.
  * @param file File object to load
  */
-export const loadImageToVideoElementAsPoster = async (
-  file: File
-): Promise<void> => {
-  // Add promise to create poster for dimensions before setting src
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (event: ProgressEvent<FileReader>) => {
-      const videoElement = document.getElementById(
-        "video-output"
-      ) as HTMLVideoElement;
+export const loadImageToCanvas = async (file: File): Promise<void> => {
+  const reader = new FileReader();
+  reader.onload = async (event: ProgressEvent<FileReader>) => {
+    const imageElement = document.getElementById(
+      "image-output"
+    ) as HTMLImageElement;
+    const canvasElement = document.getElementById(
+      "canvas-main"
+    ) as HTMLCanvasElement;
+    if (!canvasElement || !imageElement) {
+      console.log("Canvas or image element not found");
+      return;
+    }
 
-      if (!videoElement) {
-        reject(new Error("Canvas or source element not found"));
-        return;
-      }
-      // Create an image object to get dimensions
-      // needed to load the file data
-      const image = new Image();
-      image.onload = () => {
-        videoElement.style.display = "block";
-        // Poster is a static image displayed when the video is paused
-        // Allows us to place the image file into the video element
-        videoElement.poster = event.target?.result as string;
-        videoElement.pause();
-        // Once the video element is loaded we know the image is ready to be displayed
-        resolve();
-      };
-      image.onerror = (error) => {
-        reject(new Error("Error loading image file: " + error));
-      };
-      // We know the video element is ready / reader has loaded the file
-      image.src = event.target?.result as string;
+    // Once the reader.onload event is triggered and file is read as a string
+    imageElement.src = event.target?.result as string;
+    if (!imageElement.src) {
+      console.error("Image source not found.");
+    }
+    imageElement.onload = () => {
+      // Canvas needs to match image dimensions
+      canvasElement.width = imageElement.naturalWidth;
+      canvasElement.height = imageElement.naturalHeight;
+      console.log("Image loaded into image-output:", imageElement.src);
     };
-    reader.onerror = (error) => {
-      reject(new Error("Error reading file: " + error));
+    imageElement.onerror = () => {
+      console.error("Error loading image file.");
     };
-    // call the reader to read file
-    console.log("File: ", file);
-    reader.readAsDataURL(file);
-  });
+  };
+  // call the reader to read file
+  console.log("File: ", file);
+  reader.readAsDataURL(file);
 };
 
 /**
@@ -201,107 +193,123 @@ export const colorForLabels = (className: string) => {
 };
 
 /**
- * Draws bounding boxes around detected objects on the input image.
+ * Draws bounding boxes around detected objects on the media source.
  * @param predictions Array of predictions from the model
- * @param inputImage Input image to draw bounding boxes on
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const drawBoundingBoxes = (predictions: any) => {
-  const videoElement = document.getElementById(
-    "video-output"
-  ) as HTMLVideoElement;
+export const drawBoundingBoxes = (predictions: any): void => {
   const canvasElement = document.getElementById(
     "canvas-main"
   ) as HTMLCanvasElement;
-  if (!canvasElement || !videoElement) {
-    console.error("Canvas or source video element not found.");
-    return;
-  }
-  const context = canvasElement.getContext("2d");
-  if (!context) {
-    console.error("Canvas context not found.");
-    return;
-  }
+  const imageElement = document.getElementById(
+    "image-output"
+  ) as HTMLImageElement;
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  const context = canvasElement?.getContext("2d");
+
+  if (!canvasElement || !context) return;
+
   const cv = window.cv;
-  if (!cv) {
-    console.log("OpenCV is not loaded. Cannot draw bounding boxes.");
-    return;
-  }
+  if (!cv) return;
+
   try {
-    // Clear the canvas first
-    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    // Create source and destination Mats to store the image data
-    const srcMat = new cv.Mat(
-      canvasElement.height,
+    const currentMediaType = useGameStore.getState().currentMediaType;
+    // Create one source element (img or video) based on the current media type
+    const sourceElement =
+      currentMediaType === "image" ? imageElement : videoElement;
+
+    if (!sourceElement) return;
+
+    // Get the actual dimensions of the source media
+    const sourceWidth =
+      currentMediaType === "image"
+        ? imageElement.naturalWidth
+        : videoElement.videoWidth;
+    const sourceHeight =
+      currentMediaType === "image"
+        ? imageElement.naturalHeight
+        : videoElement.videoHeight;
+
+    // Set canvas to match source dimensions, not display dimensions
+    canvasElement.width = sourceWidth;
+    canvasElement.height = sourceHeight;
+    console.log(
+      "Canvas dimensions:",
       canvasElement.width,
-      cv.CV_8UC4
+      "x",
+      canvasElement.height
     );
+
+    // Create transparent Mat at source dimensions
     const dstMat = new cv.Mat(
       canvasElement.height,
       canvasElement.width,
       cv.CV_8UC4
     );
-    // Set initial transparency in destination Mat to 0
     dstMat.setTo(new cv.Scalar(0, 0, 0, 0));
+
+    // Calculate scaling for Bounding Box dynamically based on source dimensions
+    const minDimension = Math.min(canvasElement.height, canvasElement.width);
+    const boxThickness = Math.max(2, Math.floor(minDimension * 0.003));
+    const fontSize = Math.max(0.7, minDimension * 0.001);
+    const labelHeight = 50;
+    const textPadding = 10;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     predictions.forEach((prediction: any) => {
       const { bbox, class: className, score: confScore } = prediction;
-      const [x, y, width, height] = bbox.map((val: number) => Math.round(val)); // Ensure all values are integers
-
-      //   Get the class label: Class & Score
-      const label = `${className} ${Math.round(confScore * 100)}%`;
-      // Get the class color
+      // Use raw coordinates from prediction - they're already in source dimensions
+      const [x, y, width, height] = bbox.map((val: number) => val);
       const color = colorForLabels(className);
-      // Draw bounding box
-      const point1 = new cv.Point(x, y);
-      const point2 = new cv.Point(x + width, y + height);
 
-      // Draw the bounding box into the destination Mat
-      cv.rectangle(dstMat, point1, point2, color, 8);
-      // Draw the label background and text
-      const text = label;
-      const fontFace = cv.FONT_HERSHEY_SIMPLEX;
-      const fontSize = 3; // Proportional size in rem
-      const thickness = 2;
-      const filled = -1; // Filled rectangle
-      const labelHeight = 50; // These are hardcoded for now
-      const textPadding = 5;
+      // Draw bounding box and label box
+      cv.rectangle(
+        dstMat,
+        new cv.Point(x, y),
+        new cv.Point(x + width, y + height),
+        color,
+        boxThickness
+      );
 
-      // Draw background rectangle for the label
       cv.rectangle(
         dstMat,
         new cv.Point(x, y - labelHeight),
         new cv.Point(x + width, y),
         color,
-        filled
+        -1
       );
-
-      // Draw the text over the background rectangle
+      // Draw label text
+      const text = `${className} ${Math.round(confScore * 100)}%`;
       cv.putText(
         dstMat,
         text,
-        new cv.Point(x + textPadding, y - textPadding), // Adjust text placement
-        fontFace,
+        new cv.Point(x + textPadding, y - textPadding),
+        cv.FONT_HERSHEY_DUPLEX,
         fontSize,
-        new cv.Scalar(255, 255, 255, 255), // White text
-        thickness
+        new cv.Scalar(255, 255, 255, 255),
+        Math.max(1, Math.floor(fontSize / 2))
       );
-
-      // Convert destination matrix to image data and draw it on the canvas
-      const imageData = new ImageData(
-        new Uint8ClampedArray(dstMat.data),
-        dstMat.cols,
-        dstMat.rows
-      );
-      context.putImageData(imageData, 0, 0);
-
-      // Clean up
-      srcMat.delete();
-      dstMat.delete();
     });
+
+    // Draw to canvas at source dimensions
+    const imageData = new ImageData(dstMat.cols, dstMat.rows);
+    const data = dstMat.data;
+    // Swtich BGRA to RGBA
+    for (let i = 0; i < data.length; i += 4) {
+      imageData.data[i] = data[i + 2];
+      imageData.data[i + 1] = data[i + 1];
+      imageData.data[i + 2] = data[i];
+      imageData.data[i + 3] = data[i + 3];
+    }
+    // console.log("Drawing boxes on canvas...", imageData);
+    context.putImageData(imageData, 0, 0);
+    console.log("Boxes drawn on canvas.");
+    // Clean up
+    dstMat.delete();
   } catch (error) {
-    console.error("Error drawing bounding boxes:", error);
+    console.error("Error drawing boxes:", error);
   }
 };
 
@@ -333,31 +341,32 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
   const videoElement = document.getElementById(
     "video-output"
   ) as HTMLVideoElement;
-  if (!canvasElement || !videoElement) {
+
+  if (!videoElement) {
+    console.error("Video element not found.");
+    return;
+  }
+  if (!canvasElement) {
     console.error("Canvas element not found.");
     return;
   }
 
-  // Set up canvas dimensions
-  canvasElement.width = videoElement.videoWidth;
-  canvasElement.height = videoElement.videoHeight;
-
   // If the current media type is image, we need to set up the canvas differently
   if (currentMediaType === "image") {
-    if (!videoElement.poster) {
-      console.error("No poster image found in video element.");
+    const imageElement = document.getElementById(
+      "image-output"
+    ) as HTMLImageElement;
+    if (!imageElement) {
+      console.error("Image element not found.");
       return;
     }
-    // Create a temporary image object to load the poster image
-    const image = new Image();
-    image.src = videoElement.poster;
-    await new Promise<void>((resolve) => {
-      image.onload = () => {
-        canvasElement.width = image.width;
-        canvasElement.height = image.height;
-        resolve();
-      };
-    });
+    // IMAGE DETECTION
+    const predictions = await model.detect(imageElement);
+    if (!predictions || predictions.length === 0) {
+      console.log("No predictions found in image.");
+    } else {
+      drawBoundingBoxes(predictions);
+    }
   } else {
     if (!videoElement.videoWidth || !videoElement.videoHeight) {
       console.error("Video dimensions not found.");
@@ -376,26 +385,6 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
       } else {
         drawBoundingBoxes(predictions);
       }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      //   predictions.forEach((prediction: any) => {
-      //     const [x, y, width, height] = prediction.bbox;
-      //     const label = `${prediction.class} ${Math.round(
-      //       prediction.score * 100
-      //     )}%`;
-      //     // Get the class color
-      //     const color = colorForLabels(prediction.class);
-      //     context.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
-      //     context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
-      //     context.lineWidth = 2;
-      //     // Draw the label background using the label text width
-      //     context.strokeRect(x, y, width, height);
-      //     context.fillRect(x, y - 24, context.measureText(label).width + 10, 24);
-      //     // Write the label text
-      //     context.fillStyle = "#000000";
-      //     context.fillText(label, x + 5, y - 8);
-      //   });
-
       // Continue detection if video is playing/webcam is enabled
       if (
         currentMediaType !== "image" &&
@@ -453,19 +442,7 @@ export const pauseMedia = (): void => {
     "video-output"
   ) as HTMLVideoElement;
   if (!videoElement) return;
-  //  Try to clear the canvas to stop detection
-  try {
-    const canvasElement = document.getElementById(
-      "canvas-main"
-    ) as HTMLCanvasElement;
-    if (!canvasElement) return console.error("Canvas element not found.");
-    const context = canvasElement.getContext("2d");
-    if (!context) return console.error("Canvas context not found.");
-    // Clear the canvas
-    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  } catch (error) {
-    console.error("Error clearing canvas:", error);
-  }
+
   // Pause the video and update the store
   videoElement.pause();
   useGameStore.getState().setVideoPlaying(false);
@@ -481,10 +458,16 @@ export const stopMedia = (): void => {
   if (!videoElement) return;
   //   Try to clear the canvas and reset the video
   try {
+    const videoElement = document.getElementById(
+      "video-output"
+    ) as HTMLVideoElement;
+    if (!videoElement) return console.error("Video element not found.");
+
     const canvasElement = document.getElementById(
       "canvas-main"
     ) as HTMLCanvasElement;
     if (!canvasElement) return console.error("Canvas element not found.");
+
     const context = canvasElement.getContext("2d");
     if (!context) return console.error("Canvas context not found.");
     // Clear the canvas
@@ -496,4 +479,6 @@ export const stopMedia = (): void => {
   videoElement.pause();
   videoElement.currentTime = 0;
   useGameStore.getState().setVideoPlaying(false);
+  // Reset the video element
+  videoElement.src = "";
 };

@@ -3,9 +3,23 @@ import { useGameStore } from "../store"; // Import Zustand store
 
 export const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { gameState, videoPlaying } = useGameStore(); // Access Zustand state
 
-  // Access Zustand state
-  const gameState = useGameStore((state) => state.gameState);
+  // Canvas clearing interval for bounding boxes for video only
+  useEffect(() => {
+    if (videoPlaying) {
+      const intervalId = setInterval(() => {
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext("2d");
+        if (context && canvas) {
+          context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }, 2000); // Clear every 2 seconds
+
+      return () => clearInterval(intervalId);
+    }
+  }, [videoPlaying]);
+
   // Log the current game state when it changes - setup, playing, gameover
   useEffect(() => {
     if (gameState === "setup") {
@@ -58,41 +72,18 @@ export const Canvas = () => {
       });
       console.log("OpenCV.js is initialized!");
 
-      // Retry logic with a 100ms timeout and escape after 2 minutes
-      // const maxRetries = 1200; // 2 minutes @ 100ms each
-      // let retries = 0;
-
-      // await new Promise<void>((resolve, reject) => {
-      //   const interval = setInterval(() => {
-      //     if (cv && cv["onRuntimeInitialized"]) {
-      //       clearInterval(interval);
-      //       resolve();
-      //     } else if (retries >= maxRetries) {
-      //       clearInterval(interval);
-      //       reject(
-      //         new Error(
-      //           "OpenCV.js did not properly initialize within 2 minutes"
-      //         )
-      //       );
-      //     } else {
-      //       retries++;
-      //     }
-      //   }, 100); // Check every 100ms
-      // }).catch((error) => {
-      //   console.error(error.message);
-      // });
-
       // Step 3: Perform canvas initialization or other setup tasks
       const canvas = canvasRef.current;
       if (canvas) {
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.fillStyle = "black";
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.globalAlpha = 0.7; // Set transparency to 70%
-          ctx.fillStyle = "white";
-          ctx.font = "20px Arial";
-          ctx.fillText("SCAVENGER HUNT!", 10, 30);
+        const context = canvas.getContext("2d");
+        if (context) {
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.globalAlpha = 0.7; // Set transparency to 70%
+
+          context.fillStyle = "black";
+          context.font = "20px Arial";
+          context.fillText("SCAVENGER HUNT 2025", 10, 30);
+          context.globalAlpha = 1; // Reset transparency
         }
       }
 
@@ -105,7 +96,7 @@ export const Canvas = () => {
   }, [setCanvasReady]);
 
   return (
-    <div id="canvas-container" className="relative w-full h-full">
+    <div id="canvas-container" className="relative w-auto h-auto m-0">
       <canvas
         id="canvas-main"
         ref={canvasRef}
@@ -114,8 +105,8 @@ export const Canvas = () => {
           position: "absolute",
           top: "0",
           left: "0",
-          width: "100%",
-          height: "100%",
+          width: "auto",
+          height: "auto",
           zIndex: 10,
         }}
       ></canvas>
@@ -126,15 +117,27 @@ export const Canvas = () => {
           position: "absolute",
           top: "0",
           left: "0",
-          width: "100%",
-          height: "100%",
-          zIndex: 1,
+          width: "auto",
+          height: "auto",
+          zIndex: 2,
         }}
         playsInline
         muted
         crossOrigin="anonymous"
       ></video>
-     
+      <image
+        id="image-output"
+        style={{
+          display: "block",
+          position: "absolute",
+          top: "0",
+          left: "0",
+          width: "auto",
+          height: "auto",
+          zIndex: 1,
+        }}
+        crossOrigin="anonymous"
+      />
     </div>
   );
 };
