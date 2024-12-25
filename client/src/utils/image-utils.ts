@@ -1,6 +1,8 @@
-import * as tf from "@tensorflow/tfjs-node";
-import * as ml5 from "ml5";
-import sharp from "sharp";
+// import * as tf from "@tensorflow/tfjs-node";
+// import sharp from "sharp";
+
+// Import ml5 from the window object - index.html includes the ml5 library
+// const ml5 = window.ml5;
 
 /**   Image Processing Pipeline
  * 1) Enable Webcam Stream: Feed from the webcam (enableWebcam) is cast to video-output element.
@@ -14,7 +16,7 @@ import sharp from "sharp";
  *    letting them be cleared by garbage collection. This is for debugging and monitoring purposes.
  * 7) Clear Low-Confidence Data: Clear low-confidence data from memory to prevent memory leaks.
  * 9) Pass high-confidence predictions to the re-training pipeline. This will start with cropping the image
- *    (cropToBoundingBox) and then normalizing the image for training, or optimizing for re-training.
+ *    (cropToBoundingBox) and then normalizing (normalizeImage) the image for training, or optimizing for re-training.
  * 11) Export the re-trained model in a format that can be used in the game.
  * 12) Update the game with the new model and save the model to our model database. Each user will have their
  *     own model in the database to add items to the game. Long term, all this data can be used to train a
@@ -25,92 +27,54 @@ import sharp from "sharp";
  * 13) Pass the new model in on loading the game page.
  */
 
-/**
- * Classify a single frame from the webcam stream.
- * @param videoElement HTMLVideoElement - The video stream element.
- * @returns Predictions from the classifier.
- */
-export const classifyStream = async (
-    videoElement: HTMLVideoElement
-  ): Promise<Array<{ label: string; confidence: number }>> => {
-    try {
-      if (!videoElement || videoElement.readyState < 2) {
-        throw new Error('Video is not ready or not loaded properly.');
-      }
-  
-      const model = await ml5.imageClassifier('MobileNet');
-      const canvas = document.createElement('canvas');
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      const ctx = canvas.getContext('2d');
-  
-      if (!ctx) throw new Error('Failed to create canvas context.');
-  
-      // Draw current video frame to canvas
-      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-  
-      // Convert canvas to TensorFlow image tensor
-      const imageBuffer = canvas.toDataURL('image/jpeg');
-      const imageTensor = tf.node.decodeImage(
-        Buffer.from(imageBuffer.split(',')[1], 'base64')
-      );
-  
-      // Run classification
-      const predictions = await model.classify(imageTensor);
-      console.log('Predictions:', predictions);
-  
-      return predictions;
-    } catch (error) {
-      console.error('Error during classification:', error);
-      return [];
-    }
-  };
+// export const classifyStream = async () => {
+//   try {
+//     const videoElement = document.getElementById(
+//       "video-output"
+//     ) as HTMLVideoElement;
+//     if (!videoElement) {
+//       console.log("No video element found.");
+//       return;
+//     }
+//     const stream = videoElement.src;
+//     console.log(stream);
+//   } catch (error) {
+//     console.log("Error classifying webcam stream data.", error);
+//   }
+// };
 
+// export const verifyPredictions = async (objectPredictions) => {
+//   // Use ml5 to verify prediction data - outputs confidence scores for predictions on user created image data
+// };
 
-/**
- * Take the user's image (from image series/video or webcam footage) and crop it to the bounding box
- * of the prediction with some padding around it. The output will be used to retrain the model.
- * @param inputBuffer - Image buffer - needed to crop the image
- * @param boundingBox - Bounding box coordinates [x, y, width, height]
- * @param padding - Additional pixels to include around the bounding box
- * @returns Cropped image buffer
- */
-export const cropToBoundingBox = async (
-  inputBuffer: Buffer,
-  boundingBox: [x: number, y: number, width: number, height: number],
-  paddingX: number = 20,
-  paddingY: number = 20
-): Promise<Buffer> => {
-  const [x, y, width, height] = boundingBox;
+// export const sortPredictions = async (predictions) => {
+//   // Sort prediction images - high vs low confidence score images
+// };
 
-  /** This will crop a square region around the bounding box with some padding for error tolerance
-  The crop region should not exceed the image dimensions so Math.min &  Math.max make sure it 
-  does not crop the region according to the prediction if the box would go out of bounds. 
-  Padding defaults to 20, but can be adjusted to include more or less of the surrounding area.
-  */
-  const cropRegion = {
-    left: Math.max(x - paddingX, 0),
-    top: Math.max(y - paddingY, 0),
-    width: Math.min(width + paddingX * 2, width),
-    height: Math.min(height + paddingY * 2, height),
-  };
+// export const savePredictionToDatabase = async (trainingSet) => {
+//   // Save predictions to large database for training community model
+//   // Long term goal function.
+// };
 
-  // Perform the crop
-  return await sharp(inputBuffer)
-    .extract(cropRegion) // Crop to the region
-    .resize(224, 224) // Standard size for ML models
-    .normalize() // Adjust lighting levels
-    .toFormat("jpeg") // Ensure consistent format
-    .toBuffer();
-};
+// export const logResultsAndClearUnusedData = async (highConfSet, lowConfSet) => {
+//   // Log the results from the high conf and low conf arrays as summaries, and
+//   // slice 10 entries to view output data manually at cut-off point and at highest
+//   // confidence score point.
+// };
 
-export const getPredictions = async (
-  imageBuffer: Buffer
-): Promise<ml5.ObjectDetection.Prediction[]> => {
-  const objectDetector = ml5.objectDetector("cocossd");
+// export const cropToBoundingBox = async (singleImageToCrop) => {
+//   // takes the classified image with bounding box data and crops it to normalize
+// };
 
-  const image = tf.node.decodeImage(imageBuffer, 3);
-  const predictions = await objectDetector.detect(image);
+// export const normalizeImage = async (finalImageSet) => {
+//   // Takes the cropped image and normalizes it for training/re-training
+// };
 
-  return predictions;
-};
+// export const reTrainModel = async (model, trainingData, config) => {
+//   // Separates a square of the training data size for validation
+//   // Train the model using the config to send options for epochs, etc. needed for training accurately
+// };
+
+// export const loadNewModelAndUpdateStore = async (model) => {
+//   // Loads new model and updates zustand
+// };

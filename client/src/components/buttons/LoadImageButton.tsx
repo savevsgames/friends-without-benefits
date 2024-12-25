@@ -1,4 +1,4 @@
-import { loadImageToCanvas } from "@/utils/utils";
+import { loadImageToCanvas } from "@/utils/model-utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 

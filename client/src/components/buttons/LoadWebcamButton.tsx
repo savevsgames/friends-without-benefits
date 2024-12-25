@@ -1,4 +1,4 @@
-import { toggleWebcam } from "@/utils/utils";
+import { toggleWebcam } from "@/utils/model-utils";
 import { useGameStore } from "@/store";
 
 const LoadWebcamButton = () => {

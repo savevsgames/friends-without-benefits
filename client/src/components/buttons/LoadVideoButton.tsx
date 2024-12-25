@@ -1,4 +1,4 @@
-import { loadVideoToVideoOutput } from "@/utils/utils";
+import { loadVideoToVideoOutput } from "@/utils/model-utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 
@@ -33,7 +33,6 @@ const LoadVideoButton = () => {
   const handleLoadVideo = async (file: File) => {
     // If video or webcam is enabled, stop it then load the image to the video element
     if (currentMediaType === "image") {
-  
       const imageElement = document.getElementById(
         "image-output"
       ) as HTMLImageElement;

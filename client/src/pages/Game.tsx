@@ -17,6 +17,7 @@ function Game() {
   const setCanvasReady = useGameStore((state) => state.setCanvasReady);
   useEffect(() => {
     const initializeModel = async () => {
+      // TODO: In the future we can add logic to switch between models here
       console.log("Loading TensorFlow.js COCO-SSD Model...");
       try {
         const cocoSsd = await window.cocoSsd?.load();
