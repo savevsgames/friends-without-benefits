@@ -116,7 +116,7 @@ export const useUserSession = create(
 );
 
 // define a theme store
-interface ThemeStore {
+export interface ThemeStore {
   theme: string;
   toggleTheme: () => void;
 }

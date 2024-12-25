@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useThemeStore } from "@/store";
-
+import { IoMoon } from "react-icons/io5";
+import { IoSunny } from "react-icons/io5";
 
 function Landing() {
   const navigate = useNavigate();
@@ -18,32 +19,35 @@ function Landing() {
 
   console.log(theme);
 
+  const icon = (theme: string) => {
+    if (theme === "light") {
+      return <IoSunny style={{ color: "teal" }} />;
+    } else {
+      return <IoMoon style={{ color: "red" }} />;
+    }
+  };
 
   return (
     <main data-mode={theme}>
-      <div className="bg-slate-50 dark:bg-gray-900 h-screen flex overflow-hidden">
+      <div className="bg-slate-50 dark:bg-neutral-950 h-screen flex overflow-hidden">
         {/* Left Section for Text Content */}
         <div className="w-2/5 flex flex-col justify-center items-start px-12">
           <div className="absolute top-4 left-4 z-10">
-            <h2 className="font-bold tracking-widest px-7 flex flex-row">
-              <span className="text-teal-950 dark:text-slate-50 text-2xl">
+            <button
+              onClick={() => toggleTheme()}
+              className="font-bold tracking-widest px-7 flex flex-row items-center"
+            >
+              {icon(theme)}
+              <span className="text-teal-950 dark:text-slate-50 text-2xl ml-2">
                 F
               </span>
-              <span className="text-teal-900 dark:text-slate-100 text-1xl self-end">
+              <span className="text-teal-900 dark:text-slate-100 text-1xl self-end ml-1">
                 WO
               </span>
-              <span className="text-teal-950 dark:text-slate-100 text-2xl">
+              <span className="text-teal-950 dark:text-slate-100 text-2xl ml-1">
                 B
               </span>
-
-              <button
-                onClick={toggleTheme}
-                type="button"
-                className="p-4 rounded bg-black dark:bg-white text-white dark:text-black font-semibold"
-              >
-                Toggle Theme
-              </button>
-            </h2>
+            </button>
           </div>
           <h3 className="text-lg text-teal-900 dark:text-slate-100 mb-4 tracking-wider">
             Think fast. Spot faster. Win big.
