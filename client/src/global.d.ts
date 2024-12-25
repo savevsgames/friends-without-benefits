@@ -6,7 +6,8 @@ declare global {
     cocoSsd: any; // Adding `cocoSsd` to the window object for coco-ssd
     Module: OpenCVModule; // Adding `Module` to the window object for OpenCV.js initialization
     Prediction: Prediction; // Adding `Prediction` to the window object
-    Predictions: Prediction[];
+    Predictions: Prediction[];,
+    ml5: any; // Adding `ml5` to the window object for ml5.js
   }
 }
 

@@ -26,6 +26,48 @@ import sharp from "sharp";
  */
 
 /**
+ * Classify a single frame from the webcam stream.
+ * @param videoElement HTMLVideoElement - The video stream element.
+ * @returns Predictions from the classifier.
+ */
+export const classifyStream = async (
+    videoElement: HTMLVideoElement
+  ): Promise<Array<{ label: string; confidence: number }>> => {
+    try {
+      if (!videoElement || videoElement.readyState < 2) {
+        throw new Error('Video is not ready or not loaded properly.');
+      }
+  
+      const model = await ml5.imageClassifier('MobileNet');
+      const canvas = document.createElement('canvas');
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      const ctx = canvas.getContext('2d');
+  
+      if (!ctx) throw new Error('Failed to create canvas context.');
+  
+      // Draw current video frame to canvas
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+  
+      // Convert canvas to TensorFlow image tensor
+      const imageBuffer = canvas.toDataURL('image/jpeg');
+      const imageTensor = tf.node.decodeImage(
+        Buffer.from(imageBuffer.split(',')[1], 'base64')
+      );
+  
+      // Run classification
+      const predictions = await model.classify(imageTensor);
+      console.log('Predictions:', predictions);
+  
+      return predictions;
+    } catch (error) {
+      console.error('Error during classification:', error);
+      return [];
+    }
+  };
+
+
+/**
  * Take the user's image (from image series/video or webcam footage) and crop it to the bounding box
  * of the prediction with some padding around it. The output will be used to retrain the model.
  * @param inputBuffer - Image buffer - needed to crop the image
