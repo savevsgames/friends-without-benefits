@@ -5,13 +5,21 @@ const typeDefs = `
     email: String!
     password: String!
     friends: [User]
+    avatar: String!
     shortestRound: Game
+  }
+
+  type Player {
+    user: User!
+    score: Int!
+    isReady: Boolean!
+    isHost: Boolean
   }
   
   type Game {
     _id: ID!
     author: User!
-    challengers: [User]
+    challengers: [Player]
     duration: Float
     isComplete: Boolean!
     itemsFound: Int
@@ -60,6 +68,6 @@ const typeDefs = `
     userID: ID!
     friendID: ID!
   }
-`
+`;
 
-export default typeDefs
+export default typeDefs;

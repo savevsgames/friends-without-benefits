@@ -7,13 +7,21 @@ import io from "socket.io-client";
 // Dynamically infer the socket type from the io() function
 type SocketIOClient = ReturnType<typeof io>;
 
+interface Player {
+  id: string; // PK from the database
+  username: string; // Player username displayed in the game
+  score: number; // Player's current game score
+  avatar?: string; // Player avatar image URL
+  isReady: boolean; // Player is ready to start the game (multiplayer checking function)
+}
+
 interface IGameState {
   gameState: string; // "setup", "playing", "gameover"
-  canvasReady: boolean;
-  videoPlaying: boolean;
+  canvasReady: boolean; // Flag to indicate if the canvas is ready for drawing
+  videoPlaying: boolean; // Flag to indicate if the video is playing
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
   currentMediaType: "image" | "video" | "webcam" | null;
-  players: string[]; // Stores our user_id strings for player(s)
+  players: Record<string, Player>; // Stores our user_id strings for player(s) along with their metadata
   // State Setters
   setGameState: (newState: string) => void;
   setCanvasReady: (ready: boolean) => void;
@@ -110,18 +118,12 @@ export const useUserSession = create(
 );
 
 // MULTI-PLAYER STORE
-interface PlayerData {
-  username: string;
-  score: number;
-  avatar?: string;
-  isReady: boolean;
-}
 
 interface IMultiplayerState {
   playerId: string | null; // Unique player identifier (from PeerJS)
   peer: Peer | null; // PeerJS instance for WebRTC connections
   socket: SocketIOClient | null; // Socket.IO connection
-  players: Record<string, PlayerData>; // Player connections and metadata
+  players: Record<string, Player>; // Player connections and metadata
   roomId: string | null; // Current multiplayer room ID
   isConnected: boolean; // Connection state
   isHost: boolean; // Is this client the host?
