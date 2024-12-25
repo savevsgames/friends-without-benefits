@@ -7,8 +7,8 @@ import io from "socket.io-client";
 // Dynamically infer the socket type from the io() function
 type SocketIOClient = ReturnType<typeof io>;
 
+// Player extends User type with additional game-related properties
 interface Player {
-  id: string; // PK from the database
   username: string; // Player username displayed in the game
   score: number; // Player's current game score
   avatar?: string; // Player avatar image URL
@@ -28,7 +28,7 @@ interface IGameState {
   setVideoPlaying: (playing: boolean) => void;
   setCurrentMediaRef: (ref: string | null) => void;
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
-  addPlayer: (player: string) => void;
+  addPlayer: (id: string, player: Player) => void;
 }
 
 // Using set() to update the store state for key-value pairs
@@ -38,14 +38,23 @@ export const useGameStore = create<IGameState>((set) => ({
   videoPlaying: false,
   currentMediaRef: null,
   currentMediaType: null,
-  players: [],
+  players: {},
   setGameState: (newState) => set({ gameState: newState }),
   setCanvasReady: (ready) => set({ canvasReady: ready }),
   setVideoPlaying: (playing) => set({ videoPlaying: playing }),
   setCurrentMediaRef: (ref) => set({ currentMediaRef: ref }),
   setCurrentMediaType: (type) => set({ currentMediaType: type }),
-  addPlayer: (player) =>
-    set((state) => ({ players: [...state.players, player] })),
+  addPlayer: (id, player) =>
+    set((state) => ({
+      players: { ...state.players, [id]: player },
+    })),
+
+  removePlayer: (id: string) =>
+    set((state) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _data, ...rest } = state.players;
+      return { players: { ...rest } };
+    }),
 }));
 
 // define AuthStore interface to describe the shape of the store from state and actions
@@ -118,7 +127,6 @@ export const useUserSession = create(
 );
 
 // MULTI-PLAYER STORE
-
 interface IMultiplayerState {
   playerId: string | null; // Unique player identifier (from PeerJS)
   peer: Peer | null; // PeerJS instance for WebRTC connections
@@ -132,7 +140,7 @@ interface IMultiplayerState {
   setPlayerId: (id: string) => void;
   setPeer: (peer: Peer) => void;
   setSocket: (socket: SocketIOClient) => void;
-  addPlayer: (id: string, data: PlayerData) => void;
+  addPlayer: (id: string, data: Player) => void;
   removePlayer: (id: string) => void;
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
