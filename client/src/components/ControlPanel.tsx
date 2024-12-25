@@ -13,23 +13,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = (props) => {
 
       {/* Buttons Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {[
-          "Play",
-          "Pause",
-          "Cam",
-          "Quit",
-          "Load Image",
-          "Load Video",
-          "Detect",
-        ].map((label, i) => (
-          <Button
-            key={i}
-            className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition text-sm sm:text-base md:text-lg w-full"
-            size="md"
-          >
-            {label}
-          </Button>
-        ))}
+
       </div>
     </div>
   );

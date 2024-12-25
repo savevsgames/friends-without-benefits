@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import Header from "@/components/Header.tsx";
 import { ControlPanel } from "../components/ControlPanel.tsx";
@@ -11,6 +12,7 @@ import LoadVideoButton from "@/components/buttons/LoadVideoButton.tsx";
 import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
 import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
 import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
+import { Provider } from "@/components/ui/provider.tsx";
 
 function Game() {
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
@@ -36,7 +38,9 @@ function Game() {
 
   return (
     <>
-      <Header />
+      <Provider>
+        <Header />
+      </Provider>
       <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-1 h-screen overflow-auto bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100">
         <div className="col-span-1 md:col-span-1 grid grid-rows-4 gap-1 p-1">
           {/* Control Panel */}
@@ -49,7 +53,9 @@ function Game() {
               <LoadWebcamButton />
               <RunDetectionButton />
             </div>
-            <ControlPanel />
+            <Provider>
+              <ControlPanel />
+            </Provider>
           </div>
           {/* Dashboard Section */}
           <div className="row-span-3 bg-slate-200 p-4 border border-teal-900 rounded">
