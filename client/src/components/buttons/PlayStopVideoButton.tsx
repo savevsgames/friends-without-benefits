@@ -24,7 +24,7 @@ const PlayStopVideoButton = () => {
   const handleButtonClick = () => {
     try {
       const videoElement = document.getElementById(
-        "video-element"
+        "video-output"
       ) as HTMLVideoElement;
       if (!videoElement) {
         throw new Error("Video element not found.");
