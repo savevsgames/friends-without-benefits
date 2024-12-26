@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Text } from "@chakra-ui/react";
 import { Avatar } from "./ui/avatar";
 
@@ -28,7 +28,7 @@ function classNames(...classes: string[]) {
 }
 
 export default function Header() {
-  const location = useLocation();
+  const navigate = useNavigate();
   console.log("current path:", location.pathname);
 
   // header begins
@@ -80,7 +80,7 @@ export default function Header() {
                     key={item.name}
                     to={item.page}
                     className={classNames(
-                      location.pathname === item.page
+                      navigate(item.page)
                         ? "bg-teal-900 text-white" // this is to highlight active
                         : "text-gray-300 hover:outline-offset-0 hover:text-white",
                       "rounded-md px-3 py-2 text-sm font-medium"
@@ -116,7 +116,7 @@ export default function Header() {
                     <Link
                       to={item.page}
                       className={`block px-4 py-2 text-sm ${
-                        location.pathname === item.page
+                        navigate(item.page)
                           ? "bg-gray-100 text-blue-600" // Highlight active page
                           : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                       }`}
