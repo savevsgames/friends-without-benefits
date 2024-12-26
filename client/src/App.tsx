@@ -1,22 +1,24 @@
 import { Outlet } from "react-router-dom";
 import "./index.css";
-
 import {
-  ApolloProvider, 
+  ApolloProvider,
   ApolloClient,
   InMemoryCache,
   createHttpLink,
 } from "@apollo/client";
-import {setContext} from "@apollo/client/Link/context";
+import { setContext } from "@apollo/client/Link/context";
 
-const httpLink = createHttpLink({uri: '/graphql'})
+import { useEffect } from "react";
+import { useThemeStore } from "./store";
+
+const httpLink = createHttpLink({ uri: "/graphql" });
 
 const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem("id_token")
+  const token = localStorage.getItem("id_token");
   return {
     ...headers,
-    Authorization: token ? `bEARER ${token}` : ""
-  }
+    Authorization: token ? `Bearer ${token}` : "",
+  };
 });
 
 const client = new ApolloClient({
@@ -24,8 +26,18 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-
 function App() {
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    // Update the data-theme attribute on the <html> element when theme changes
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
   return (
     <ApolloProvider client={client}>
       <>
@@ -36,21 +48,5 @@ function App() {
     </ApolloProvider>
   );
 }
-
-// function App() {
-//   return (
-//     <Routes>
-//       <Route path="/" element={<Landing />} />
-//       <Route path="/login" element={<Login />} />
-//       <Route element={<Layout />}>
-//         <Route path="/profile" element={<Profile />} />
-//         <Route path="/login" element={<Login />} />
-//         <Route path="/leaderboard" element={<LeaderBoard />} />
-//         <Route path="/game" element={<Game />} />
-//         <Route path="*" element={<Error />} />
-//       </Route>
-//     </Routes>
-//   );
-// }
 
 export default App;

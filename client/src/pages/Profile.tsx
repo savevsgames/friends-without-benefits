@@ -1,21 +1,39 @@
 import Header from "../components/Header.tsx";
-import {  useState } from "react";
+import { useState } from "react";
 
 // import queries here once done
-// import { QUERY_ME } from "@/utils/queries.ts";
-// import { useUserSession } from "@/store.ts";
+import { QUERY_ME } from "@/utils/queries.ts";
+import { useAuthStore, useUserSession } from "@/store.ts";
+import { useQuery } from "@apollo/client";
 
 function Profile() {
-
   // set a default profile picture placeholder until changed by the user
   const [picture, setPicture] = useState<string>(
     "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
   );
+  const loggedIn = useAuthStore((state) => state.isLoggedIn);
+  const userId = useUserSession((state) => state.user?.id);
 
-  // get the user data from the store
-  // const userId = useUserSession(state => (state.user))
+  const { loading, data } = useQuery(QUERY_ME, {
+    variables: {
+      userId: userId,
+    },
+  });
 
+  if (!loggedIn) {
+    return (
+      <div>LOG IN FIIIIRST // can be changed to reroute to error page</div>
+    );
+  }
 
+  if (loading) {
+    return <div>LOADING USER PROFILE</div>;
+  }
+
+  const user = data?.me || null;
+
+  // TODO: this will have to change to update the user's avatar, and the save the avatar to the backend
+  // I think I need a mutation to be able to do a post request to the db
   const handleChange = (event: React.ChangeEvent) => {
     const target = event.target as HTMLInputElement;
     const newFile: File | undefined = (target.files as FileList)[0]; // get the selected file
@@ -24,7 +42,7 @@ function Profile() {
       console.log(stringFile);
       setPicture(stringFile);
     }
-      console.log("failed uploading profile image");
+    console.log("failed uploading profile image");
   };
 
   return (
@@ -61,17 +79,14 @@ function Profile() {
           <div className="md:w-3/5 flex flex-col justify-center p-6">
             <ul className="text-gray-700 text-sm space-y-2">
               {[
-                { label: "Username:", value: "Player Username" },
-                { label: "Email:", value: "Player Email" },
-                { label: "Started On:", value: "Started On" },
-                { label: "Player ID:", value: "Player ID" },
-                { label: "Shortest Round:", value: "Shortest Round" },
+                { label: "Username:", value: user?.username },
+                { label: "Email:", value: user?.email },
+                { label: "Started On:", value: user?.createdAt },
+                { label: "Player ID:", value: user?.id },
+                { label: "Shortest Round:", value: user?.shortestRound },
                 { label: "Rounds Played:", value: "Rounds Played" },
               ].map((item, index) => (
-                <li
-                  key={index}
-                  className="grid grid-cols-3 gap-x-2 text-left"
-                >
+                <li key={index} className="grid grid-cols-3 gap-x-2 text-left">
                   <span className="font-medium tracking-widest">
                     {item.label}
                   </span>

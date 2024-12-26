@@ -2,22 +2,24 @@ import { loadImageToCanvas } from "@/utils/model-utils";
 import { useRef } from "react";
 import { useGameStore } from "@/store";
 
+
 const LoadImageButton = () => {
   // Button Styling - TEMPORARY STYLING BEGINS
-  const testButtons = {
-    padding: "0.25em 0.5em",
-    margin: "0.25em",
-    border: "3px solid #333",
-    boxShadow: "0 0 0.5em #333",
-    borderRadius: "0.25em",
-    backgroundColor: "#10343D",
-    color: "#f8f8f8",
-    textDecoration: "none",
-    fontWeight: "bold",
-    cursor: "pointer",
-    width: "100%",
-    height: "100%",
-  };
+  // const testButtons = {
+  //   padding: "0.25em 0.5em",
+  //   margin: "0.25em",
+  //   border: "3px solid #333",
+  //   boxShadow: "0 0 0.5em #333",
+  //   borderRadius: "0.25em",
+  //   backgroundColor: "#10343D",
+  //   color: "#f8f8f8",
+  //   textDecoration: "none",
+  //   fontWeight: "bold",
+  //   cursor: "pointer",
+  //   width: "100%",
+  //   height: "100%",
+  // };
+
   // END OF TEMPORARY STYLING
 
   const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
@@ -80,7 +82,8 @@ const LoadImageButton = () => {
     <div className="btn btn-primary">
       {/* disabled when canvas is not ready=true */}
       <button
-        style={testButtons}
+        className="bg-teal-50 dark:bg-teal-800 text-teal-900 dark:text-gray-200 font-bold tracking-wide rounded-lg shadow-lg px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base 
+hover:bg-teal-100 dark:hover:bg-teal-700 transition focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 w-full"
         type="button"
         id="load-image"
         name="load-image"
