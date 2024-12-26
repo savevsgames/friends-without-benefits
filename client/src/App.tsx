@@ -9,6 +9,7 @@ import {
 import { setContext } from "@apollo/client/Link/context";
 
 import { useEffect } from "react";
+import { useThemeStore } from "./store";
 
 const httpLink = createHttpLink({ uri: "/graphql" });
 
@@ -26,16 +27,16 @@ const client = new ApolloClient({
 });
 
 function App() {
-  console.log("APP RENDERINGGGGGG");
+  const theme = useThemeStore((state) => state.theme);
 
-  // useEffect(() => {
-  //   // Update the data-theme attribute on the <html> element when theme changes
-  //   if (theme === "dark") {
-  //     document.documentElement.classList.add("dark");
-  //   } else {
-  //     document.documentElement.classList.remove("dark");
-  //   }
-  // }, [theme]);
+  useEffect(() => {
+    // Update the data-theme attribute on the <html> element when theme changes
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   return (
     <ApolloProvider client={client}>

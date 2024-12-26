@@ -4,9 +4,9 @@ export const Dashboard = () => {
   const items = ["Item1", "Item2", "Item3", "Item4", "Item5"];
 
   return (
-    <div className="max-w-screen-lg mx-auto bg-gray-100 shadow-lg rounded-lg p-4 text-teal-950 tracking-widest font-bold max-h-full overflow-auto">
+    <div className="max-w-screen-lg mx-auto bg-gray-100 dark:bg-teal-950 shadow-lg rounded-lg p-2 text-teal-950 tracking-widest font-bold max-h-full overflow-auto">
       {/* Header */}
-      <h1 className="text-center text-xl sm:text-l mb-4">Game Dashboard</h1>
+      <h1 className="text-center text-xl sm:text-l mb-2 dark:text-white">Game Dashboard</h1>
 
       <div className="space-y-4 sm:space-y-6">
         {/* Timer Section */}
