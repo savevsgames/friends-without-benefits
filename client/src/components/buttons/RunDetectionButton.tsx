@@ -32,7 +32,8 @@ const RunDetectionButton = () => {
       disabled={!canvasReady}
       name="detect"
       id="detect"
-      className="bg-white text-teal-950 font-bold tracking-wider rounded-md shadow-md px-2 py-1 sm:px-3 sm:py-2 text-sm md:text-xs sm:text-xs  hover:bg-teal-100 transition focus:outline-none focus:ring-2 focus:ring-teal-500 w-full"
+      className="bg-teal-50 dark:bg-teal-800 text-teal-900 dark:text-gray-200 font-bold tracking-wide rounded-lg shadow-lg px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base 
+hover:bg-teal-100 dark:hover:bg-teal-700 transition focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 w-full"
     >
       🎭START GAME!🎭
     </button>

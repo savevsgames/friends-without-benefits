@@ -38,20 +38,21 @@ function Game() {
   return (
     <>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-1 h-screen overflow-auto bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100 dark:bg-gradient-to-r dark:from-neutral-950 dark:via-teal-950 dark:to-neutral-900">
+      <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-1 h-screen overflow-auto bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100 dark:bg-gradient-to-r dark:from-neutral-950 dark:via-teal-900 dark:to-neutral-950">
         {/* Control Panel and Dashboard */}
-        <div className="col-span-1 md:col-span-1 grid grid-rows-4 gap-1 p-1">
+        <div className="col-span-1 md:col-span-1 grid grid-rows-4 gap-2 p-2">
           {/* Control Panel */}
-          <div className="row-span-1 bg-slate-100 dark:bg-teal-950 border border-teal-900 dark:border-teal-900 rounded-lg mb-1">
+          <div className="row-span-1 bg-slate-50 dark:bg-teal-900 border border-teal-800 dark:border-teal-800 shadow-md rounded-lg">
             <ControlPanel />
           </div>
           {/* Dashboard */}
-          <div className="row-span-3 bg-slate-200 dark:bg-teal-950 border border-teal-900 dark:border-teal-900 rounded">
+          <div className="row-span-3 bg-slate-100 dark:bg-teal-800 border border-teal-700 dark:border-teal-700 shadow-sm rounded-lg">
             <Dashboard />
           </div>
         </div>
+
         {/* Canvas Section */}
-        <div className="col-span-1 md:col-span-2 m-1 bg-slate-50 dark:bg-teal-950 border border-teal-900 dark:border-teal-900 rounded">
+        <div className="col-span-1 md:col-span-2 m-2 bg-slate-200 dark:bg-teal-900 border border-teal-800 dark:border-teal-800 shadow-md rounded-lg">
           <Canvas />
         </div>
       </div>

@@ -4,41 +4,43 @@ export const Dashboard = () => {
   const items = ["Item1", "Item2", "Item3", "Item4", "Item5"];
 
   return (
-    <div className="max-w-screen-lg mx-auto bg-gray-100 dark:bg-teal-950 shadow-lg rounded-lg p-2 text-teal-950 tracking-widest font-bold max-h-full overflow-auto">
+    <div className="max-w-screen-lg mx-auto bg-slate-50 dark:bg-teal-900 shadow-md rounded-lg p-4 text-teal-900 dark:text-gray-200  font-semibold max-h-full overflow-auto">
       {/* Header */}
-      <h1 className="text-center text-xl sm:text-l mb-2 dark:text-white">Game Dashboard</h1>
+      <h1 className="text-center text-xl sm:text-l mb-4 tracking-widest font-bold text-teal-800 dark:text-white">
+        Game Dashboard
+      </h1>
 
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-6">
         {/* Timer Section */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl sm:text-l md:text-lg text-gray-900 pb-1 font-bold">
+        <div className="bg-teal-50 dark:bg-teal-800 rounded-lg shadow-md p-4 border border-teal-300 dark:border-teal-700">
+          <h2 className="text-l sm:text-l md:text-2xl text-teal-900 dark:text-gray-200 font-bold pb-2">
             Game Timer
           </h2>
-          <div className="text-sm sm:text-base md:text-lg text-teal-800 font-semibold">
+          <div className="text-sm sm:text-base md:text-lg text-teal-800 dark:text-gray-300 font-semibold">
             <Countdown date={Date.now() + 10000} />
           </div>
         </div>
 
         {/* Items Found Section */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl sm:text-l md:text-lg text-gray-900 pb-1 font-bold">
+        <div className="bg-teal-50 dark:bg-teal-800 rounded-lg shadow-md p-4 border border-teal-300 dark:border-teal-700">
+          <h2 className="text-lg sm:text-xl md:text-2xl text-teal-900 dark:text-gray-200 font-bold pb-2">
             Items Found
           </h2>
-          <div className="text-xl sm:text-l md:text-lg text-teal-800 font-semibold">
+          <div className="text-sm sm:text-base md:text-lg text-teal-800 dark:text-gray-300 font-semibold">
             0/5
           </div>
         </div>
 
         {/* Items To Find Section */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl sm:text-l md:text-lg text-gray-900 pb-1 font-bold">
+        <div className="bg-teal-50 dark:bg-teal-800 rounded-lg shadow-md p-4 border border-teal-300 dark:border-teal-700">
+          <h2 className="text-lg sm:text-xl md:text-2xl text-teal-900 dark:text-gray-200 font-bold pb-2">
             Items To Find
           </h2>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-3 space-y-3">
             {items.map((item, i) => (
               <li
                 key={i}
-                className="bg-teal-100 hover:bg-teal-200 transition rounded-md px-3 py-2 text-xs sm:text-sm md:text-base"
+                className="bg-teal-100 hover:bg-teal-200 dark:bg-teal-700 dark:hover:bg-teal-600 transition rounded-md px-4 py-2 text-sm sm:text-base md:text-lg text-teal-900 dark:text-gray-200"
               >
                 {item}
               </li>
