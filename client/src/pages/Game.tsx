@@ -53,9 +53,7 @@ function Game() {
               <LoadWebcamButton />
               <RunDetectionButton />
             </div>
-            <Provider>
               <ControlPanel />
-            </Provider>
           </div>
           {/* Dashboard Section */}
           <div className="row-span-3 bg-slate-200 p-4 border border-teal-900 rounded">
