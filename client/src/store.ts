@@ -132,6 +132,7 @@ export const useThemeStore = create(
       toggleTheme: () => {
         set((state) => ({
           theme: state.theme === "light" ? "dark" : "light",
+          
         }));
       },
     }),

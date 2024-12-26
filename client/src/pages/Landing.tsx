@@ -1,7 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useThemeStore } from "@/store";
-import { IoMoon } from "react-icons/io5";
-import { IoSunny } from "react-icons/io5";
 
 function Landing() {
   const navigate = useNavigate();
@@ -14,30 +11,13 @@ function Landing() {
     navigate("/game");
   };
 
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
-  const theme = useThemeStore((state) => state.theme);
-
-  console.log(theme);
-
-  const icon = (theme: string) => {
-    if (theme === "light") {
-      return <IoSunny style={{ color: "teal" }} />;
-    } else {
-      return <IoMoon style={{ color: "red" }} />;
-    }
-  };
-
   return (
-    <main data-mode={theme}>
+    <main>
       <div className="bg-slate-50 dark:bg-neutral-950 h-screen flex overflow-hidden">
         {/* Left Section for Text Content */}
         <div className="w-2/5 flex flex-col justify-center items-start px-12">
           <div className="absolute top-4 left-4 z-10">
-            <button
-              onClick={() => toggleTheme()}
-              className="font-bold tracking-widest px-7 flex flex-row items-center"
-            >
-              {icon(theme)}
+            <button className="font-bold tracking-widest px-7 flex flex-row items-center">
               <span className="text-teal-950 dark:text-slate-50 text-2xl ml-2">
                 F
               </span>
