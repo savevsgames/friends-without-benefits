@@ -1,5 +1,5 @@
 import { useGameStore } from "@/store";
-import { pauseMedia, stopMedia } from "@/utils/utils";
+import { pauseMedia, stopMedia } from "@/utils/model-utils";
 
 const PauseVideoButton = () => {
   // Button Styling - TEMPORARY STYLING BEGINS

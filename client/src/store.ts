@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware"; // this is a zustand middleware to persist login throughout the app
 import AuthService from "./utils/auth.ts";
+import Peer from "peerjs";
+import { Socket as SocketIOClient } from "socket.io-client";
+import io from "socket.io-client";
+// Dynamically infer the socket type from the io() function
+type SocketIOClient = ReturnType<typeof io>;
 
 interface IGameState {
   gameState: string; // "setup", "playing", "gameover"
@@ -133,3 +138,62 @@ export const useThemeStore = create(
     { name: "theme" }
   )
 );
+
+// MULTI-PLAYER STORE
+interface PlayerData {
+  username: string;
+  score: number;
+  avatar?: string;
+  isReady: boolean;
+}
+
+interface IMultiplayerState {
+  playerId: string | null; // Unique player identifier (from PeerJS)
+  peer: Peer | null; // PeerJS instance for WebRTC connections
+  socket: SocketIOClient | null; // Socket.IO connection
+  players: Record<string, PlayerData>; // Player connections and metadata
+  roomId: string | null; // Current multiplayer room ID
+  isConnected: boolean; // Connection state
+  isHost: boolean; // Is this client the host?
+  gameStartTime: number | null; // Track when the game starts
+  inviteLink: string | null; // Generated invite link for a challenger
+  setPlayerId: (id: string) => void;
+  setPeer: (peer: Peer) => void;
+  setSocket: (socket: SocketIOClient) => void;
+  addPlayer: (id: string, data: PlayerData) => void;
+  removePlayer: (id: string) => void;
+  setRoomId: (id: string) => void;
+  setIsHost: (isHost: boolean) => void;
+  setInviteLink: (link: string) => void;
+  setGameStartTime: (time: number) => void;
+}
+
+export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
+  playerId: null,
+  peer: null,
+  socket: null,
+  players: {},
+  roomId: null,
+  isConnected: false,
+  isHost: false,
+  gameStartTime: null,
+  inviteLink: null,
+  setPlayerId: (id) => set({ playerId: id }),
+  setPeer: (peer) => set({ peer }),
+  setSocket: (socket) => set({ socket }),
+  addPlayer: (id, data) =>
+    set((state) => ({
+      players: { ...state.players, [id]: data },
+    })),
+  removePlayer: (id) =>
+    set((state) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _data, ...rest } = state.players;
+
+      return { players: { ...rest } };
+    }),
+  setRoomId: (id) => set({ roomId: id }),
+  setIsHost: (isHost) => set({ isHost }),
+  setInviteLink: (link) => set({ inviteLink: link }),
+  setGameStartTime: (time) => set({ gameStartTime: time }),
+}));
