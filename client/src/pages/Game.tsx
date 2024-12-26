@@ -6,12 +6,12 @@ import Canvas from "../components/Canvas.tsx";
 import { Dashboard } from "../components/Dashboard.tsx";
 
 import { useGameStore } from "@/store";
-import LoadImageButton from "../components/buttons/LoadImageButton.tsx";
-import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
-import LoadVideoButton from "@/components/buttons/LoadVideoButton.tsx";
-import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
-import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
-import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
+// import LoadImageButton from "../components/buttons/LoadImageButton.tsx";
+// import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
+// import LoadVideoButton from "@/components/buttons/LoadVideoButton.tsx";
+// import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
+// import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
+// import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
 import { Provider } from "@/components/ui/provider.tsx";
 
 function Game() {
@@ -46,14 +46,14 @@ function Game() {
         <div className="col-span-1 md:col-span-1 grid grid-rows-4 gap-1 p-1">
           {/* Control Panel */}
           <div className="row-span-1 bg-slate-100 p-4 border border-teal-900 rounded">
-            <div className="grid grid-cols-2 gap-2 grid-rows-3">
+            {/* <div className="grid grid-cols-2 gap-2 grid-rows-3">
               <LoadImageButton />
               <LoadVideoButton />
               <PlayStopVideoButton />
               <PauseVideoButton />
               <LoadWebcamButton />
               <RunDetectionButton />
-            </div>
+            </div> */}
               <ControlPanel />
           </div>
           {/* Dashboard Section */}
