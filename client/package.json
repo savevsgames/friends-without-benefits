@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "install": "npm run install",
+    "watch": "tsc -w",
+    "dev": "concurrently \"tsc -w\" \"vite\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

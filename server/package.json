@@ -8,8 +8,8 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "start": "node dist/server.js",
+    "dev": "concurrently \"tsc -w\" \"nodemon dist/server.js\"",
     "seed": "node dist/seeds/seed.js",
-    "watch": "nodemon dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -9,8 +9,8 @@ const MultiplayerConnectionManager: React.FC = () => {
     setPeer,
     setSocket,
     setPlayerId,
-    addPlayer,
-    removePlayer,
+    // addPlayer,
+    // removePlayer,
     setRoomId,
     isHost,
     setIsHost,
@@ -23,8 +23,30 @@ const MultiplayerConnectionManager: React.FC = () => {
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
   useEffect(() => {
-    // Initialize socket.io connection
     const socket = io("http://localhost:3001");
+
+    socket.on("connect", () => {
+      console.log("✅ Socket.IO Connected:", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("❌ Socket.IO Disconnected");
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("❗ Socket.IO Connection Error:", err);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Initialize socket.io connection
+    const socket = io("http://localhost:3001", {
+      transports: ["websocket", "polling"],
+    });
     setSocket(socket); // Save socket instance to store
 
     socket.on("connect", () => {
@@ -111,7 +133,12 @@ const MultiplayerConnectionManager: React.FC = () => {
         <p>Room ID: {roomId}</p>
       ) : (
         <div>
-          <p>input for room joining</p>
+          <input
+            type="text"
+            placeholder="Enter Room ID"
+            value={inputRoomId}
+            onChange={(e) => setInputRoomId(e.target.value)}
+          />
           <button onClick={handleJoinRoom}>Join Room</button>
         </div>
       )}

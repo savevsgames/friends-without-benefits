@@ -11,6 +11,7 @@ import LoadVideoButton from "@/components/buttons/LoadVideoButton.tsx";
 import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
 import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
 import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
+import MultiplayerConnectionManager from "@/components/MultiplayerConnectionManager.tsx";
 
 function Game() {
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
@@ -49,6 +50,9 @@ function Game() {
               <PauseVideoButton />
               <LoadWebcamButton />
               <RunDetectionButton />
+            </div>
+            <div>
+              <MultiplayerConnectionManager />
             </div>
             <ControlPanel />
           </div>
