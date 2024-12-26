@@ -6,68 +6,76 @@ import io from "socket.io-client";
 const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
   const {
-    setPeer,
     setSocket,
+    setPeer,
     setPlayerId,
-    // addPlayer,
-    // removePlayer,
-    setRoomId,
     isHost,
     setIsHost,
     roomId,
+    setRoomId,
   } = useMultiplayerStore();
 
-  const [localPeerId, setLocalPeerId] = useState<string | null>(null);
+  // Local States
+  // eslint-disable-next-line
+  const [socket, setLocalSocket] = useState<any | null>(null);
+  const [peer, setLocalPeer] = useState<Peer | null>(null);
   const [connectionStatus, setConnectionStatus] =
     useState<string>("Disconnected");
+  const [localPeerId, setLocalPeerId] = useState<string | null>(null);
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
   useEffect(() => {
-    const socket = io("http://localhost:3001");
+    // Initialize socket.io connection with POLLING first to avoid CORS and blocking issues and provide more compatibility and fallback
+    const socketIo = io("http://localhost:3001", {
+      path: "/socket.io",
+      transports: ["polling", "websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
 
-    socket.on("connect", () => {
+    socketIo.on("connect", () => {
       console.log("✅ Socket.IO Connected:", socket.id);
     });
 
-    socket.on("disconnect", () => {
+    socketIo.on("disconnect", () => {
       console.log("❌ Socket.IO Disconnected");
     });
 
-    socket.on("connect_error", (err) => {
-      console.error("❗ Socket.IO Connection Error:", err);
+    socketIo.on("connect_error", (error: Error) => {
+      console.error("❗ Socket.IO Connection Error:", error);
     });
+
+    // Save socket instance to store when the socket responds to one of the events
+    setLocalSocket(socketIo);
+    setSocket(socketIo);
 
     return () => {
-      socket.disconnect();
+      // Cleanup function to drop socket.io connection
+      socketIo.disconnect();
     };
-  }, []);
+  }, [setSocket]);
 
-  useEffect(() => {
-    // Initialize socket.io connection
-    const socket = io("http://localhost:3001", {
-      transports: ["websocket", "polling"],
-    });
-    setSocket(socket); // Save socket instance to store
+  // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
+  // USING BUTTON CLICK TO TRIGGER CONNECTION
+  // Currently initializes without a peer ID, will be assigned one after connection (undefined)
 
-    socket.on("connect", () => {
-      console.log("Connected to socket.io server!");
-    });
+  const handlePeerJSInitialization = () => {
+    if (peer) {
+      console.error("PeerJS connection already established.");
+      return;
+    }
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from socket.io server!");
-      setConnectionStatus("Disconnected");
-    });
+    console.log("Initializing PeerJS connection...");
 
-    // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
-    // Currently initializes without a peer ID, will be assigned one after connection (undefined)
-    const peer = new Peer({
+    const peerJs = new Peer({
       host: "localhost",
       port: 3001,
       path: "/peerjs",
     });
 
     // When peer is initialized, update the store with the peerId and player ID and set connection status
-    peer.on("open", (id) => {
+    peerJs.on("open", (id) => {
       console.log("PeerJS connection established with ID:", id);
       setLocalPeerId(id);
       setPlayerId(id);
@@ -75,7 +83,7 @@ const MultiplayerConnectionManager: React.FC = () => {
     });
 
     // Log data when a peer connection is established
-    peer.on("connection", (conn) => {
+    peerJs.on("connection", (conn) => {
       console.log("Peer connection is incoming: ", conn.peer);
       conn.on("data", (data) => {
         console.log("Received data from peer: ", data);
@@ -83,24 +91,35 @@ const MultiplayerConnectionManager: React.FC = () => {
     });
 
     // Log when a peer connection is closed
-    peer.on("close", () => {
+    peerJs.on("close", () => {
       console.log("Peer connection is closed.");
-      setConnectionStatus("Disconnected");
+      // setConnectionStatus("Disconnected");
     });
 
-    setPeer(peer); // Save peer instance to store
+    setLocalPeer(peerJs); // Save peer instance to store
+    setPeer(peerJs); // Save peer instance to store
+  };
 
-    return () => {
-      // Cleanup function
-      peer.destroy();
+  // Cleanup
+  const cleanupConnections = () => {
+    if (socket) {
       socket.disconnect();
-    };
-  }, [setPeer, setSocket, setPlayerId]);
+      console.log("🧹 Disconnected Socket.IO...");
+    }
+    if (peer) {
+      peer.destroy();
+      console.log("🧹 Destroyed PeerJS...");
+    }
+  };
 
   const handleCreateRoom = () => {
-    setRoomId(localPeerId || ""); // Use local peer ID as room ID
+    if (!peer) {
+      console.error("PeerJS connection not established.");
+      return;
+    }
+    setRoomId(peer.id || ""); // Use local peer ID as room ID
     setIsHost(true); // Set this client as the host
-    console.log("Room created with ID:", localPeerId);
+    console.log("Room created with ID:", peer.id);
   };
 
   const handleJoinRoom = () => {
@@ -129,6 +148,19 @@ const MultiplayerConnectionManager: React.FC = () => {
       <h3>🔗 MultiplayerConnectionManager 🔗</h3>
       <p>Connection Status: {connectionStatus}</p>
       <p>Local Peer ID: {localPeerId}</p>
+      <div>
+        <button className="border btn" onClick={handlePeerJSInitialization}>
+          Initialize PeerJS
+        </button>
+
+        <button
+          className="border btn"
+          onClick={cleanupConnections}
+          style={{ marginLeft: "10px" }}
+        >
+          Cleanup Both
+        </button>
+      </div>
       {isHost ? (
         <p>Room ID: {roomId}</p>
       ) : (
