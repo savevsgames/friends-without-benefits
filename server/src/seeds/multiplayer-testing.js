@@ -8,9 +8,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Add your MongoDB URI for testing to env with console or .env file
-const MONGODB_URI_MPTESTING = process.env.MONGODB_URI_MPTESTING;
+// The collection name is /FWOBTesting
+// COMMAND: node --env-file=../../.env multiplayer-testing.js to run without starting application
 
 const db = async () => {
+  const MONGODB_URI_MPTESTING = process.env.MONGODB_URI_MPTESTING;
   if (!MONGODB_URI_MPTESTING) {
     throw new Error("Missing MongoDB URI environment variable!");
   }
@@ -69,7 +71,7 @@ const seed = async () => {
     // Create a Game referencing userA as author, and push player ids to challengers []
     const testGame = await Game.create({
       author: userA._id,
-      challengers: [playerA._id, playerB._id], // CHANGED: store Player _ids
+      challengers: [playerA._id, playerB._id],
       duration: 0,
       isComplete: false,
       itemsFound: 0,
