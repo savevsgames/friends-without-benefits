@@ -15,7 +15,7 @@ interface IGame extends Document {
   itemsFound: number;
   items: string[];
   createdAt: Date;
-  winner: Schema.Types.ObjectId;
+  winner?: Schema.Types.ObjectId;
 }
 
 const ChallengerSchema = new Schema<IChallenger>({
@@ -66,7 +66,7 @@ const GameSchema = new Schema<IGame>({
   winner: {
     type: Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false,
   },
   createdAt: {
     type: Date,

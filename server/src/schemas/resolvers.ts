@@ -6,14 +6,6 @@ import {
 
 import bcrypt from "bcrypt";
 
-// Define the shape of the Player object passed as 'parent' in the Player resolver
-type IPlayerParent = {
-  user: string; // MongoDB ObjectId stored as a string
-  score: number;
-  isReady: boolean;
-  isHost?: boolean;
-};
-
 const resolvers = {
   Query: {
     // querying all users
@@ -65,38 +57,21 @@ const resolvers = {
     // Querying all games
     games: async () => {
       try {
-        const games = await Game.find({}).populate("author").populate("winner");
+        const games = await Game.find({})
+          .populate("author")
+          .populate("winner")
+          .populate("challengers.user");
 
-        // Populate the user data for each challenger
-        for (let game of games) {
-          await Promise.all(
-            game.challengers.map(async (challenger) => {
-              const userData = await User.findById(challenger.userId);
-              challenger.user = userData; // This line seems wrong - i want to populate the challenger with the userId on creation, score - 0, isReady - false, isHost - false
-            })
-          );
-        }
         return games;
       } catch (error) {
         throw GQLQueryError("games", error);
       }
     },
-
     players: async () => {
       try {
         return await Player.find({}).populate("user");
       } catch (error) {
         throw GQLQueryError("players", error);
-      }
-    },
-  },
-
-  Player: {
-    user: async (parent: IPlayerParent) => {
-      try {
-        return await User.findById(parent.user);
-      } catch (error) {
-        throw GQLQueryError("Player.user", error);
       }
     },
   },
@@ -180,13 +155,13 @@ const resolvers = {
         const challengers = [];
         if (challengerIds && challengerIds.length > 0) {
           for (const userId of challengerIds) {
-            const user = await User.findById(userId);
-            if (!user) {
+            const userDocument = await User.findById(userId);
+            if (!userDocument) {
               throw new Error(`User with ID: ${userId} does not exist`);
             }
 
             challengers.push({
-              userId: userId,
+              user: userId, // Stored directly on subdocument
               score: 0,
               isReady: false,
               isHost: false,
@@ -194,8 +169,8 @@ const resolvers = {
           }
         }
 
-        // Create the Game with embedded challengers
-        const game = await Game.create({
+        // Create the Game with embedded challengers using let so we can populate the user data
+        let game = await Game.create({
           author: author._id,
           challengers: challengers,
           duration: 0,
@@ -205,14 +180,9 @@ const resolvers = {
           winner: null,
         });
 
-        await game.populate("author");
-        await game.populate("winner");
-
-        // Populate user data for each challenger
-        for (let challenger of game.challengers) {
-          const userData = await User.findById(challenger.userId);
-          challenger.user = userData; // This line seems wrong - i want to populate the challenger with the userId on creation, score - 0, isReady - false, isHost - false
-        }
+        game = await game.populate("author");
+        game = await game.populate("winner");
+        game = await game.populate("challengers.user");
 
         return game;
       } catch (error) {
@@ -229,7 +199,7 @@ const resolvers = {
         challengers,
       } = input;
       try {
-        const game = await Game.findById(gameId);
+        let game = await Game.findById(gameId);
         if (!game) {
           throw new Error(`Game (id: ${gameId}) not found`);
         }
@@ -251,42 +221,14 @@ const resolvers = {
           game.winner = winnerId;
         }
 
-        await game.save();
+        game = await game.save();
         await game.populate("author");
         await game.populate("winner");
-
-        // Populate user data for each challenger
-        for (let challenger of game.challengers) {
-          const userData = await User.findById(challenger.userId);
-          //
-          challenger.user = userData;
-        }
+        await game.populate("challengers.user");
 
         return game;
       } catch (error) {
         throw GQLMutationError("updateGame", error);
-      }
-    },
-    // Not sure i need this anymore? if Players are subdocuments of Game then i should be able to create them when creating a game
-    // I will need to be able to update the challenger's score and isReady properties after the game has been created though
-    createPlayer: async (_: any, { input }: any) => {
-      const { userId, score, isReady, isHost } = input;
-      try {
-        const existingUser = await User.findById(userId);
-        if (!existingUser) {
-          throw new Error(`User (id: ${userId}) not found`);
-        }
-
-        const newPlayer = await Player.create({
-          user: userId,
-          score: score || 0,
-          isReady: isReady ?? false,
-          isHost: isHost ?? false,
-        });
-
-        return newPlayer.populate("user");
-      } catch (error) {
-        throw GQLMutationError("createPlayer", error);
       }
     },
   },
