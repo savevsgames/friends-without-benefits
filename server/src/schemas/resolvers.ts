@@ -1,4 +1,4 @@
-import { Game, User } from "../models/index.js";
+import { Game, User, Player } from "../models/index.js";
 import {
   GQLMutationError,
   GQLQueryError,
@@ -65,12 +65,28 @@ const resolvers = {
     // Querying all games
     games: async () => {
       try {
-        return await Game.find({})
-          .populate("author")
-          .populate("challengers")
-          .populate("winner");
+        const games = await Game.find({}).populate("author").populate("winner");
+
+        // Populate the user data for each challenger
+        for (let game of games) {
+          await Promise.all(
+            game.challengers.map(async (challenger) => {
+              const userData = await User.findById(challenger.userId);
+              challenger.user = userData; // This line seems wrong - i want to populate the challenger with the userId on creation, score - 0, isReady - false, isHost - false
+            })
+          );
+        }
+        return games;
       } catch (error) {
         throw GQLQueryError("games", error);
+      }
+    },
+
+    players: async () => {
+      try {
+        return await Player.find({}).populate("user");
+      } catch (error) {
+        throw GQLQueryError("players", error);
       }
     },
   },
@@ -149,6 +165,128 @@ const resolvers = {
         };
       } catch (error) {
         throw GQLMutationError("addFriend", error);
+      }
+    },
+    createGame: async (_: any, { input }: any) => {
+      const { authorId, challengerIds, items } = input;
+
+      try {
+        const author = await User.findById(authorId);
+        if (!author) {
+          throw new Error(`User with ID: ${authorId} does not exist`);
+        }
+
+        // Create challenger objects as subdocuments
+        const challengers = [];
+        if (challengerIds && challengerIds.length > 0) {
+          for (const userId of challengerIds) {
+            const user = await User.findById(userId);
+            if (!user) {
+              throw new Error(`User with ID: ${userId} does not exist`);
+            }
+
+            challengers.push({
+              userId: userId,
+              score: 0,
+              isReady: false,
+              isHost: false,
+            });
+          }
+        }
+
+        // Create the Game with embedded challengers
+        const game = await Game.create({
+          author: author._id,
+          challengers: challengers,
+          duration: 0,
+          isComplete: false,
+          itemsFound: 0,
+          items: items || [],
+          winner: null,
+        });
+
+        await game.populate("author");
+        await game.populate("winner");
+
+        // Populate user data for each challenger
+        for (let challenger of game.challengers) {
+          const userData = await User.findById(challenger.userId);
+          challenger.user = userData; // This line seems wrong - i want to populate the challenger with the userId on creation, score - 0, isReady - false, isHost - false
+        }
+
+        return game;
+      } catch (error) {
+        throw GQLMutationError("createGame", error);
+      }
+    },
+    updateGame: async (_: any, { input }: any) => {
+      const {
+        gameId,
+        isComplete,
+        duration,
+        itemsFound,
+        winnerId,
+        challengers,
+      } = input;
+      try {
+        const game = await Game.findById(gameId);
+        if (!game) {
+          throw new Error(`Game (id: ${gameId}) not found`);
+        }
+
+        if (typeof isComplete === "boolean") {
+          game.isComplete = isComplete;
+        }
+        if (typeof duration === "number") {
+          game.duration = duration;
+        }
+        if (typeof itemsFound === "number") {
+          game.itemsFound = itemsFound;
+        }
+        if (winnerId) {
+          const winner = await User.findById(winnerId);
+          if (!winner) {
+            throw new Error(`User (winnerId: ${winnerId}) not found`);
+          }
+          game.winner = winnerId;
+        }
+
+        await game.save();
+        await game.populate("author");
+        await game.populate("winner");
+
+        // Populate user data for each challenger
+        for (let challenger of game.challengers) {
+          const userData = await User.findById(challenger.userId);
+          //
+          challenger.user = userData;
+        }
+
+        return game;
+      } catch (error) {
+        throw GQLMutationError("updateGame", error);
+      }
+    },
+    // Not sure i need this anymore? if Players are subdocuments of Game then i should be able to create them when creating a game
+    // I will need to be able to update the challenger's score and isReady properties after the game has been created though
+    createPlayer: async (_: any, { input }: any) => {
+      const { userId, score, isReady, isHost } = input;
+      try {
+        const existingUser = await User.findById(userId);
+        if (!existingUser) {
+          throw new Error(`User (id: ${userId}) not found`);
+        }
+
+        const newPlayer = await Player.create({
+          user: userId,
+          score: score || 0,
+          isReady: isReady ?? false,
+          isHost: isHost ?? false,
+        });
+
+        return newPlayer.populate("user");
+      } catch (error) {
+        throw GQLMutationError("createPlayer", error);
       }
     },
   },

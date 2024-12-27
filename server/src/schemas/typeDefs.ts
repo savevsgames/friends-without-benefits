@@ -51,7 +51,6 @@ const typeDefs = `
     users: [User]
     games: [Game]
     topTen: [User]
-    players: [Player]
   }
   
   type Mutation {
