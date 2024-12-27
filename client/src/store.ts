@@ -142,6 +142,7 @@ interface IMultiplayerState {
   setSocket: (socket: SocketIOClient) => void;
   addPlayer: (id: string, data: Player) => void;
   removePlayer: (id: string) => void;
+  setIsConnected: (connected: boolean) => void;
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
   setInviteLink: (link: string) => void;
@@ -172,6 +173,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
 
       return { players: { ...rest } };
     }),
+  setIsConnected: (connected) => set({ isConnected: connected }),
   setRoomId: (id) => set({ roomId: id }),
   setIsHost: (isHost) => set({ isHost }),
   setInviteLink: (link) => set({ inviteLink: link }),

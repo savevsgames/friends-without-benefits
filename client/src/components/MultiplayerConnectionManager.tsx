@@ -13,6 +13,8 @@ const MultiplayerConnectionManager: React.FC = () => {
     setIsHost,
     roomId,
     setRoomId,
+    // isConnected,
+    setIsConnected,
   } = useMultiplayerStore();
 
   // Local States
@@ -35,7 +37,7 @@ const MultiplayerConnectionManager: React.FC = () => {
     });
 
     socketIo.on("connect", () => {
-      console.log("✅ Socket.IO Connected:", socket.id);
+      console.log("✅ Socket.IO Connected:", socketIo.id);
     });
 
     socketIo.on("disconnect", () => {
@@ -80,11 +82,13 @@ const MultiplayerConnectionManager: React.FC = () => {
       setLocalPeerId(id);
       setPlayerId(id);
       setConnectionStatus("Connected");
+      setIsConnected(true);
     });
 
     // Log data when a peer connection is established
     peerJs.on("connection", (conn) => {
       console.log("Peer connection is incoming: ", conn.peer);
+
       conn.on("data", (data) => {
         console.log("Received data from peer: ", data);
       });
@@ -93,11 +97,12 @@ const MultiplayerConnectionManager: React.FC = () => {
     // Log when a peer connection is closed
     peerJs.on("close", () => {
       console.log("Peer connection is closed.");
-      // setConnectionStatus("Disconnected");
+      setConnectionStatus("Disconnected");
+      setIsConnected(false);
     });
 
-    setLocalPeer(peerJs); // Save peer instance to store
-    setPeer(peerJs); // Save peer instance to store
+    setLocalPeer(peerJs); // Save peer instance to local store
+    setPeer(peerJs); // Save peer instance to Zustand store
   };
 
   // Cleanup
@@ -105,10 +110,11 @@ const MultiplayerConnectionManager: React.FC = () => {
     if (socket) {
       socket.disconnect();
       console.log("🧹 Disconnected Socket.IO...");
-    }
-    if (peer) {
+    } else if (peer) {
       peer.destroy();
       console.log("🧹 Destroyed PeerJS...");
+    } else {
+      console.log("🧹 No connections to cleanup...");
     }
   };
 
@@ -117,9 +123,9 @@ const MultiplayerConnectionManager: React.FC = () => {
       console.error("PeerJS connection not established.");
       return;
     }
-    setRoomId(peer.id || ""); // Use local peer ID as room ID
+    setRoomId(localPeerId || ""); // Use local peer ID as room ID
     setIsHost(true); // Set this client as the host
-    console.log("Room created with ID:", peer.id);
+    console.log("Room created with ID:", localPeerId);
   };
 
   const handleJoinRoom = () => {
@@ -153,12 +159,8 @@ const MultiplayerConnectionManager: React.FC = () => {
           Initialize PeerJS
         </button>
 
-        <button
-          className="border btn"
-          onClick={cleanupConnections}
-          style={{ marginLeft: "10px" }}
-        >
-          Cleanup Both
+        <button className="border btn" onClick={cleanupConnections}>
+          Cleanup Connections
         </button>
       </div>
       {isHost ? (
