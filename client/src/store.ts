@@ -13,6 +13,7 @@ interface Player {
   score: number; // Player's current game score
   avatar?: string; // Player avatar image URL
   isReady: boolean; // Player is ready to start the game (multiplayer checking function)
+  // Need to add more relevant props like items to find, etc.
 }
 
 interface IGameState {
@@ -21,7 +22,7 @@ interface IGameState {
   videoPlaying: boolean; // Flag to indicate if the video is playing
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
   currentMediaType: "image" | "video" | "webcam" | null;
-  players: Record<string, Player>; // Stores our user_id strings for player(s) along with their metadata
+  players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
   // State Setters
   setGameState: (newState: string) => void;
   setCanvasReady: (ready: boolean) => void;
@@ -29,6 +30,10 @@ interface IGameState {
   setCurrentMediaRef: (ref: string | null) => void;
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   addPlayer: (id: string, player: Player) => void;
+
+  // Socket IO / Zustand Actions to set opponent player state
+  outgoingUpdate: (updates: Partial<IGameState>) => void;
+  incomingUpdate: (updates: Partial<IGameState>) => void;
 }
 
 // Using set() to update the store state for key-value pairs
@@ -55,6 +60,17 @@ export const useGameStore = create<IGameState>((set) => ({
       const { [id]: _data, ...rest } = state.players;
       return { players: { ...rest } };
     }),
+  // Local update and emit via Socket.IO to challenger
+  outgoingUpdate: (updates) => {
+    set((state) => ({ ...state, ...updates }));
+    const socket = useMultiplayerStore.getState().socket;
+    socket?.emit("stateUpdate", { store: "game", updates });
+  },
+
+  // Apply updates from Socket.IO
+  incomingUpdate: (updates) => {
+    set((state) => ({ ...state, ...updates }));
+  },
 }));
 
 // define AuthStore interface to describe the shape of the store from state and actions
@@ -149,7 +165,6 @@ export const useThemeStore = create(
       toggleTheme: () => {
         set((state) => ({
           theme: state.theme === "light" ? "dark" : "light",
-          
         }));
       },
     }),
@@ -180,6 +195,9 @@ interface IMultiplayerState {
   addChatMessage: (message: { sender: string; message: string }) => void;
   setInviteLink: (link: string) => void;
   setGameStartTime: (time: number) => void;
+  // Socket IO / Zustand Actions to set state/opponent player state
+  outgoingUpdate: (updates: Partial<IMultiplayerState>) => void;
+  incomingUpdate: (updates: Partial<IMultiplayerState>) => void;
 }
 
 export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
@@ -214,4 +232,12 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
     set((state) => ({ chatMessages: [...state.chatMessages, message] })),
   setInviteLink: (link) => set({ inviteLink: link }),
   setGameStartTime: (time) => set({ gameStartTime: time }),
+  outgoingUpdate: (updates) => {
+    set((state) => ({ ...state, ...updates }));
+    const socket = useMultiplayerStore.getState().socket;
+    socket?.emit("stateUpdate", { store: "multiplayer", updates });
+  },
+  incomingUpdate: (updates) => {
+    set((state) => ({ ...state, ...updates }));
+  },
 }));

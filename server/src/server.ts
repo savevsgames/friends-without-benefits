@@ -52,6 +52,29 @@ const startApolloServer = async () => {
   io.on("connection", (socket) => {
     console.log("🔗 Socket.IO Connected:", socket.id);
 
+    /**
+     * 🔄 State Update Middleware
+     * - Listens for state updates from clients.
+     * - Broadcasts state updates to all other clients (not the sender)
+     */
+    socket.on("stateUpdate", ({ store, updates }) => {
+      // SYNCHRONIZATION MIDDLEWARE - Updates zustand "store" with incoming updates
+      console.log(`🔄 State Update (${store}):`, updates);
+      socket.broadcast.emit("stateUpdate", { store, updates });
+    });
+
+    /**
+     * 🛠️ Chat Messaging Middleware
+     * - Listens for chat messages from clients.
+     * - Broadcasts chat messages to all clients to update chat history as single source of truth.
+     */
+    socket.on("chat-message", (data) => {
+      console.log(`💬 Chat message from ${data.sender}: ${data.message}`);
+
+      // Send to everyone including the sender
+      io.emit("chat-message", data);
+    });
+
     socket.on("disconnect", () => {
       console.log("❌ Socket.IO Disconnected:", socket.id);
     });

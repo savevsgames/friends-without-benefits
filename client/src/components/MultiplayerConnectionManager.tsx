@@ -197,6 +197,39 @@ const MultiplayerConnectionManager: React.FC = () => {
     }
   }, [isConnected]);
 
+  useEffect(() => {
+    const socket = useMultiplayerStore.getState().socket;
+
+    if (!socket) {
+      console.error("❌ Socket.IO connection not established.");
+      return;
+    }
+
+    // Listen for state updates
+    socket.on(
+      "stateUpdate",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ({ store, updates }: { store: string; updates: any }) => {
+        if (store === "game") {
+          useGameStore.getState().incomingUpdate(updates);
+        } else if (store === "multiplayer") {
+          useMultiplayerStore.getState().incomingUpdate(updates);
+        }
+      }
+    );
+
+    // Listen for chat messages
+    socket.on("chat-message", (data: { sender: string; message: string }) => {
+      console.log("💬 Chat Message Received:", data);
+      useMultiplayerStore.getState().addChatMessage(data);
+    });
+
+    return () => {
+      socket.off("stateUpdate");
+      socket.off("chat-message");
+    };
+  }, []);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
       <h3 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
