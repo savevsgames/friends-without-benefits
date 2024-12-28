@@ -9,61 +9,75 @@ import { typeDefs, resolvers } from "./schemas/index.js";
 import { Server as SocketIOServer } from "socket.io";
 import { createServer } from "node:http";
 import { ExpressPeerServer } from "peer";
+import cors from "cors";
 
-const server = new ApolloServer({
+// Apollo Server Initialization
+const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
 });
 
 const startApolloServer = async () => {
-  await server.start();
+  await apolloServer.start();
   await db();
 
   const PORT = process.env.PORT || 3001;
   const app = express();
 
+  // Middleware
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
+  app.use(
+    cors({
+      origin: "*", // TODO: for dev -> wildcard
+      credentials: true,
+    })
+  );
 
-  app.use("/graphql", expressMiddleware(server));
+  // GraphQL
+  app.use("/graphql", expressMiddleware(apolloServer));
 
-  // PEERJS/SOCKET.IO SERVER ADDED TO SAME EXPRESS INSTANCE AS APOLLO SERVER FOR MVP
-  // Create an HTTP server instance for PeerJs
+  // Create HTTP Server
   const httpServer = createServer(app);
 
-  // Socket.IO Setup
+  // SOCKET.IO
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
+      origin: "*", // TODO: for dev -> wildcard
+      credentials: true,
     },
+    path: "/socket.io",
   });
 
   io.on("connection", (socket) => {
-    console.log(`New client connected: ${socket.id}`);
+    console.log("🔗 Socket.IO Connected:", socket.id);
+
     socket.on("disconnect", () => {
-      console.log(`Client disconnected: ${socket.id}`);
+      console.log("❌ Socket.IO Disconnected:", socket.id);
     });
   });
 
-  // PeerJS Setup
+  // PEERJS
   const peerServer = ExpressPeerServer(httpServer, {
-    path: "/peerjs",
+    path: "/", // internally = "/peerjs/" within Express
+    allow_discovery: true,
   });
   app.use("/peerjs", peerServer);
 
+  // Serve static files in production
   if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../client/dist")));
-
+    // Catch all other routes and return the index file
     app.get("*", (_req: Request, res: Response) => {
       res.sendFile(path.join(__dirname, "../client/dist/index.html"));
     });
   }
 
-  app.listen(PORT, () => {
-    console.log(`API server running on port ${PORT}!`);
-    console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
-    console.log(`Use PeerJS at http://localhost:${PORT}/peerjs`);
+  // Start the server
+  httpServer.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
+    console.log(`🛠️ GraphQL: http://localhost:${PORT}/graphql`);
+    console.log(`🔗 Socket.IO: http://localhost:${PORT}/socket.io`);
+    console.log(`🔗 PeerJS: http://localhost:${PORT}/peerjs`);
   });
 };
 
