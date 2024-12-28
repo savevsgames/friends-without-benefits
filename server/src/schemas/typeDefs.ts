@@ -5,13 +5,21 @@ const typeDefs = `
     email: String!
     password: String!
     friends: [User]
+    avatar: String!
     shortestRound: Game
+  }
+
+  type Player {
+    user: User!
+    score: Int!
+    isReady: Boolean!
+    isHost: Boolean
   }
   
   type Game {
     _id: ID!
     author: User!
-    challengers: [User]
+    challengers: [Player]
     duration: Float
     isComplete: Boolean!
     itemsFound: Int
@@ -48,6 +56,8 @@ const typeDefs = `
   type Mutation {
     addUser(input: AddUserInput): User!
     addFriend(input: AddFriendInput): MutateResponse!
+    createGame(input: CreateGameInput): Game!
+    updateGame(input: UpdateGameInput): Game!
   }
   
   input AddUserInput {
@@ -60,6 +70,20 @@ const typeDefs = `
     userID: ID!
     friendID: ID!
   }
-`
 
-export default typeDefs
+  input CreateGameInput {
+  authorId: ID!
+  challengerIds: [ID!] # array of user IDs
+  items: [String]
+}
+
+  input UpdateGameInput {
+  gameId: ID!
+  isComplete: Boolean
+  duration: Float
+  itemsFound: Int
+  winnerId: ID
+}
+`;
+
+export default typeDefs;

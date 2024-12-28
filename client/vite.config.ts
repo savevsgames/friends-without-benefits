@@ -22,4 +22,16 @@ export default defineConfig({
       external: ["opencv.js"], // List files or libraries to exclude from bundling
     },
   },
+  server: {
+    proxy: {
+      "/socket.io": {
+        target: "ws://localhost:3001",
+        ws: true,
+      },
+      "/peerjs": {
+        target: "http://localhost:3001",
+        ws: true,
+      },
+    },
+  },
 });

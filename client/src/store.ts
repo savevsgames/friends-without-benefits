@@ -7,20 +7,28 @@ import io from "socket.io-client";
 // Dynamically infer the socket type from the io() function
 type SocketIOClient = ReturnType<typeof io>;
 
+// Player extends User type with additional game-related properties
+interface Player {
+  username: string; // Player username displayed in the game
+  score: number; // Player's current game score
+  avatar?: string; // Player avatar image URL
+  isReady: boolean; // Player is ready to start the game (multiplayer checking function)
+}
+
 interface IGameState {
   gameState: string; // "setup", "playing", "gameover"
-  canvasReady: boolean;
-  videoPlaying: boolean;
+  canvasReady: boolean; // Flag to indicate if the canvas is ready for drawing
+  videoPlaying: boolean; // Flag to indicate if the video is playing
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
   currentMediaType: "image" | "video" | "webcam" | null;
-  players: string[]; // Stores our user_id strings for player(s)
+  players: Record<string, Player>; // Stores our user_id strings for player(s) along with their metadata
   // State Setters
   setGameState: (newState: string) => void;
   setCanvasReady: (ready: boolean) => void;
   setVideoPlaying: (playing: boolean) => void;
   setCurrentMediaRef: (ref: string | null) => void;
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
-  addPlayer: (player: string) => void;
+  addPlayer: (id: string, player: Player) => void;
 }
 
 // Using set() to update the store state for key-value pairs
@@ -30,14 +38,23 @@ export const useGameStore = create<IGameState>((set) => ({
   videoPlaying: false,
   currentMediaRef: null,
   currentMediaType: null,
-  players: [],
+  players: {},
   setGameState: (newState) => set({ gameState: newState }),
   setCanvasReady: (ready) => set({ canvasReady: ready }),
   setVideoPlaying: (playing) => set({ videoPlaying: playing }),
   setCurrentMediaRef: (ref) => set({ currentMediaRef: ref }),
   setCurrentMediaType: (type) => set({ currentMediaType: type }),
-  addPlayer: (player) =>
-    set((state) => ({ players: [...state.players, player] })),
+  addPlayer: (id, player) =>
+    set((state) => ({
+      players: { ...state.players, [id]: player },
+    })),
+
+  removePlayer: (id: string) =>
+    set((state) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _data, ...rest } = state.players;
+      return { players: { ...rest } };
+    }),
 }));
 
 // define AuthStore interface to describe the shape of the store from state and actions
@@ -141,30 +158,26 @@ export const useThemeStore = create(
 );
 
 // MULTI-PLAYER STORE
-interface PlayerData {
-  username: string;
-  score: number;
-  avatar?: string;
-  isReady: boolean;
-}
-
 interface IMultiplayerState {
   playerId: string | null; // Unique player identifier (from PeerJS)
   peer: Peer | null; // PeerJS instance for WebRTC connections
   socket: SocketIOClient | null; // Socket.IO connection
-  players: Record<string, PlayerData>; // Player connections and metadata
+  players: Record<string, Player>; // Player connections and metadata
   roomId: string | null; // Current multiplayer room ID
   isConnected: boolean; // Connection state
   isHost: boolean; // Is this client the host?
+  chatMessages: { sender: string; message: string }[]; // Chat message history
   gameStartTime: number | null; // Track when the game starts
   inviteLink: string | null; // Generated invite link for a challenger
   setPlayerId: (id: string) => void;
   setPeer: (peer: Peer) => void;
   setSocket: (socket: SocketIOClient) => void;
-  addPlayer: (id: string, data: PlayerData) => void;
+  addPlayer: (id: string, data: Player) => void;
   removePlayer: (id: string) => void;
+  setIsConnected: (connected: boolean) => void;
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
+  addChatMessage: (message: { sender: string; message: string }) => void;
   setInviteLink: (link: string) => void;
   setGameStartTime: (time: number) => void;
 }
@@ -177,6 +190,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   roomId: null,
   isConnected: false,
   isHost: false,
+  chatMessages: [],
   gameStartTime: null,
   inviteLink: null,
   setPlayerId: (id) => set({ playerId: id }),
@@ -193,8 +207,11 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
 
       return { players: { ...rest } };
     }),
+  setIsConnected: (connected) => set({ isConnected: connected }),
   setRoomId: (id) => set({ roomId: id }),
   setIsHost: (isHost) => set({ isHost }),
+  addChatMessage: (message) =>
+    set((state) => ({ chatMessages: [...state.chatMessages, message] })),
   setInviteLink: (link) => set({ inviteLink: link }),
   setGameStartTime: (time) => set({ gameStartTime: time }),
 }));
