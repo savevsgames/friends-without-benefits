@@ -1,4 +1,4 @@
-import { Game, User, Player } from "../models/index.js";
+import { Game, User } from "../models/index.js";
 import {
   GQLMutationError,
   GQLQueryError,
@@ -65,13 +65,6 @@ const resolvers = {
         return games;
       } catch (error) {
         throw GQLQueryError("games", error);
-      }
-    },
-    players: async () => {
-      try {
-        return await Player.find({}).populate("user");
-      } catch (error) {
-        throw GQLQueryError("players", error);
       }
     },
   },
@@ -212,6 +205,9 @@ const resolvers = {
         }
         if (typeof itemsFound === "number") {
           game.itemsFound = itemsFound;
+        }
+        if (challengers && challengers.length > 0) {
+          game.challengers = challengers;
         }
         if (winnerId) {
           const winner = await User.findById(winnerId);

@@ -2,7 +2,6 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import Game from "../models/Game.js";
-import Player from "../models/Player.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -27,16 +26,17 @@ const db = async () => {
   }
 };
 
+// Seed Data
 const seed = async () => {
   try {
     await db();
 
-    // 1) Clear existing data
+    // 1️⃣ Clear existing data
     await User.deleteMany({});
-    await Player.deleteMany({});
     await Game.deleteMany({});
+    console.log("✅ Cleared existing Users and Games.");
 
-    // 2) Create two test users
+    // 2️⃣ Create two test users
     const [userA, userB] = await User.create([
       {
         username: "RockemSocketRobby",
@@ -49,46 +49,135 @@ const seed = async () => {
         password: "strongerPassword",
       },
     ]);
-    console.log("✅ Created users:", userA.username, "and", userB.username);
+    console.log(`✅ Created users: ${userA.username} and ${userB.username}`);
 
-    // Create Player docs referencing userA, userB
-    // UserA will be the host, userB be the challenger
-    const playerA = await Player.create({
-      user: userA._id,
-      score: 0,
-      isReady: true,
-      isHost: true,
-    });
+    // 3️⃣ Create two single-player games per user
+    const singlePlayerGames = await Game.create([
+      {
+        author: userA._id,
+        challengers: [
+          {
+            user: userA._id,
+            score: 10,
+            isReady: true,
+            isHost: true,
+          },
+        ],
+        duration: 5.5,
+        isComplete: true,
+        itemsFound: 5,
+        items: ["item1", "item2", "item3"],
+        winner: userA._id,
+      },
+      {
+        author: userA._id,
+        challengers: [
+          {
+            user: userA._id,
+            score: 0,
+            isReady: false,
+            isHost: true,
+          },
+        ],
+        duration: 0,
+        isComplete: false,
+        itemsFound: 0,
+        items: ["item4", "item5"],
+      },
+      {
+        author: userB._id,
+        challengers: [
+          {
+            user: userB._id,
+            score: 15,
+            isReady: true,
+            isHost: true,
+          },
+        ],
+        duration: 7.2,
+        isComplete: true,
+        itemsFound: 7,
+        items: ["itemA", "itemB", "itemC"],
+        winner: userB._id,
+      },
+      {
+        author: userB._id,
+        challengers: [
+          {
+            user: userB._id,
+            score: 0,
+            isReady: false,
+            isHost: true,
+          },
+        ],
+        duration: 0,
+        isComplete: false,
+        itemsFound: 0,
+        items: ["itemD", "itemE"],
+      },
+    ]);
+    console.log(
+      "✅ Created 4 single-player games (2 per user).",
+      singlePlayerGames
+    );
 
-    const playerB = await Player.create({
-      user: userB._id,
-      score: 0,
-      isReady: false,
-      isHost: false,
-    });
-    console.log("✅ Created player docs for userA, userB");
-
-    // Create a Game referencing userA as author, and push player ids to challengers []
-    const testGame = await Game.create({
-      author: userA._id,
-      challengers: [playerA._id, playerB._id],
-      duration: 0,
-      isComplete: false,
-      itemsFound: 0,
-      items: ["item1", "item2"],
-      // Change to null if game must be incomplete for test to work - but for now
-      // using winner will let me log the full game object to see if it's working as expected
-      winner: userA._id,
-    });
-
-    console.log("✅ Created game with challengers:", testGame.challengers);
+    // 4️⃣ Create two multiplayer games between users
+    const multiplayerGames = await Game.create([
+      {
+        author: userA._id,
+        challengers: [
+          {
+            user: userA._id,
+            score: 12,
+            isReady: true,
+            isHost: true,
+          },
+          {
+            user: userB._id,
+            score: 8,
+            isReady: true,
+            isHost: false,
+          },
+        ],
+        duration: 10.5,
+        isComplete: true,
+        itemsFound: 8,
+        items: ["item1", "item2", "item3"],
+        winner: userA._id,
+      },
+      {
+        author: userB._id,
+        challengers: [
+          {
+            user: userA._id,
+            score: 0,
+            isReady: false,
+            isHost: false,
+          },
+          {
+            user: userB._id,
+            score: 0,
+            isReady: false,
+            isHost: true,
+          },
+        ],
+        duration: 0,
+        isComplete: false,
+        itemsFound: 0,
+        items: ["item4", "item5"],
+      },
+    ]);
+    console.log(
+      "✅ Created 2 multiplayer games (1 finished, 1 in progress).",
+      multiplayerGames
+    );
 
     console.log("✅ Seed data inserted successfully!");
   } catch (err) {
     console.error("❌ Error seeding data:", err);
   } finally {
     await mongoose.connection.close();
-    console.log("✅ DB connection closed (seed script).");
+    console.log("✅ DB connection closed (seed script complete).");
   }
 };
 

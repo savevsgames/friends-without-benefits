@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
 
+// Changed to TESTING database for multiplayer additions
 const MONGODB_URI = process.env.MONGODB_URI_MPTESTING;
 
 const db = async (): Promise<typeof mongoose.connection> => {

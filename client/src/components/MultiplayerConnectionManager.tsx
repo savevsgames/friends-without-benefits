@@ -38,6 +38,8 @@ const MultiplayerConnectionManager: React.FC = () => {
 
     socketIo.on("connect", () => {
       console.log("✅ Socket.IO Connected:", socketIo.id);
+      setSocket(socketIo);
+      setLocalSocket(socketIo);
     });
 
     socketIo.on("disconnect", () => {
@@ -81,13 +83,15 @@ const MultiplayerConnectionManager: React.FC = () => {
       console.log("PeerJS connection established with ID:", id);
       setLocalPeerId(id);
       setPlayerId(id);
-      setConnectionStatus("Connected");
-      setIsConnected(true);
     });
 
     // Log data when a peer connection is established
     peerJs.on("connection", (conn) => {
       console.log("Peer connection is incoming: ", conn.peer);
+      setLocalPeer(peerJs); // Save peer instance to local store
+      setPeer(peerJs); // Save peer instance to Zustand store
+      setConnectionStatus("Connected");
+      setIsConnected(true);
 
       conn.on("data", (data) => {
         console.log("Received data from peer: ", data);
@@ -97,12 +101,44 @@ const MultiplayerConnectionManager: React.FC = () => {
     // Log when a peer connection is closed
     peerJs.on("close", () => {
       console.log("Peer connection is closed.");
+      setLocalPeerId(null); // React local state cleanup on disconnect - if connection comes back, the state will be updated
       setConnectionStatus("Disconnected");
       setIsConnected(false);
     });
+  };
 
-    setLocalPeer(peerJs); // Save peer instance to local store
-    setPeer(peerJs); // Save peer instance to Zustand store
+  const handleCreateMultiplayerRoom = () => {
+    // Create a multiplayer game
+    if (!peer || !socket) {
+      console.error("❌ PeerJS or Socket.IO not initialized.");
+      return;
+    }
+    setLocalPeerId(peer.id);
+    setRoomId(localPeerId || ""); // Use local peer ID as room ID
+    setIsHost(true); // Set this client as the host
+    console.log("🏠 Room Created. Room ID:", localPeerId);
+  };
+
+  const handleJoinMultiplayerRoom = () => {
+    if (!inputRoomId) {
+      console.error("❌ Please enter a Room ID.");
+      return;
+    }
+
+    if (!peer || !socket) {
+      console.error("❌ PeerJS or Socket.IO not initialized.");
+      return;
+    }
+    // Join the game using the room ID that was provided by the host
+    const conn = peer.connect(inputRoomId);
+    conn.on("open", () => {
+      console.log("🔗 Connected to Room:", inputRoomId);
+      conn.send("🎥 PeerJS Connection Established!");
+    });
+
+    conn.on("data", (data) => {
+      console.log("📥 Received data from host:", data);
+    });
   };
 
   // Cleanup
@@ -118,65 +154,65 @@ const MultiplayerConnectionManager: React.FC = () => {
     }
   };
 
-  const handleCreateRoom = () => {
-    if (!peer) {
-      console.error("PeerJS connection not established.");
+  const handleSocketIOConnection = () => {
+    if (socket) {
+      console.error("Socket.IO connection already established.");
       return;
     }
-    setRoomId(localPeerId || ""); // Use local peer ID as room ID
-    setIsHost(true); // Set this client as the host
-    console.log("Room created with ID:", localPeerId);
-  };
-
-  const handleJoinRoom = () => {
-    if (!inputRoomId) {
-      console.error("Please enter a room ID to join.");
-      return;
-    }
-    const peer = useMultiplayerStore.getState().peer;
-    if (!peer) {
-      console.error("PeerJS connection not established.");
-      return;
-    }
-
-    const conn = peer.connect(inputRoomId);
-    conn.on("open", () => {
-      console.log("Connected to room:", inputRoomId);
-      conn.send("PeerJS Connection Established!");
+    console.log("Initializing Socket.IO connection...");
+    const socketIo = io("http://localhost:3001", {});
+    socketIo.on("connect", () => {
+      console.log("✅ Socket.IO Connected:", socketIo.id);
+      setSocket(socketIo);
+      setLocalSocket(socketIo);
     });
-    conn.on("data", (data) => {
-      console.log("Received data:", data);
+    socketIo.on("disconnect", () => {
+      console.log("❌ Socket.IO Disconnected");
+    });
+    socketIo.on("connect_error", (error: Error) => {
+      console.error("❗ Socket.IO Connection Error:", error);
     });
   };
 
   return (
     <div>
-      <h3>🔗 MultiplayerConnectionManager 🔗</h3>
-      <p>Connection Status: {connectionStatus}</p>
-      <p>Local Peer ID: {localPeerId}</p>
-      <div>
-        <button className="border btn" onClick={handlePeerJSInitialization}>
-          Initialize PeerJS
+      <h3>🔗 Multiplayer Connection Manager</h3>
+      <div className="grid grid-cols-2 gap-4">
+        <button className="border btn" onClick={handleSocketIOConnection}>
+          Re-connect to Socket.IO
         </button>
-
         <button className="border btn" onClick={cleanupConnections}>
           Cleanup Connections
         </button>
+        {/* Step 1: Initialize Peer */}
+        {!peer && (
+          <button onClick={handlePeerJSInitialization}>
+            Initialize PeerJS
+          </button>
+        )}
+
+        {/* Step 2: Create Room */}
+        {peer && isHost && (
+          <button onClick={handleCreateMultiplayerRoom}>Create Room</button>
+        )}
+
+        {/* Step 3: Join Room aka not Host*/}
+        {peer && !isHost && (
+          <div>
+            <input
+              type="text"
+              placeholder="Enter Room ID"
+              value={inputRoomId}
+              onChange={(e) => setInputRoomId(e.target.value)}
+            />
+            <button onClick={handleJoinMultiplayerRoom}>Join Room</button>
+          </div>
+        )}
       </div>
-      {isHost ? (
-        <p>Room ID: {roomId}</p>
-      ) : (
-        <div>
-          <input
-            type="text"
-            placeholder="Enter Room ID"
-            value={inputRoomId}
-            onChange={(e) => setInputRoomId(e.target.value)}
-          />
-          <button onClick={handleJoinRoom}>Join Room</button>
-        </div>
-      )}
-      {isHost && <button onClick={handleCreateRoom}>Create Room</button>}
+      <p>
+        Socket ID: {socket?.id || "Not Connected"} | Peer ID:{" "}
+        {peer?.id || "Not Connected"}
+      </p>
     </div>
   );
 };
