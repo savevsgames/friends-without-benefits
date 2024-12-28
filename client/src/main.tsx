@@ -1,4 +1,3 @@
-import { Provider } from "@/components/ui/provider";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -14,23 +13,21 @@ import SignUp from "./pages/SignUp.tsx";
 
 import App from "./App.tsx";
 
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <Provider>
-        <Routes>
-          <Route path="/" element={<App />} />
+      <Routes>
+        <Route path="/" element={<App />} >
           {/* nested routes within the app are: */}
-          <Route path="/" index element={<Landing />} />
+          <Route index element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/game" element={<Game />} />
           <Route path="/leaderboard" element={<LeaderBoard />} />
           <Route path="*" element={<Error />} />
-        </Routes>
-      </Provider>
+        </Route>
+      </Routes>
     </BrowserRouter>
   </StrictMode>
 );

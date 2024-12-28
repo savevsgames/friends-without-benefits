@@ -62,7 +62,7 @@ const SignUp: React.FC = () => {
           </h2>
         </div>
         <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 mb-6">
-          Let's get started!
+          Let's Get Started!
         </h1>
         <form
           className="flex flex-col box-border w-full max-w-sm"
@@ -114,7 +114,7 @@ const SignUp: React.FC = () => {
             />
           </div>
           {err && <p className="text-red-500 text-center">{err}</p>}
-          
+
           {/* Submit button */}
           <button
             type="submit"
@@ -136,7 +136,7 @@ const SignUp: React.FC = () => {
         <img
           className="h-screen w-full object-cover"
           style={{ clipPath: "polygon(10% 0, 100% 0, 100% 100%, 0% 100%)" }}
-          src="../../assets/mainPic.png"
+          src="../../assets/pic2-c.png"
           alt="objectsPicture"
         />
       </div>

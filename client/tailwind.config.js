@@ -5,16 +5,10 @@ export default {
     "./components/**/*.{html,js,jsx,ts,tsx}",
     "./index.html",
   ],
+  // darkMode: [ '[data-mode="dark"]'],
+  darkMode: "class",
+  plugins: [],
   theme: {
     extend: {},
-    theme: {
-      colors: {
-        color0: "#052e16", //teal
-        color1: "#14532d", // light teal
-        color2: "#f1f5f9", // light gray
-      },
-    },
   },
-  plugins: [],
 };
-
