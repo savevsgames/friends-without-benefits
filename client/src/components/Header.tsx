@@ -2,8 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useThemeStore } from "@/store";
 import { IoMoon } from "react-icons/io5";
 import { IoSunny } from "react-icons/io5";
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
-
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 
 // page navigations
 const navigation = [
@@ -20,7 +19,6 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-
 export default function Header() {
   const location = useLocation();
   console.log("current path:", location.pathname);
@@ -28,17 +26,16 @@ export default function Header() {
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const theme = useThemeStore((state) => state.theme);
 
-
   const icon = (theme: string) => {
     if (theme === "light") {
-      return <IoSunny style={{ color: "teal" }} />;
-    } else {
       return <IoMoon style={{ color: "teal" }} />;
+    } else {
+      return <IoSunny style={{ color: "teal" }} />;
     }
   };
 
   return (
-    <nav className="bg-gradient-to-r from-gray-900 via-teal-600 to-cyan-100 dark:bg-gradient-to-r dark:from-neutral-950 dark:via-teal-950 dark:to-teal-900 border-b-2">
+    <nav className="bg-gradient-to-r from-teal-800 via-teal-500 to-teal-300 dark:bg-gradient-to-r dark:from-neutral-950 dark:via-teal-950 dark:to-teal-900 border-b-2">
       <div className="mx-auto max-w-9xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -76,9 +73,9 @@ export default function Header() {
                     to={item.page}
                     className={classNames(
                       location.pathname === item.page
-                        ? "bg-teal-900 text-white dark:bg-teal-700 dark:text-white"
-                        : "text-gray-300 hover:text-white dark:text-white dark:hover:text-white",
-                      "rounded-md px-3 py-2 text-xl font-bold"
+                        ? "text-white underline underline-offset-4 dark:text-white dark:underline"
+                        : "text-white hover:underline  dark:text-gray-400 dark:hover:text-white dark:hover:underline",
+                      "px-3 py-2 font-bold text-sm sm:text-base md:text-sm lg:text-base"
                     )}
                   >
                     {item.name}
