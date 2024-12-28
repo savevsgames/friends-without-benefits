@@ -40,6 +40,9 @@ const startApolloServer = async () => {
   // Create HTTP Server
   const httpServer = createServer(app);
 
+  // SocketId -> PeerJS ID mappings for Socket.IO to track connected users
+  const connectedUsers = new Map<string, string>();
+
   // SOCKET.IO
   const io = new SocketIOServer(httpServer, {
     cors: {
@@ -75,8 +78,49 @@ const startApolloServer = async () => {
       io.emit("chat-message", data);
     });
 
+    /**
+     * 📡 PeerJS Signalling Middleware
+     * - Listens for PeerJS events.
+     * - Broadcasts PeerJS events to all clients.
+     */
+    socket.on("registerPeerId", ({ peerId }) => {
+      // Store the mapping of SocketId -> PeerId to connectedUsers
+      connectedUsers.set(socket.id, peerId);
+      console.log(`📹 Peer Registered: ${peerId} by Socket: ${socket.id}`);
+      socket.broadcast.emit("peer-registered", { peerId, socketId: socket.id });
+    });
+
+    /**
+     * 🔍 Opponent ID Request Middleware
+     * - Listens for requests for an opponent ID.
+     * - Responds with the first available opponent ID.
+     */
+    socket.on("requestOpponentId", ({ from }) => {
+      console.log(`🔍 Opponent ID requested by: ${from}`);
+      // Find the first available opponent - later we can implement an
+      // array where all connected users and loop through them
+      const opponent = Array.from(connectedUsers.entries()).find(
+        // Find a key-value pair that is not the user's own socket.id
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([key, value]) => key !== socket.id
+      );
+
+      if (opponent) {
+        const [socketId, peerId] = opponent;
+        socket.emit("opponentId", { opponentId: peerId });
+        console.log(`📤 Sent opponentId: ${peerId} to ${from}`);
+      } else {
+        console.warn("❗ No opponent available");
+        socket.emit("opponentId", { opponentId: null });
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log("❌ Socket.IO Disconnected:", socket.id);
+      // Clean up connectedUsers map
+      connectedUsers.delete(socket.id);
+      // Notify all clients that a peer has disconnected
+      socket.broadcast.emit("peer-disconnected", { socketId: socket.id });
     });
   });
 
