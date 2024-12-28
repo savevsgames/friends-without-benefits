@@ -64,6 +64,13 @@ export const loadVideoToVideoOutput = async (file: File): Promise<void> => {
     console.log("Hidden video element not found.");
     return;
   }
+  const canvasContainer = document.getElementById(
+    "canvas-container"
+  ) as HTMLDivElement;
+  if (!canvasContainer) {
+    console.error("Canvas container not found.");
+    return;
+  }
 
   // Create a blob URL for the video file - plain src will fail detection
   const url = URL.createObjectURL(file);
@@ -80,6 +87,8 @@ export const loadVideoToVideoOutput = async (file: File): Promise<void> => {
       console.log(
         `Video dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`
       );
+      // Dynamically set the canvas-container height to update the css so that the relative positioning works
+      canvasContainer.style.height = `${videoElement.clientHeight}px`;
       resolve();
     };
   });
@@ -110,6 +119,13 @@ export const enableWebcam = async (
     ) as HTMLVideoElement;
     if (!videoElement) {
       console.error("Video element not found.");
+      return null;
+    }
+    const canvasContainer = document.getElementById(
+      "canvas-container"
+    ) as HTMLDivElement;
+    if (!canvasContainer) {
+      console.error("Canvas container not found.");
       return null;
     }
     // Stop any existing streams
@@ -147,6 +163,8 @@ export const enableWebcam = async (
         console.log(
           `Webcam dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`
         );
+        // Dynamically set the canvas-container height to update the css so that the relative positioning works
+        canvasContainer.style.height = `${videoElement.clientHeight}px`;
         resolve();
       };
     });

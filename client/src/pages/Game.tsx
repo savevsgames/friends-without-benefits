@@ -15,7 +15,6 @@ import MultiplayerConnectionManager from "@/components/MultiplayerConnectionMana
 // import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
 // import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
 
-
 function Game() {
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
   const setCanvasReady = useGameStore((state) => state.setCanvasReady);
@@ -50,8 +49,8 @@ function Game() {
             <ControlPanel />
           </div>
           <div>
-             <MultiplayerConnectionManager />
-           </div>
+            <MultiplayerConnectionManager />
+          </div>
           {/* Dashboard */}
           <div className="row-span-3 bg-teal-50 dark:bg-teal-950 border border-teal-700 dark:border-teal-700 shadow-sm rounded-lg h-full overflow-auto">
             <Dashboard />
@@ -59,7 +58,7 @@ function Game() {
         </div>
 
         {/* Canvas Section */}
-        <div className="col-span-1 md:col-span-2 m-2 bg-teal-50 dark:bg-teal-950 border border-teal-800 dark:border-teal-800 shadow-md rounded-lg">
+        <div className="h-full grid grid-cols-1 md:col-span-2 m-2 bg-teal-50 dark:bg-teal-950 border border-teal-800 dark:border-teal-800 shadow-md rounded-lg">
           <Canvas />
         </div>
       </div>

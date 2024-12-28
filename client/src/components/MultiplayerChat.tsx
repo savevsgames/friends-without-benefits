@@ -93,6 +93,12 @@ const MultiplayerChat = () => {
           </p>
         ))}
       </div>
+      <p>
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Asperiores
+        esse nobis dicta itaque ratione soluta praesentium facilis beatae
+        possimus? Autem hic reprehenderit iusto cumque dicta sequi explicabo
+        distinctio aut accusamus.
+      </p>
       <div>
         <input
           id="message_input"
