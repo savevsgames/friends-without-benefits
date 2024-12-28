@@ -7,6 +7,8 @@ import { initializeSocket } from "@/utils/multiplayer-utils";
 import { enableWebcam } from "@/utils/model-utils";
 // import { initializePeer } from "@/utils/multiplayer-utils";
 
+import MultiplayerChat from "./MultiplayerChat";
+
 const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
   const {
@@ -93,7 +95,6 @@ const MultiplayerConnectionManager: React.FC = () => {
 
     peerJs.on("close", () => {
       console.log("Peer connection is closed.");
-      peerJs.destroy();
     });
 
     peerJs.on("error", (err) => {
@@ -133,6 +134,14 @@ const MultiplayerConnectionManager: React.FC = () => {
       console.log("🔗 Connected to Room:", inputRoomId);
       conn.send("🎥 PeerJS Connection Established!");
       setIsConnected(true);
+      // TODO:
+      // We need a to sync the game state from the host to the challenger here.
+      // Since the game state is created when start game is clicked
+      // we need to sync the game state to the challenger when they join the room.
+      // When we implement the start game button to add an entry to the db, we can
+      // sync the zustand game state of the host to the challenger as well once the db is confirmed.
+      // NOTE: Watch for conflicts before trying to sync the game state - im not sure if doing that
+      // will cause issues with the store or db calls yet.
     });
 
     conn.on("data", (data) => {
@@ -142,6 +151,10 @@ const MultiplayerConnectionManager: React.FC = () => {
     conn.on("close", () => {
       console.log("🔌 Disconnected from Room:", inputRoomId);
       setIsConnected(false);
+    });
+
+    conn.on("error", (err) => {
+      console.error("❗ Connection Error:", err);
     });
   };
 
@@ -237,6 +250,9 @@ const MultiplayerConnectionManager: React.FC = () => {
         <button className="border btn" onClick={handleJoinMultiplayerRoom}>
           Join Game
         </button>
+      </div>
+      <div>
+        <MultiplayerChat />
       </div>
     </div>
   );
