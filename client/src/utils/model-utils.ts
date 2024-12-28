@@ -134,7 +134,9 @@ export const enableWebcam = async (
     console.log("Webcam enabled:", videoElement.srcObject);
 
     if (shareMyStream) {
-      console.log("Sharing webcam stream for multiplayer game...");
+      console.log(
+        "Sharing webcam stream for multiplayer game...TODO - Add more logic here."
+      );
       //TODO: Add streaming logic here for peer.js
     }
 
