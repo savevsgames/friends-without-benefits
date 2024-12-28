@@ -60,7 +60,7 @@ const Login: React.FC = () => {
             <span className="text-teal-950 dark:text-slate-50 text-2xl">B</span>
           </h2>
         </div>
-        <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 dark:text-slate-50 mb-6">
+        <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 dark:text-slate-100 mb-6">
           Welcome Back!
         </h1>
         <form
@@ -69,7 +69,7 @@ const Login: React.FC = () => {
         >
           {/* Username field */}
           <div className="flex flex-col mb-4">
-            <label className="text-sm md:text-base text-gray-800 dark:text-slate-100 font-medium mb-2">
+            <label className="text-sm md:text-base text-gray-800 dark:text-slate-50 font-medium mb-2">
               Username:
             </label>
             <input
