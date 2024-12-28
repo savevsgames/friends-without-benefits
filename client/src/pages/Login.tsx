@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
-import { UserLogin } from "../interfaces/UserLogin.tsx"
-import { useAuthStore } from "@/store.ts";
+import { UserLogin } from "../interfaces/userLogin.tsx"
+import { useAuthStore, useUserSession } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
 import { LOGIN_USER} from "../utils/mutations"; 
 import { useMutation } from "@apollo/client";
@@ -12,6 +12,7 @@ const Login: React.FC = () => {
   const [form, setForm] = useState<UserLogin>({ username: "", password: "" });
   const [err, setErr] = useState<string | null>(null);
   const login = useAuthStore((state) => state.login);
+  useUserSession.getState().UserDataFromToken();
 
   // function handleInputChange for the form inputs
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,7 +118,7 @@ const Login: React.FC = () => {
         <img
           className="h-screen w-full object-cover"
           style={{ clipPath: "polygon(10% 0, 100% 0, 100% 100%, 0% 100%)" }}
-          src="../../assets/mainPic.png"
+          src="../../assets/pic2-c.png"
           alt="objectsPicture"
         />
       </div>

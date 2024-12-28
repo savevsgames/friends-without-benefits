@@ -1,4 +1,9 @@
-import { Button } from "@chakra-ui/react";
+import LoadImageButton from "../components/buttons/LoadImageButton.tsx";
+import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
+import LoadVideoButton from "@/components/buttons/LoadVideoButton.tsx";
+import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
+import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
+import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
 
 interface ControlPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -6,30 +11,21 @@ export const ControlPanel: React.FC<ControlPanelProps> = (props) => {
   return (
     <div
       {...props}
-      className="bg-gray-100 shadow-lg rounded-lg p-4 text-teal-950 tracking-widest font-bold max-h-full overflow-auto"
+      className="bg-teal-50 dark:bg-teal-950 shadow-lg rounded-lg p-4 text-teal-950 dark:text-gray-100 tracking-widest font-bold max-h-full overflow-auto"
     >
       {/* Header */}
-      <h2 className="text-center text-xl sm:text-2xl mb-4">Control Panel</h2>
+      <h2 className="text-center text-base sm:text-lg md:text-xl mb-4 tracking-wide font-bold text-teal-900 dark:text-white">
+        Control Panel
+      </h2>
 
       {/* Buttons Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {[
-          "Play",
-          "Pause",
-          "Cam",
-          "Quit",
-          "Load Image",
-          "Load Video",
-          "Detect",
-        ].map((label, i) => (
-          <Button
-            key={i}
-            className="bg-teal-500 hover:bg-teal-600 text-white font-semibold transition text-sm sm:text-base md:text-lg w-full"
-            size="md"
-          >
-            {label}
-          </Button>
-        ))}
+        <LoadImageButton />
+        <LoadVideoButton />
+        <PlayStopVideoButton />
+        <PauseVideoButton />
+        <LoadWebcamButton />
+        <RunDetectionButton />
       </div>
     </div>
   );

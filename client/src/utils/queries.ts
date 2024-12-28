@@ -1,4 +1,17 @@
 import { gql } from "@apollo/client"
 
-export const QUERY_ME = gql `
-`
+// TODO: to be changed if need be, I just needed a placeholder
+export const QUERY_ME = gql`
+  query me {
+    me {
+      _id
+      username
+      email
+      avatar
+      friends
+      createdAt
+      shortesRound
+
+    }
+  }
+`;

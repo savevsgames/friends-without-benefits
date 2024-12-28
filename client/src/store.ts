@@ -78,6 +78,7 @@ export const useAuthStore = create(
       logout: () => {
         set({ isLoggedIn: false });
         AuthService.logout();
+        useUserSession.getState().clearUser();
       },
     }),
     {
@@ -87,9 +88,10 @@ export const useAuthStore = create(
 );
 
 type User = {
+  id: string;
   username: string;
   email: string;
-  password: string;
+  password?: string;
   avatar: string;
   friends: string[];
   createdAt: string;
@@ -106,7 +108,16 @@ export const useUserSession = create(
   persist<SessionState>(
     (set) => ({
       // our main state
-      user: null,
+      user: {
+        id: "",
+        username: "",
+        email: "",
+        password: "",
+        avatar: "",
+        friends: [],
+        createdAt: "",
+        shortestRound: "",
+      },
 
       // action to retrieve user from token
       UserDataFromToken: () => {
@@ -123,6 +134,26 @@ export const useUserSession = create(
     {
       name: "user-session", // the key used in localStorage to store the session
     }
+  )
+);
+
+// define a theme store
+export interface ThemeStore {
+  theme: string;
+  toggleTheme: () => void;
+}
+export const useThemeStore = create(
+  persist<ThemeStore>(
+    (set) => ({
+      theme: "light",
+      toggleTheme: () => {
+        set((state) => ({
+          theme: state.theme === "light" ? "dark" : "light",
+          
+        }));
+      },
+    }),
+    { name: "theme" }
   )
 );
 
