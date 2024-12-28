@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMultiplayerStore } from "@/store";
 
 const MultiplayerChat = () => {
@@ -8,10 +8,25 @@ const MultiplayerChat = () => {
   // For local chat message state on react / DOM component
   const [message, setMessage] = useState<string>("");
 
+  // Use a Ref to ensure only one listener is attached (avoid echoing messages in chat)
+  const isListenerAttached = useRef(false);
+
   // Handle incoming socket.io chat messages
   useEffect(() => {
+    if (!socket) {
+      console.log("No socket connection");
+      return;
+    }
+    // Avoids echoing messages in chat
+    if (isListenerAttached.current) {
+      console.warn("⚠️ Chat listener is already attached ⚠️");
+      return;
+    }
     // Handle incoming chat messages
     const handleChatMessage = (data: { sender: string; message: string }) => {
+      // Add a check to see if the sender is the current player to avoid echoing the message
+      if (data.sender === playerId) return;
+
       addChatMessage(data);
       console.log("Chat Message Received:", data);
     };
@@ -20,18 +35,24 @@ const MultiplayerChat = () => {
       console.log("No socket connection");
       return;
     }
-    socket.on("chat-message", handleChatMessage);
 
-    // Clean-up: when socket is disconnected, remove the event listener
+    // Attach the event listener only once
+    socket.on("chat-message", handleChatMessage);
+    isListenerAttached.current = true;
+
     return () => {
+      // Update the ref to allow re-attaching the listener
+      isListenerAttached.current = false;
       socket.off("chat-message", handleChatMessage);
     };
-  }, [socket, addChatMessage]);
 
-  // Update chat message state on change
-  useEffect(() => {
-    console.log("Chat Messages Updated:", chatMessages);
-  }, [chatMessages]);
+    // Clean-up: when socket is disconnected, remove the event listener
+  }, [socket, addChatMessage, playerId]);
+
+  // // Update chat message state on change
+  // useEffect(() => {
+  //   console.log("Chat Messages Updated:", chatMessages);
+  // }, [chatMessages]);
 
   // Send message to the socket.io server
   const sendMessage = () => {

@@ -71,7 +71,7 @@ const startApolloServer = async () => {
     socket.on("chat-message", (data) => {
       console.log(`💬 Chat message from ${data.sender}: ${data.message}`);
 
-      // Send to everyone including the sender
+      // Send to everyone including the sender - chat component will filter out the sender
       io.emit("chat-message", data);
     });
 
