@@ -35,7 +35,7 @@ export default function Header() {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-teal-800 via-teal-500 to-teal-300 dark:bg-gradient-to-r dark:from-neutral-950 dark:via-teal-950 dark:to-teal-900 border-b-2">
+    <nav className="bg-gradient-to-r from-teal-800 via-teal-500 to-teal-300 dark:from-black dark:via-neutral-950 dark:to-teal-950 border-b-2">
       <div className="mx-auto max-w-9xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">

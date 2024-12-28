@@ -51,17 +51,19 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div className=" bg-gray-50 h-screen flex overflow-hidden">
+    <div className=" bg-gray-50 dark:bg-neutral-950 h-screen flex overflow-hidden">
       {/* left section: Login form */}
       <div className="w-2/5 flex flex-col justify-center items-start px-12">
         <div className="absolute top-4 left-4 z-10">
           <h2 className="font-bold tracking-widest px-7 flex flex-row">
-            <span className="text-teal-950 text-2xl">F</span>
-            <span className="text-teal-900 text-1xl self-end">WO</span>
-            <span className="text-teal-950 text-2xl">B</span>
+            <span className="text-teal-950 dark:text-slate-50 text-2xl">F</span>
+            <span className="text-teal-900 dark:text-slate-100 text-1xl self-end">
+              WO
+            </span>
+            <span className="text-teal-950 dark:text-slate-50 text-2xl">B</span>
           </h2>
         </div>
-        <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 mb-6">
+        <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 dark:text-slate-100 mb-6">
           Let's Get Started!
         </h1>
         <form
@@ -70,7 +72,7 @@ const SignUp: React.FC = () => {
         >
           {/* Username field */}
           <div className="flex flex-col mb-4">
-            <label className="text-sm md:text-base text-gray-800 font-medium mb-2">
+            <label className="text-sm md:text-base text-gray-800 dark:text-slate-50 font-medium mb-2">
               Username:
             </label>
             <input
@@ -85,7 +87,7 @@ const SignUp: React.FC = () => {
           </div>
           {/* Username field */}
           <div className="flex flex-col mb-4">
-            <label className="text-sm md:text-base text-gray-800 font-medium mb-2">
+            <label className="text-sm md:text-base text-gray-800 dark:text-slate-50 font-medium mb-2">
               Email Address:
             </label>
             <input
@@ -100,7 +102,7 @@ const SignUp: React.FC = () => {
           </div>
           {/* Password field */}
           <div className="flex flex-col mb-6">
-            <label className="text-sm md:text-base text-gray-700 font-medium mb-2">
+            <label className="text-sm md:text-base text-gray-800 dark:text-slate-50 font-medium mb-2">
               Password:
             </label>
             <input
@@ -118,16 +120,18 @@ const SignUp: React.FC = () => {
           {/* Submit button */}
           <button
             type="submit"
-            className="bg-teal-900 hover:bg-teal-800 text-white font-semibold transition duration-200 text-sm sm:text-base md:text-lg w-full py-3 rounded-lg shadow-md"
+            className="bg-teal-900 dark:bg-slate-100 hover:bg-teal-800 text-white dark:text-teal-950 dark:border dark:border-teal-400 font-semibold transition duration-200 text-sm sm:text-base md:text-lg w-full py-3 rounded-lg shadow-md"
           >
             Sign Up
           </button>
         </form>
         <div className="pt-2 flex flex-row">
-          <p className="text-l text-gray-700 font-small pr-2">
+          <p className="text-l text-gray-700 dark:text-slate-50 font-small pr-2">
             Already have an account?
           </p>
-          <button className="underline text-teal-900 font-small">Log in</button>
+          <button className="underline text-teal-900 dark:text-teal-400 font-small">
+            Log in
+          </button>
         </div>
       </div>
 
