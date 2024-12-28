@@ -11,7 +11,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = (props) => {
   return (
     <div
       {...props}
-      className="bg-teal-50 dark:bg-teal-950 shadow-lg rounded-lg p-4 text-teal-950 dark:text-gray-100 tracking-widest font-bold max-h-full overflow-auto"
+      className="bg-teal-50 dark:bg-teal-950 shadow-lg rounded-lg p-4 text-teal-950 tracking-widest font-bold max-h-full overflow-auto"
     >
       {/* Header */}
       <h2 className="text-center text-base sm:text-lg md:text-xl mb-4 tracking-wide font-bold text-teal-900 dark:text-white">

@@ -41,7 +41,7 @@ function Game() {
   return (
     <>
       <Header />
-      <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-1 h-screen overflow-auto bg-gradient-to-r from-teal-800 via-teal-500 to-teal-300 dark:bg-gradient-to-r dark:from-neutral-950 dark:via-teal-950 dark:to-teal-900">
+      <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-1 h-screen overflow-auto bg-gradient-to-r from-teal-800 via-teal-500 to-teal-300 dark:bg-gradient-to-r dark:from-black dark:via-neutral-950 dark:to-teal-950">
         {/* Control Panel and Dashboard */}
         <div className="col-span-1 md:col-span-1 grid grid-rows-4 gap-2 p-2">
           {/* Control Panel */}
