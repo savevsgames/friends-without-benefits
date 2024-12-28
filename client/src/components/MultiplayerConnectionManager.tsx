@@ -84,19 +84,21 @@ const MultiplayerConnectionManager: React.FC = () => {
     // Log data when a peer connection is established
     peerJs.on("connection", (conn) => {
       console.log("Peer connection is incoming: ", conn.peer);
+      setIsConnected(true);
 
       conn.on("data", (data) => {
         console.log("Received data from peer: ", data);
       });
     });
 
-    // TODO: When closed, allow for reconnection or cleanup
     peerJs.on("close", () => {
       console.log("Peer connection is closed.");
+      peerJs.destroy();
     });
 
     peerJs.on("error", (err) => {
       console.error("PeerJS Error:", err);
+      peerJs.destroy();
     });
   };
 

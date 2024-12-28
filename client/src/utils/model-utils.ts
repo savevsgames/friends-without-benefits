@@ -123,12 +123,12 @@ export const enableWebcam = async (
     // Get the webcam stream
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
-      audio: false,
+      audio: true, // UPDATED FOR MULTIPLAYER
     });
     // Set the video element source to the stream
     videoElement.srcObject = stream;
     videoElement.autoplay = true;
-    videoElement.muted = true; // UPDATE FOR MULTIPLAYER
+    videoElement.muted = true;
     videoElement.playsInline = true;
 
     console.log("Webcam enabled:", videoElement.srcObject);
@@ -137,6 +137,8 @@ export const enableWebcam = async (
       console.log(
         "Sharing webcam stream for multiplayer game...TODO - Add more logic here."
       );
+      // Unmute the video when sharing webcam connection.
+      videoElement.muted = false;
       //TODO: Add streaming logic here for peer.js
     }
 

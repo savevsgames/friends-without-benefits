@@ -135,6 +135,7 @@ interface IMultiplayerState {
   roomId: string | null; // Current multiplayer room ID
   isConnected: boolean; // Connection state
   isHost: boolean; // Is this client the host?
+  chatMessages: { sender: string; message: string }[]; // Chat message history
   gameStartTime: number | null; // Track when the game starts
   inviteLink: string | null; // Generated invite link for a challenger
   setPlayerId: (id: string) => void;
@@ -145,6 +146,7 @@ interface IMultiplayerState {
   setIsConnected: (connected: boolean) => void;
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
+  addChatMessage: (message: { sender: string; message: string }) => void;
   setInviteLink: (link: string) => void;
   setGameStartTime: (time: number) => void;
 }
@@ -157,6 +159,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   roomId: null,
   isConnected: false,
   isHost: false,
+  chatMessages: [],
   gameStartTime: null,
   inviteLink: null,
   setPlayerId: (id) => set({ playerId: id }),
@@ -176,6 +179,8 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   setIsConnected: (connected) => set({ isConnected: connected }),
   setRoomId: (id) => set({ roomId: id }),
   setIsHost: (isHost) => set({ isHost }),
+  addChatMessage: (message) =>
+    set((state) => ({ chatMessages: [...state.chatMessages, message] })),
   setInviteLink: (link) => set({ inviteLink: link }),
   setGameStartTime: (time) => set({ gameStartTime: time }),
 }));
