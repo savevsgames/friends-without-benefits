@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { UserLogin } from "../interfaces/userLogin.tsx";
+import { UserLogin } from "../interfaces/UserLogin.tsx";
 import { useAuthStore, useUserSession } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
 import { LOGIN_USER } from "../utils/mutations";
