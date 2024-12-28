@@ -86,6 +86,32 @@ const MultiplayerChat = () => {
   return (
     <div>
       <h3>Multiplayer Chat</h3>
+      <div
+        style={{
+          display: "flex",
+          gap: "1rem",
+          justifyContent: "space-between",
+        }}
+      >
+        <input
+          id="message_input"
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message here..."
+        />
+        <button
+          id="send_message_button"
+          onClick={sendMessage}
+          style={{
+            marginLeft: "1rem",
+            border: "1px solid black",
+            padding: "0.25rem 0.5rem",
+          }}
+        >
+          Send Message
+        </button>
+      </div>
       <div>
         {chatMessages.map((msg, index) => (
           <p key={index}>
@@ -99,18 +125,6 @@ const MultiplayerChat = () => {
         possimus? Autem hic reprehenderit iusto cumque dicta sequi explicabo
         distinctio aut accusamus.
       </p>
-      <div>
-        <input
-          id="message_input"
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message here..."
-        />
-        <button id="send_message_button" onClick={sendMessage}>
-          Send Message
-        </button>
-      </div>
     </div>
   );
 };

@@ -6,8 +6,8 @@ import io from "socket.io-client";
 import { initializeSocket } from "@/utils/multiplayer-utils";
 import { enableWebcam } from "@/utils/model-utils";
 // import { initializePeer } from "@/utils/multiplayer-utils";
-
-import MultiplayerChat from "./MultiplayerChat";
+import { IMultiplayerState } from "@/store";
+import { IGameState } from "@/store";
 
 const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
@@ -205,28 +205,42 @@ const MultiplayerConnectionManager: React.FC = () => {
       return;
     }
 
-    // Listen for state updates
+    // Listen for state updates to either game or multiplayer store
     socket.on(
       "stateUpdate",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ({ store, updates }: { store: string; updates: any }) => {
+      ({
+        store,
+        updates,
+      }: {
+        store: "game" | "multiplayer";
+        updates: Partial<IGameState | IMultiplayerState>;
+      }) => {
         if (store === "game") {
-          useGameStore.getState().incomingUpdate(updates);
+          console.log(`🔄 Incoming GameStore Update (${store}):`, updates);
+          useGameStore
+            .getState()
+            .incomingUpdate(updates as Partial<IGameState>);
         } else if (store === "multiplayer") {
-          useMultiplayerStore.getState().incomingUpdate(updates);
+          console.log(
+            `🔄 Incoming MultiplayerStore Update (${store}):`,
+            updates
+          );
+          useMultiplayerStore
+            .getState()
+            .incomingUpdate(updates as Partial<IMultiplayerState>);
         }
       }
     );
 
     // Listen for chat messages
-    socket.on("chat-message", (data: { sender: string; message: string }) => {
-      console.log("💬 Chat Message Received:", data);
-      useMultiplayerStore.getState().addChatMessage(data);
-    });
+    // socket.on("chat-message", (data: { sender: string; message: string }) => {
+    //   console.log("💬 Chat Message Received:", data);
+    //   useMultiplayerStore.getState().addChatMessage(data);
+    // });
 
     return () => {
       socket.off("stateUpdate");
-      socket.off("chat-message");
+      // socket.off("chat-message");
     };
   }, []);
 
@@ -283,9 +297,6 @@ const MultiplayerConnectionManager: React.FC = () => {
         <button className="border btn" onClick={handleJoinMultiplayerRoom}>
           Join Game
         </button>
-      </div>
-      <div>
-        <MultiplayerChat />
       </div>
     </div>
   );

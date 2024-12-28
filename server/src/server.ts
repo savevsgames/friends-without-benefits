@@ -61,9 +61,22 @@ const startApolloServer = async () => {
      * - Broadcasts state updates to all other clients (not the sender)
      */
     socket.on("stateUpdate", ({ store, updates }) => {
-      // SYNCHRONIZATION MIDDLEWARE - Updates zustand "store" with incoming updates
-      console.log(`🔄 State Update (${store}):`, updates);
-      socket.broadcast.emit("stateUpdate", { store, updates });
+      // SYNCHRONIZATION MIDDLEWARE - Updates zustand "store" with incoming updates - game or multiplayer
+      console.log(`Updating the ${store} store with:`, updates);
+      try {
+        if (store === "game") {
+          console.log("🔄 Game State Update:", updates);
+          socket.broadcast.emit("stateUpdate", { store: "game", updates });
+        } else if (store === "multiplayer") {
+          console.log("🔄 Multiplayer State Update:", updates);
+          socket.broadcast.emit("stateUpdate", {
+            store: "multiplayer",
+            updates,
+          });
+        }
+      } catch (error) {
+        console.error("❗ Error updating state:", error);
+      }
     });
 
     /**

@@ -16,7 +16,7 @@ interface Player {
   // Need to add more relevant props like items to find, etc.
 }
 
-interface IGameState {
+export interface IGameState {
   gameState: string; // "setup", "playing", "gameover"
   canvasReady: boolean; // Flag to indicate if the canvas is ready for drawing
   videoPlaying: boolean; // Flag to indicate if the video is playing
@@ -173,7 +173,7 @@ export const useThemeStore = create(
 );
 
 // MULTI-PLAYER STORE
-interface IMultiplayerState {
+export interface IMultiplayerState {
   playerId: string | null; // Unique player identifier (from PeerJS)
   peer: Peer | null; // PeerJS instance for WebRTC connections
   socket: SocketIOClient | null; // Socket.IO connection

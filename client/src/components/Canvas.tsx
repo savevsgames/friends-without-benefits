@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "../store"; // Import Zustand store
 import MultiplayerChat from "./MultiplayerChat";
+import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
+import GameStoreLiveFeed from "./GameStoreLiveFeed";
 
 export const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -110,7 +112,7 @@ export const Canvas = () => {
       <div
         id="canvas-container"
         className="relative w-full"
-        style={{ overflow: "hidden" }}
+        style={{ overflow: "hidden", maxHeight: "calc(100vh - 400px)" }}
       >
         <canvas
           id="canvas-main"
@@ -153,6 +155,20 @@ export const Canvas = () => {
           }}
           crossOrigin="anonymous"
         />
+        <div
+          id="debug-overlay"
+          style={{
+            display: "block",
+            position: "absolute",
+            top: "0",
+            left: "0",
+            width: "100%",
+            height: "auto",
+            zIndex: 100,
+          }}
+        >
+          <GameStoreLiveFeed />
+        </div>
       </div>
       {/* New Div Below Canvas */}
       <div
@@ -173,17 +189,7 @@ export const Canvas = () => {
           }}
         >
           <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
-            This could be the video feed. Lorem ipsum dolor sit amet consectetur
-            adipisicing elit. Excepturi dicta facilis magni commodi perferendis
-            dolore amet doloremque ratione beatae qui? Repudiandae maiores
-            debitis dolorem, ullam recusandae voluptatum exercitationem eum
-            possimus. Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Nisi nihil similique perspiciatis veniam id! Ex, corporis
-            asperiores? Veniam qui facere nihil unde sunt, rem maxime repellat
-            saepe consequuntur voluptatum temporibus. Lorem, ipsum dolor sit
-            amet consectetur adipisicing elit. Natus itaque voluptate nulla,
-            assumenda molestiae laborum fugiat sit nisi voluptatum facilis quam,
-            hic ex cum, quos adipisci aliquam eius dolor obcaecati?
+            <MultiplayerVideoFeed />
           </div>
           <MultiplayerChat />
         </div>
