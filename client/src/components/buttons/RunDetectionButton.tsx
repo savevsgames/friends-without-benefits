@@ -1,5 +1,7 @@
 import { useGameStore } from "@/store";
-import { runDetectionOnCurrentMedia } from "@/utils/model-utils";
+// import { runDetectionOnCurrentMedia } from "@/utils/model-utils";
+
+import { runDetectionOnCurrentMedia } from "@/utils/ml5-model-utils";
 
 const RunDetectionButton = () => {
   // Button Styling - TEMPORARY STYLING BEGINS
