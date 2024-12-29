@@ -6,32 +6,64 @@ import { Dashboard } from "../components/Dashboard.tsx";
 
 import { useGameStore } from "@/store";
 
-// import MultiplayerConnectionManager from "@/components/MultiplayerConnectionManager.tsx";
-import MultiPlayerModal from "@/components/MultiplayerModal.tsx";
+import MultiplayerConnectionManager from "@/components/MultiplayerConnectionManager.tsx";
+import { loadModel } from "@/utils/ml5-model-utils.ts";
 
+// import LoadImageButton from "../components/buttons/LoadImageButton.tsx";
+// import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
+// import LoadVideoButton from "../components/buttons/LoadVideoButton.tsx";
+// import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
+// import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
+// import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
 
 function Game() {
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
   const setCanvasReady = useGameStore((state) => state.setCanvasReady);
 
-  useEffect(() => {
-    const initializeModel = async () => {
-      console.log("Loading TensorFlow.js COCO-SSD Model...");
-      try {
-        const cocoSsd = await window.cocoSsd?.load();
-        if (cocoSsd) {
-          window.cocoSsd = cocoSsd;
-          console.log("COCO-SSD Model successfully loaded!");
-        } else {
-          console.error("COCO-SSD Model failed to load.");
-        }
-      } catch (error) {
-        console.error("Error loading TensorFlow model:", error);
-      }
-    };
+  const loadMl5Model = async () => {
+    console.log("Loading ml5 model...");
+    try {
+      await loadModel();
+    } catch (error) {
+      console.error("Error loading ml5 model:", error);
+    }
+  };
 
-    initializeModel();
+  useEffect(() => {
+    // if ml5 is already there, just load the model
+    if (window.ml5) {
+      loadMl5Model();
+      return;
+    }
+
+    // otherwise, poll every 100ms
+    const interval = setInterval(() => {
+      if (window.ml5) {
+        clearInterval(interval);
+        loadMl5Model();
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
   }, [setCanvasReady]);
+
+  // useEffect(() => {
+  // const initializeModel = async () => {
+  //   console.log("Loading TensorFlow.js COCO-SSD Model...");
+  //   try {
+  //     const cocoSsd = await window.cocoSsd?.load();
+  //     if (cocoSsd) {
+  //       window.cocoSsd = cocoSsd;
+  //       console.log("COCO-SSD Model successfully loaded!");
+  //     } else {
+  //       console.error("COCO-SSD Model failed to load.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading TensorFlow model:", error);
+  //   }
+  // };
+  // initializeModel();
+  // }, [setCanvasReady]);
 
   return (
     <>

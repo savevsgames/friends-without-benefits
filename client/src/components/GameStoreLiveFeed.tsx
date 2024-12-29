@@ -1,14 +1,16 @@
-import React from "react";
 import { useGameStore, useMultiplayerStore } from "@/store";
 
 // Helper function to safely stringify objects without throwing errors
-const safeStringify = (obj: Record<string, unknown>) => {
+const safeStringify = (
+  obj: Record<string, unknown>,
+  maxLength: number = 20
+) => {
   try {
     const objectCache = new Set();
     return JSON.stringify(
       obj,
-      (key, value) => {
-        console.log("key:", key, "value:", value);
+      (_key, value) => {
+        // console.log("key:", key, "value:", value);
         if (typeof value === "object" && value !== null) {
           if (objectCache.has(value)) {
             // Circular reference found, discard key
@@ -20,7 +22,11 @@ const safeStringify = (obj: Record<string, unknown>) => {
         if (typeof value === "function") {
           return `[Function: ${value.name || "Anonymous () "}]` + `=> {...}`;
         }
-        return value.slice(0, 50);
+        // Trim non-string values to maxLength
+        if (typeof value !== "string" && !Array.isArray(value)) {
+          return JSON.stringify(value).substring(0, maxLength) + "...";
+        }
+        return value;
       },
       2
     ); // 2-space indentation
@@ -48,7 +54,7 @@ const renderAllFields = (store: Record<string, any>) => {
 };
 
 // Only used for development/debugging - shows all store data in one component for easy viewing
-const GameStoreLiveFeed: React.FC = () => {
+const GameStoreLiveFeed = () => {
   // Fetch entire Zustand store states
   const gameStore = useGameStore((state) => state);
   const multiplayerStore = useMultiplayerStore((state) => state);
