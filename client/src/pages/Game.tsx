@@ -6,14 +6,9 @@ import { Dashboard } from "../components/Dashboard.tsx";
 
 import { useGameStore } from "@/store";
 
-import MultiplayerConnectionManager from "@/components/MultiplayerConnectionManager.tsx";
+// import MultiplayerConnectionManager from "@/components/MultiplayerConnectionManager.tsx";
+import MultiPlayerModal from "@/components/MultiplayerModal.tsx";
 
-// import LoadImageButton from "../components/buttons/LoadImageButton.tsx";
-// import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
-// import LoadVideoButton from "../components/buttons/LoadVideoButton.tsx";
-// import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
-// import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
-// import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
 
 function Game() {
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
@@ -49,7 +44,7 @@ function Game() {
             <ControlPanel />
           </div>
           <div>
-            <MultiplayerConnectionManager />
+            <MultiPlayerModal />
           </div>
           {/* Dashboard */}
           <div className="row-span-3 bg-teal-50 dark:bg-teal-950 border border-teal-700 dark:border-teal-700 shadow-sm rounded-lg h-full overflow-auto">

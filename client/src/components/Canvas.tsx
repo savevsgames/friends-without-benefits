@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "../store"; // Import Zustand store
-import MultiplayerChat from "./MultiplayerChat";
-import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
-import GameStoreLiveFeed from "./GameStoreLiveFeed";
+// import MultiplayerChat from "./MultiplayerChat";
+// import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
+// import GameStoreLiveFeed from "./GameStoreLiveFeed";
 
 export const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -167,7 +167,7 @@ export const Canvas = () => {
             zIndex: 100,
           }}
         >
-          <GameStoreLiveFeed />
+          {/* <GameStoreLiveFeed /> */}
         </div>
       </div>
       {/* New Div Below Canvas */}
@@ -189,9 +189,9 @@ export const Canvas = () => {
           }}
         >
           <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
-            <MultiplayerVideoFeed />
+            {/* <MultiplayerVideoFeed /> */}
           </div>
-          <MultiplayerChat />
+          {/* <MultiplayerChat /> */}
         </div>
       </div>
     </div>
