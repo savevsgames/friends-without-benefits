@@ -10,9 +10,9 @@ const MultiPlayerModal: React.FC = () => {
 
   return (
     <div>
-      <button onClick={openModal} className="border btn bg-teal-100">
-        Open Multiplayer Manager
-      </button>
+      <h1 onClick={openModal} className="">
+        Multiplayer Manager
+      </h1>
 
       <ReactModal
         isOpen={isModalOpen}
@@ -35,15 +35,6 @@ const MultiPlayerModal: React.FC = () => {
           },
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <h2 className="font-bold text-lg pb-1 text-center">
-            Multiplayer Connection Manager
-          </h2>
-          <button onClick={closeModal} style={{ fontSize: "1.2rem" }}>
-            X
-          </button>
-        </div>
-        <hr className="pb-2" />
         <MultiplayerConnectionManager />
       </ReactModal>
     </div>
