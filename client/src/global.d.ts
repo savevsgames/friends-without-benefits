@@ -8,6 +8,8 @@ declare global {
     Prediction: Prediction; // Adding `Prediction` to the window object
     Predictions: Prediction[];
     ml5: ml5Library; // Adding `ml5` to the window object for ml5.js
+    ml5Loaded?: boolean; // Flag to check if ml5.js has been loaded
+    myMl5Detector?: ml5ObjectDetector; // Adding `myMl5Detector` to the window object for ml5.js object detection
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tf: any; // Adding `tf` to the window object for TensorFlow.js
   }

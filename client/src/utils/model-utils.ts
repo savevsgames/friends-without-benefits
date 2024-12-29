@@ -294,9 +294,21 @@ export const drawBoundingBoxes = (predictions: any): void => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     predictions.forEach((prediction: any) => {
-      const { bbox, class: className, score: confScore } = prediction;
+      // Map your existing properties to the ones the function expects
+      prediction.bbox = [
+        prediction.x,
+        prediction.y,
+        prediction.width,
+        prediction.height,
+      ];
+      prediction.className = prediction.label;
+      prediction.score = prediction.confidence;
+
+      // const { bbox, class: className, score: confScore } = prediction;
       // Use raw coordinates from prediction - they're already in source dimensions
-      const [x, y, width, height] = bbox.map((val: number) => val);
+      const [x, y, width, height] = prediction.bbox;
+      const className = prediction.className;
+      const confScore = prediction.score;
       const color = colorForLabels(className);
 
       // Draw bounding box and label box
