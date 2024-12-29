@@ -6,8 +6,8 @@ import io from "socket.io-client";
 import { initializeSocket } from "@/utils/multiplayer-utils";
 import { enableWebcam } from "@/utils/model-utils";
 // import { initializePeer } from "@/utils/multiplayer-utils";
-
-import MultiplayerChat from "./MultiplayerChat";
+import { IMultiplayerState } from "@/store";
+import { IGameState } from "@/store";
 
 const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
@@ -197,6 +197,53 @@ const MultiplayerConnectionManager: React.FC = () => {
     }
   }, [isConnected]);
 
+  useEffect(() => {
+    const socket = useMultiplayerStore.getState().socket;
+
+    if (!socket) {
+      console.error("❌ Socket.IO connection not established.");
+      return;
+    }
+
+    // Listen for state updates to either game or multiplayer store
+    socket.on(
+      "stateUpdate",
+      ({
+        store,
+        updates,
+      }: {
+        store: "game" | "multiplayer";
+        updates: Partial<IGameState | IMultiplayerState>;
+      }) => {
+        if (store === "game") {
+          console.log(`🔄 Incoming GameStore Update (${store}):`, updates);
+          useGameStore
+            .getState()
+            .incomingUpdate(updates as Partial<IGameState>);
+        } else if (store === "multiplayer") {
+          console.log(
+            `🔄 Incoming MultiplayerStore Update (${store}):`,
+            updates
+          );
+          useMultiplayerStore
+            .getState()
+            .incomingUpdate(updates as Partial<IMultiplayerState>);
+        }
+      }
+    );
+
+    // Listen for chat messages
+    // socket.on("chat-message", (data: { sender: string; message: string }) => {
+    //   console.log("💬 Chat Message Received:", data);
+    //   useMultiplayerStore.getState().addChatMessage(data);
+    // });
+
+    return () => {
+      socket.off("stateUpdate");
+      // socket.off("chat-message");
+    };
+  }, []);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
       <h3 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
@@ -250,9 +297,6 @@ const MultiplayerConnectionManager: React.FC = () => {
         <button className="border btn" onClick={handleJoinMultiplayerRoom}>
           Join Game
         </button>
-      </div>
-      <div>
-        <MultiplayerChat />
       </div>
     </div>
   );

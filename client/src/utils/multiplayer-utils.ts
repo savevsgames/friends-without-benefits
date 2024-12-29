@@ -1,5 +1,7 @@
 import io from "socket.io-client";
 import { Peer } from "peerjs";
+import { IGameState, useGameStore } from "@/store";
+import { IMultiplayerState, useMultiplayerStore } from "@/store";
 
 /**
  * Initialize Socket.IO connection
@@ -48,4 +50,37 @@ export const initializePeer = (): Peer => {
   });
 
   return peer;
+};
+
+type StoreUpdateData = {
+  gameUpdates?: Partial<IGameState>;
+  multiplayerUpdates?: Partial<IMultiplayerState>;
+};
+
+// Handles sending state updates to the server which will broadcast to all clients
+export const sendStateUpdate = ({
+  gameUpdates,
+  multiplayerUpdates,
+}: StoreUpdateData) => {
+  const socket = useMultiplayerStore.getState().socket;
+
+  if (!socket) {
+    console.error("No socket connection");
+    return;
+  }
+  socket.emit("storeUpdate", {
+    gameUpdates,
+    multiplayerUpdates,
+  });
+
+  if (gameUpdates) {
+    console.log("Game State Updated:", gameUpdates);
+    useGameStore.getState().outgoingUpdate(gameUpdates);
+    socket.emit("gameStateUpdate", gameUpdates);
+  }
+
+  if (multiplayerUpdates) {
+    console.log("Multiplayer State Updated:", multiplayerUpdates);
+    useMultiplayerStore.getState().outgoingUpdate(multiplayerUpdates);
+  }
 };
