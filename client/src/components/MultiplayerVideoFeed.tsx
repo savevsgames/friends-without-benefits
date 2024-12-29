@@ -40,6 +40,29 @@ const MultiplayerVideoFeed: React.FC = () => {
       // TODO:
       // eventually add a parameter to the store as a flag to indicate that the stream is incoming
       // for MVP it should work to just set isReady to true to enable both the incoming stream and outgoing stream
+
+      // Request Opponent's peerId using socket io
+      socket.emit("requestOpponentId", { from: playerId });
+      socket.on("opponentId", (opponentId: string) => {
+        if (!opponentId) {
+          console.error("No opponentId found...");
+          return;
+        }
+        console.log("Calling opponent with id: ", opponentId);
+        // Create a call to opponent by id to send webcam stream
+        const call = peer.call(opponentId, stream);
+        call.on("stream", (remoteStream) => {
+          console.log("Outgoing Stream Enabled...");
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = remoteStream;
+          }
+        });
+
+        call.on("error", (error) => {
+          console.error("Error calling opponent: ", error);
+        });
+      });
+      // Update Zustand using socket.io
       socket.emit("storeUpdate", {
         updates: { isReady: true },
         playerId: playerId,
@@ -58,11 +81,13 @@ const MultiplayerVideoFeed: React.FC = () => {
       }
       peer.on("call", async (call) => {
         console.log("Incoming call from opponent: ", call.peer);
+        // Enable the webcam stream for the opponent
         const stream = await enableWebcam(true);
         if (!stream) {
           console.error("Error enabling webcam stream...");
           return;
         }
+        // Respond to the call with the webcam stream
         call.answer(stream);
         call.on("stream", (remoteStream) => {
           console.log("Incoming Stream Enabled...");

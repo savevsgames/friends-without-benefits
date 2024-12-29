@@ -1,7 +1,10 @@
 import { useGameStore, useMultiplayerStore } from "@/store";
 
 // Helper function to safely stringify objects without throwing errors
-const safeStringify = (obj: Record<string, unknown>) => {
+const safeStringify = (
+  obj: Record<string, unknown>,
+  maxLength: number = 20
+) => {
   try {
     const objectCache = new Set();
     return JSON.stringify(
@@ -18,6 +21,10 @@ const safeStringify = (obj: Record<string, unknown>) => {
         }
         if (typeof value === "function") {
           return `[Function: ${value.name || "Anonymous () "}]` + `=> {...}`;
+        }
+        // Trim non-string values to maxLength
+        if (typeof value !== "string" && !Array.isArray(value)) {
+          return JSON.stringify(value).substring(0, maxLength) + "...";
         }
         return value;
       },
