@@ -54,12 +54,7 @@ const MultiplayerChat = () => {
     };
 
     // Clean-up: when socket is disconnected, remove the event listener
-  }, [socket, addChatMessage, playerId]);
-
-  // Update chat message state on change
-  useEffect(() => {
-    console.log("Chat Messages Updated:", chatMessages);
-  }, [chatMessages]);
+  }, [socket, addChatMessage, playerId, chatMessages]);
 
   // Send message to the socket.io server
   const sendMessage = () => {
