@@ -246,9 +246,9 @@ const MultiplayerConnectionManager: React.FC = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-      <h3 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+      {/* <h3 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
         Multiplayer Connection Manager
-      </h3>
+      </h3> */}
       <div className="grid grid-cols-2 gap-4">
         {/* Reconnect to Socket.IO */}
         <button

@@ -115,13 +115,14 @@ const startApolloServer = async () => {
       const opponent = Array.from(connectedUsers.entries()).find(
         // Find a key-value pair that is not the user's own socket.id
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ([key, value]) => key !== socket.id
+        ([key, _value]) => key !== socket.id
       );
 
       if (opponent) {
         const [socketId, peerId] = opponent;
         socket.emit("opponentId", { opponentId: peerId });
         console.log(`📤 Sent opponentId: ${peerId} to ${from}`);
+        console.log("socket ID", socketId)
       } else {
         console.warn("❗ No opponent available");
         socket.emit("opponentId", { opponentId: null });
