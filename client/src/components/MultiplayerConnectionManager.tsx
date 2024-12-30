@@ -29,46 +29,13 @@ const MultiplayerConnectionManager: React.FC = () => {
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
-  // useEffect(() => {
-  //   // Initialize socket.io connection with POLLING first to avoid CORS and blocking issues and provide more compatibility and fallback
-  //   const socketIo = io("http://localhost:3001", {
-  //     path: "/socket.io",
-  //     transports: ["polling", "websocket"],
-  //     reconnection: true,
-  //     reconnectionAttempts: 5,
-  //     reconnectionDelay: 1000,
-  //   });
-
-  //   socketIo.on("connect", () => {
-  //     console.log("✅ Socket.IO Connected:", socketIo.id);
-  //     setSocket(socketIo);
-  //   });
-
-  //   socketIo.on("disconnect", () => {
-  //     console.log("❌ Socket.IO Disconnected");
-  //   });
-
-  //   socketIo.on("connect_error", (error: Error) => {
-  //     console.error("❗ Socket.IO Connection Error:", error);
-  //   });
-
-  //   // Save socket instance to store when the socket responds to one of the events
-  //   setSocket(socketIo);
-
-  //   return () => {
-  //     // Cleanup function to drop socket.io connection
-  //     // socketIo.disconnect();
-  //   };
-  // }, [setSocket]);
-
   // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
   // USING BUTTON CLICK TO TRIGGER CONNECTION
-  // Currently initializes without a peer ID, will be assigned one after connection (undefined)
 
   const handlePeerJSInitialization = () => {
     // TODO: Check store first to see if peer exists? or disable button if peer exists?
     const peerJs = useMultiplayerStore.getState().peer || new Peer();
-    // console.log("Initializing PeerJS connection...");
+    console.log("Initializing PeerJS connection...");
 
     // const peerJs = new Peer({
     //   host: "localhost",
