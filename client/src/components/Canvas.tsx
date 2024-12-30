@@ -236,22 +236,18 @@ export const Canvas = () => {
           {/* <GameStoreLiveFeed /> */}
         </div>
       </div>
-      {/* New Div Below Canvas */}
+      {/* New Div Right of Canvas */}
       <div
-        className="relative z-20 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-md rounded-lg"
+        className="relative z-20 p-4"
         style={{
           marginTop: "10px",
         }}
       >
-        <h3 className="text-xl font-bold text-gray-700 dark:text-gray-200 my-2 underline-offset-4 underline">
-          This is an option for the multiplayer video/chat area.
-        </h3>
         <div
           style={{
             display: "grid",
-            gridTemplateRows: "1fr 1fr",
+            gridTemplateRows: "2fr 5fr",
             gap: "2rem",
-            border: "1px solid black",
           }}
         >
           <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
