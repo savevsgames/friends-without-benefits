@@ -1,5 +1,6 @@
 // Note: Utility functions for the application
 import { useGameStore } from "@/store";
+import { useMultiplayerStore } from "@/store";
 
 /**
  * Load a given image file into the canvas.
@@ -144,6 +145,7 @@ export const enableWebcam = async (
       console.error("Canvas container not found.");
       return null;
     }
+    const setWebcamEnabled = useMultiplayerStore.getState().setWebcamEnabled;
     // Stop any existing streams
     if (videoElement.srcObject) {
       const existingStream = videoElement.srcObject as MediaStream;
@@ -172,6 +174,7 @@ export const enableWebcam = async (
       // Unmute the video when sharing webcam connection.
       videoElement.muted = false;
       //TODO: Add streaming logic here for peer.js
+      setWebcamEnabled(true);
     }
 
     await new Promise<void>((resolve) => {

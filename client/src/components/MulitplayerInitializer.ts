@@ -7,8 +7,15 @@ import io from "socket.io-client";
 // mulitplayer connection manager component, but now that the manager is a modal this must
 // load in a higher level component that wont lose context
 const MultiplayerInitializer: React.FC = () => {
-  const { setSocket, setPeer, setPlayerId, setIsConnected } =
-    useMultiplayerStore();
+  const {
+    playerId,
+    roomId,
+    setRoomId,
+    setSocket,
+    setPeer,
+    setPlayerId,
+    setIsConnected,
+  } = useMultiplayerStore();
 
   useEffect(() => {
     const socketIo = io("http://localhost:3001", {
@@ -38,13 +45,23 @@ const MultiplayerInitializer: React.FC = () => {
     });
 
     peerJs.on("open", (id) => {
-      console.log("✅ PeerJS connected:", id);
-      setPeer(peerJs);
-      setPlayerId(id);
+      console.log("PeerJS connection established with ID:", id);
+
+      setPlayerId(id); // Save player ID to store
+      console.log("🆔 Player ID:", playerId);
+
+      // Both players will have their own room ID until they
+      // create a room OR join another player's room
+      setRoomId(id); // Set the room ID to the local peer ID
+
+      console.log("🏠 Room ID:", roomId);
+
+      setPeer(peerJs); // Save peer instance to store
     });
 
     peerJs.on("connection", (conn) => {
       console.log("🔗 PeerJS Connection:", conn.peer);
+
       setIsConnected(true);
     });
 

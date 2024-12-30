@@ -181,6 +181,7 @@ export interface IMultiplayerState {
   roomId: string | null; // Current multiplayer room ID
   isConnected: boolean; // Connection state
   isHost: boolean; // Is this client the host?
+  webcamEnabled: boolean; // Is the webcam enabled?
   chatMessages: { sender: string; message: string }[]; // Chat message history
   gameStartTime: number | null; // Track when the game starts
   inviteLink: string | null; // Generated invite link for a challenger
@@ -192,6 +193,7 @@ export interface IMultiplayerState {
   setIsConnected: (connected: boolean) => void;
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
+  setWebcamEnabled: (enabled: boolean) => void;
   addChatMessage: (message: { sender: string; message: string }) => void;
   setInviteLink: (link: string) => void;
   setGameStartTime: (time: number) => void;
@@ -208,6 +210,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   roomId: null,
   isConnected: false,
   isHost: false,
+  webcamEnabled: false,
   chatMessages: [],
   gameStartTime: null,
   inviteLink: null,
@@ -228,6 +231,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   setIsConnected: (connected) => set({ isConnected: connected }),
   setRoomId: (id) => set({ roomId: id }),
   setIsHost: (isHost) => set({ isHost }),
+  setWebcamEnabled: (enabled) => set({ webcamEnabled: enabled }),
   addChatMessage: (message) =>
     set((state) => ({ chatMessages: [...state.chatMessages, message] })),
   setInviteLink: (link) => set({ inviteLink: link }),

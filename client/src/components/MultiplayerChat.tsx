@@ -44,8 +44,8 @@ const MultiplayerChat = () => {
     }
 
     // Attach the event listener only once
-    socket.on("chat-message", handleChatMessage);
     isListenerAttached.current = true;
+    socket.on("chat-message", handleChatMessage);
 
     return () => {
       // Update the ref to allow re-attaching the listener
@@ -54,7 +54,7 @@ const MultiplayerChat = () => {
     };
 
     // Clean-up: when socket is disconnected, remove the event listener
-  }, [socket, addChatMessage, playerId, chatMessages]);
+  }, [socket, addChatMessage, playerId]);
 
   // Send message to the socket.io server
   const sendMessage = () => {

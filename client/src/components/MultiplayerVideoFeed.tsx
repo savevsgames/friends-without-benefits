@@ -43,6 +43,7 @@ const MultiplayerVideoFeed: React.FC = () => {
 
       // Request Opponent's peerId using socket io
       socket.emit("requestOpponentId", { from: playerId });
+      console.log("Requesting opponentId from server...");
       socket.on("opponentId", (opponentId: string) => {
         if (!opponentId) {
           console.error("No opponentId found...");
@@ -76,7 +77,7 @@ const MultiplayerVideoFeed: React.FC = () => {
   useEffect(() => {
     try {
       if (!peer) {
-        console.error("Peer not initialized...");
+        console.log("Peer not initialized...");
         return;
       }
       peer.on("call", async (call) => {
