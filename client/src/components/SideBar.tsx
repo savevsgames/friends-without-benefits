@@ -13,6 +13,9 @@ import {
 import { IoLogoGameControllerA } from "react-icons/io";
 import { MdDashboard } from "react-icons/md";
 import { FaPeopleGroup } from "react-icons/fa6";
+import { FaImage } from "react-icons/fa";
+import { FaHourglassStart } from "react-icons/fa";
+import { RiWebcamFill } from "react-icons/ri";
 import LoadImageButton from "./buttons/LoadImageButton";
 import MultiPlayerModal from "./MultiplayerModal";
 import PauseVideoButton from "./buttons/PauseVideoButton";
@@ -34,7 +37,10 @@ const SideBar = () => {
 
   return (
     <>
-      <Sidebar collapsed={isCollapsed} className="h-screen">
+      <Sidebar
+        collapsed={isCollapsed}
+        className="bg-zinc-100 h-screen absolute top-0 left-0 z-10"
+      >
         {/* Hamburger Button to open the sidebar */}
         <div className="flex justify-center py-4">
           <button
@@ -49,23 +55,24 @@ const SideBar = () => {
           <SubMenu
             label="Control Panel"
             icon={<IoLogoGameControllerA size={26} />}
+            className="z-21"
           >
-            <MenuItem icon={<FaPlay />}>
+            <MenuItem icon={<FaImage />}>
               <LoadImageButton />
             </MenuItem>
             <MenuItem icon={<FaPause />}>
               <PauseVideoButton />
             </MenuItem>
-            <MenuItem icon={<FaVideo />}>
+            <MenuItem icon={<RiWebcamFill />}>
               <LoadWebcamButton />
             </MenuItem>
-            <MenuItem icon={<FaRocket />}>
+            <MenuItem icon={<FaPlay />}>
               <PlayStopVideoButton />
             </MenuItem>
-            <MenuItem icon={<FaRocket />}>
+            <MenuItem icon={<FaHourglassStart />}>
               <RunDetectionButton />
             </MenuItem>
-            <MenuItem icon={<FaRocket />}>
+            <MenuItem icon={<FaVideo />}>
               <LoadVideoButton />
             </MenuItem>
           </SubMenu>

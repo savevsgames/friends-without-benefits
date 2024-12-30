@@ -28,14 +28,14 @@ export default function Header() {
 
   const icon = (theme: string) => {
     if (theme === "light") {
-      return <IoMoon style={{ color: "teal" }} />;
+      return <IoMoon style={{ color: "gray" }} />;
     } else {
-      return <IoSunny style={{ color: "teal" }} />;
+      return <IoSunny style={{ color: "black" }} />;
     }
   };
 
   return (
-    <nav className="bg-gradient-to-r from-teal-800 via-teal-500 to-teal-300 dark:from-black dark:via-neutral-950 dark:to-teal-950 border-b-2">
+    <nav className="bg-zinc-50 dark:from-black dark:via-neutral-950 dark:to-teal-950 z-0">
       <div className="mx-auto max-w-9xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -73,8 +73,8 @@ export default function Header() {
                     to={item.page}
                     className={classNames(
                       location.pathname === item.page
-                        ? "text-white underline underline-offset-4 dark:text-white dark:underline"
-                        : "text-white hover:underline  dark:text-gray-400 dark:hover:text-white dark:hover:underline",
+                        ? "text-neutral-950 underline underline-offset-4 dark:text-white dark:underline"
+                        : "text-neutral-950 hover:underline  dark:text-gray-400 dark:hover:text-white dark:hover:underline",
                       "px-3 py-2 font-bold text-sm sm:text-base md:text-sm lg:text-base"
                     )}
                   >
