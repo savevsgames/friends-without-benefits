@@ -115,7 +115,9 @@ const MultiplayerVideoFeed: React.FC = () => {
         ref={remoteVideoRef}
         id="challenger-video-output"
         autoPlay
-        style={{ border: "1px solid black" }}
+        style={{
+          border: "1px solid black",
+        }}
       />
       <button onClick={enableOutgoingWebcamStream}>
         Enable Outgoing Stream
