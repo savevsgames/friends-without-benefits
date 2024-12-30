@@ -1,11 +1,16 @@
-
 import { useState, useEffect, useRef } from "react";
 
 import { useMultiplayerStore } from "@/store";
+import GameStoreLiveFeed from "./GameStoreLiveFeed";
 
 const MultiplayerChat = () => {
-  const { socket, isConnected, chatMessages, addChatMessage, playerId } =
-    useMultiplayerStore();
+  const {
+    socket,
+    // isConnected,
+    chatMessages,
+    addChatMessage,
+    playerId,
+  } = useMultiplayerStore();
 
   // For local chat message state on react / DOM component
   const [message, setMessage] = useState<string>("");
@@ -81,9 +86,9 @@ const MultiplayerChat = () => {
     setMessage("");
   };
 
-  if (!isConnected) {
-    return <div>Connecting...</div>;
-  }
+  // if (!isConnected) {
+  //   return <div>Connecting...</div>;
+  // }
 
   return (
     <div>
@@ -121,12 +126,7 @@ const MultiplayerChat = () => {
           </p>
         ))}
       </div>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Asperiores
-        esse nobis dicta itaque ratione soluta praesentium facilis beatae
-        possimus? Autem hic reprehenderit iusto cumque dicta sequi explicabo
-        distinctio aut accusamus.
-      </p>
+      <GameStoreLiveFeed />
     </div>
   );
 };
