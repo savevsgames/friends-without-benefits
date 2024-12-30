@@ -23,10 +23,11 @@ import RunDetectionButton from "./buttons/RunDetectionButton";
 import PlayStopVideoButton from "./buttons/PlayStopVideoButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import LoadVideoButton from "./buttons/LoadVideoButton";
+// import { useUserSession } from "@/store";
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
-
+  // const user = useUserSession((state) => state.user)
   const sidebarIcon = () => {
     if (isCollapsed) {
       return <FaBars size={22} />;
@@ -39,9 +40,9 @@ const SideBar = () => {
     <>
       <Sidebar
         collapsed={isCollapsed}
-        className="bg-zinc-100 h-screen absolute top-0 left-0 z-10"
+        className="bg-zinc-100 h-screen absolute top-0 left-0 z-30"
       >
-        {/* Hamburger Button to open the sidebar */}
+        {/* Hamburger Button to open the sidebar or X button to close it */}
         <div className="flex justify-center py-4">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -51,6 +52,22 @@ const SideBar = () => {
           </button>
         </div>
         <Menu>
+          {/* user profile picture and username */}
+          <div
+            className={`transition-opacity duration-300 ${
+              isCollapsed ? "hidden" : "block"
+            }`}
+          >
+            <div className="flex flex-col items-center mb-3">
+              <img
+                alt="user profile"
+                src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
+                className="w-1/2 h-1/2 cursor-pointer rounded-full mb-2"
+              ></img>
+              <h1 className="my-2 text-center">User Username</h1>
+            </div>
+          </div>
+
           {/* Control Panel SubMenu */}
           <SubMenu
             label="Control Panel"
