@@ -4,7 +4,7 @@ import Header from "@/components/Header.tsx";
 import Canvas from "../components/Canvas.tsx";
 
 import { useGameStore } from "@/store";
-// import MultiplayerConnectionManager from "@/components/MultiplayerConnectionManager.tsx";
+import MultiplayerInitializer from "@/components/MulitplayerInitializer.ts";
 import { loadModel } from "@/utils/ml5-model-utils.ts";
 import SideBar from "@/components/SideBar.tsx";
 
@@ -59,6 +59,8 @@ function Game() {
 
   return (
     <>
+      {/* Multiplayer initializer has no dimensions - used to initialize socket-io and peerjs with server */}
+      <MultiplayerInitializer />
       <div className="grid grid-cols-[auto,1fr] h-screen overflow-auto bg-zinc-50 dark:bg-gradient-to-r dark:from-black dark:via-neutral-950 dark:to-teal-950">
         {/* Sidebar */}
         <div className="h-full flex-none">

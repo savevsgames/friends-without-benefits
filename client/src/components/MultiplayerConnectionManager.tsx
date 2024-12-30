@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGameStore, useMultiplayerStore } from "@/store";
 import { Peer } from "peerjs";
-import io from "socket.io-client";
+// import io from "socket.io-client";
 // Repeatable functions to connect to Socket.IO and PeerJS
 import { initializeSocket } from "@/utils/multiplayer-utils";
 import { enableWebcam } from "@/utils/model-utils";
@@ -29,37 +29,37 @@ const MultiplayerConnectionManager: React.FC = () => {
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
-  useEffect(() => {
-    // Initialize socket.io connection with POLLING first to avoid CORS and blocking issues and provide more compatibility and fallback
-    const socketIo = io("http://localhost:3001", {
-      path: "/socket.io",
-      transports: ["polling", "websocket"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+  // useEffect(() => {
+  //   // Initialize socket.io connection with POLLING first to avoid CORS and blocking issues and provide more compatibility and fallback
+  //   const socketIo = io("http://localhost:3001", {
+  //     path: "/socket.io",
+  //     transports: ["polling", "websocket"],
+  //     reconnection: true,
+  //     reconnectionAttempts: 5,
+  //     reconnectionDelay: 1000,
+  //   });
 
-    socketIo.on("connect", () => {
-      console.log("✅ Socket.IO Connected:", socketIo.id);
-      setSocket(socketIo);
-    });
+  //   socketIo.on("connect", () => {
+  //     console.log("✅ Socket.IO Connected:", socketIo.id);
+  //     setSocket(socketIo);
+  //   });
 
-    socketIo.on("disconnect", () => {
-      console.log("❌ Socket.IO Disconnected");
-    });
+  //   socketIo.on("disconnect", () => {
+  //     console.log("❌ Socket.IO Disconnected");
+  //   });
 
-    socketIo.on("connect_error", (error: Error) => {
-      console.error("❗ Socket.IO Connection Error:", error);
-    });
+  //   socketIo.on("connect_error", (error: Error) => {
+  //     console.error("❗ Socket.IO Connection Error:", error);
+  //   });
 
-    // Save socket instance to store when the socket responds to one of the events
-    setSocket(socketIo);
+  //   // Save socket instance to store when the socket responds to one of the events
+  //   setSocket(socketIo);
 
-    return () => {
-      // Cleanup function to drop socket.io connection
-      socketIo.disconnect();
-    };
-  }, [setSocket]);
+  //   return () => {
+  //     // Cleanup function to drop socket.io connection
+  //     // socketIo.disconnect();
+  //   };
+  // }, [setSocket]);
 
   // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
   // USING BUTTON CLICK TO TRIGGER CONNECTION
@@ -67,13 +67,15 @@ const MultiplayerConnectionManager: React.FC = () => {
 
   const handlePeerJSInitialization = () => {
     // TODO: Check store first to see if peer exists? or disable button if peer exists?
-    console.log("Initializing PeerJS connection...");
+    const peerJs = useMultiplayerStore.getState().peer || new Peer();
+    // console.log("Initializing PeerJS connection...");
 
-    const peerJs = new Peer({
-      host: "localhost",
-      port: 3001,
-      path: "/peerjs",
-    });
+    // const peerJs = new Peer({
+    //   host: "localhost",
+    //   port: 3001,
+    //   path: "/peerjs",
+    // });
+    //
 
     // When peer is initialized, update the store with the peerId and player ID and set connection status
     peerJs.on("open", (id) => {
@@ -233,14 +235,14 @@ const MultiplayerConnectionManager: React.FC = () => {
     );
 
     // Listen for chat messages
-    // socket.on("chat-message", (data: { sender: string; message: string }) => {
-    //   console.log("💬 Chat Message Received:", data);
-    //   useMultiplayerStore.getState().addChatMessage(data);
-    // });
+    socket.on("chat-message", (data: { sender: string; message: string }) => {
+      console.log("💬 Chat Message Received:", data);
+      useMultiplayerStore.getState().addChatMessage(data);
+    });
 
     return () => {
       socket.off("stateUpdate");
-      // socket.off("chat-message");
+      socket.off("chat-message");
     };
   }, []);
 

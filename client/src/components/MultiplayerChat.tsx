@@ -32,7 +32,7 @@ const MultiplayerChat = () => {
     // Handle incoming chat messages
     const handleChatMessage = (data: { sender: string; message: string }) => {
       // Add a check to see if the sender is the current player to avoid echoing the message
-      if (data.sender === playerId) return;
+      // if (data.sender === playerId) return; - not needed for now
 
       addChatMessage(data);
       console.log("Chat Message Received:", data);
@@ -56,10 +56,10 @@ const MultiplayerChat = () => {
     // Clean-up: when socket is disconnected, remove the event listener
   }, [socket, addChatMessage, playerId]);
 
-  // // Update chat message state on change
-  // useEffect(() => {
-  //   console.log("Chat Messages Updated:", chatMessages);
-  // }, [chatMessages]);
+  // Update chat message state on change
+  useEffect(() => {
+    console.log("Chat Messages Updated:", chatMessages);
+  }, [chatMessages]);
 
   // Send message to the socket.io server
   const sendMessage = () => {
