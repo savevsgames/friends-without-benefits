@@ -1,5 +1,6 @@
 // Note: Utility functions for the application
 import { useGameStore } from "@/store";
+import { useMultiplayerStore } from "@/store";
 
 /**
  * Load a given image file into the canvas.
@@ -8,7 +9,7 @@ import { useGameStore } from "@/store";
 export const loadImageToCanvas = async (file: File): Promise<void> => {
   const reader = new FileReader();
 
-  reader.onload = (event: ProgressEvent<FileReader>) => {
+  reader.onload = async (event: ProgressEvent<FileReader>) => {
     const imageElement = document.getElementById(
       "image-output"
     ) as HTMLImageElement;
@@ -17,14 +18,30 @@ export const loadImageToCanvas = async (file: File): Promise<void> => {
       "canvas-main"
     ) as HTMLCanvasElement;
 
-    if (!imageElement || !canvasElement) {
-      console.error("Required element image-output - not found.");
+    const canvasContainer = document.getElementById(
+      "canvas-container"
+    ) as HTMLDivElement;
+
+    if (!imageElement || !canvasElement || !canvasContainer) {
+      console.error("Required elements not found.");
       return;
     }
     imageElement.src = event.target?.result as string;
+    // Resize the CANVAS-CONTAINER to match the image dimensions
+    await new Promise<void>((resolve) => {
+      imageElement.onloadedmetadata = () => {
+        console.log(
+          `Image dimensions: ${imageElement.width}x${imageElement.height}`
+        );
+        // Dynamically set the canvas-container height to update the css so that the relative positioning works
+        canvasContainer.style.height = `${imageElement.clientHeight}px`;
+        resolve();
+      };
+    });
+
     imageElement.onload = () => {
       try {
-        // Set image source to the loaded image
+        // Set canvas size to the loaded image dimensions
         canvasElement.width = imageElement.naturalWidth;
         canvasElement.height = imageElement.naturalWidth;
         console.log(
@@ -128,6 +145,7 @@ export const enableWebcam = async (
       console.error("Canvas container not found.");
       return null;
     }
+    const setWebcamEnabled = useMultiplayerStore.getState().setWebcamEnabled;
     // Stop any existing streams
     if (videoElement.srcObject) {
       const existingStream = videoElement.srcObject as MediaStream;
@@ -156,6 +174,7 @@ export const enableWebcam = async (
       // Unmute the video when sharing webcam connection.
       videoElement.muted = false;
       //TODO: Add streaming logic here for peer.js
+      setWebcamEnabled(true);
     }
 
     await new Promise<void>((resolve) => {

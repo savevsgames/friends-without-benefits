@@ -43,6 +43,7 @@ const MultiplayerVideoFeed: React.FC = () => {
 
       // Request Opponent's peerId using socket io
       socket.emit("requestOpponentId", { from: playerId });
+      console.log("Requesting opponentId from server...");
       socket.on("opponentId", (opponentId: string) => {
         if (!opponentId) {
           console.error("No opponentId found...");
@@ -76,7 +77,7 @@ const MultiplayerVideoFeed: React.FC = () => {
   useEffect(() => {
     try {
       if (!peer) {
-        console.error("Peer not initialized...");
+        console.log("Peer not initialized...");
         return;
       }
       peer.on("call", async (call) => {
@@ -109,15 +110,39 @@ const MultiplayerVideoFeed: React.FC = () => {
   return (
     <div
       id="challenger-video-wrapper"
-      style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
+      style={{
+        display: "flex",
+        gap: "1rem",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        maxHeight: "30vh",
+        border: "1px solid black",
+      }}
     >
       <video
         ref={remoteVideoRef}
         id="challenger-video-output"
         autoPlay
-        style={{ border: "1px solid black" }}
+        style={{
+          width: "100%",
+          height: "auto",
+        }}
       />
-      <button onClick={enableOutgoingWebcamStream}>
+      <button
+        onClick={enableOutgoingWebcamStream}
+        style={{
+          width: "60%",
+          height: "auto",
+          maxHeight: "50px",
+          backgroundColor: "green",
+          borderRadius: "5px",
+          color: "white",
+          padding: "0.5rem",
+          margin: "1rem",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        }}
+      >
         Enable Outgoing Stream
       </button>
     </div>

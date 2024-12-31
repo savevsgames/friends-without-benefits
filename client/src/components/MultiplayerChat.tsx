@@ -1,11 +1,16 @@
-
 import { useState, useEffect, useRef } from "react";
 
 import { useMultiplayerStore } from "@/store";
+import GameStoreLiveFeed from "./GameStoreLiveFeed";
 
 const MultiplayerChat = () => {
-  const { socket, isConnected, chatMessages, addChatMessage, playerId } =
-    useMultiplayerStore();
+  const {
+    socket,
+    // isConnected,
+    chatMessages,
+    addChatMessage,
+    playerId,
+  } = useMultiplayerStore();
 
   // For local chat message state on react / DOM component
   const [message, setMessage] = useState<string>("");
@@ -27,7 +32,7 @@ const MultiplayerChat = () => {
     // Handle incoming chat messages
     const handleChatMessage = (data: { sender: string; message: string }) => {
       // Add a check to see if the sender is the current player to avoid echoing the message
-      if (data.sender === playerId) return;
+      // if (data.sender === playerId) return; - not needed for now
 
       addChatMessage(data);
       console.log("Chat Message Received:", data);
@@ -39,8 +44,8 @@ const MultiplayerChat = () => {
     }
 
     // Attach the event listener only once
-    socket.on("chat-message", handleChatMessage);
     isListenerAttached.current = true;
+    socket.on("chat-message", handleChatMessage);
 
     return () => {
       // Update the ref to allow re-attaching the listener
@@ -50,11 +55,6 @@ const MultiplayerChat = () => {
 
     // Clean-up: when socket is disconnected, remove the event listener
   }, [socket, addChatMessage, playerId]);
-
-  // // Update chat message state on change
-  // useEffect(() => {
-  //   console.log("Chat Messages Updated:", chatMessages);
-  // }, [chatMessages]);
 
   // Send message to the socket.io server
   const sendMessage = () => {
@@ -81,9 +81,9 @@ const MultiplayerChat = () => {
     setMessage("");
   };
 
-  if (!isConnected) {
-    return <div>Connecting...</div>;
-  }
+  // if (!isConnected) {
+  //   return <div>Connecting...</div>;
+  // }
 
   return (
     <div>
@@ -121,12 +121,7 @@ const MultiplayerChat = () => {
           </p>
         ))}
       </div>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Asperiores
-        esse nobis dicta itaque ratione soluta praesentium facilis beatae
-        possimus? Autem hic reprehenderit iusto cumque dicta sequi explicabo
-        distinctio aut accusamus.
-      </p>
+      <GameStoreLiveFeed />
     </div>
   );
 };

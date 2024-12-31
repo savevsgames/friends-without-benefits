@@ -112,6 +112,7 @@ const startApolloServer = async () => {
       console.log(`🔍 Opponent ID requested by: ${from}`);
       // Find the first available opponent - later we can implement an
       // array where all connected users and loop through them
+      console.log("Connected Users", connectedUsers);
       const opponent = Array.from(connectedUsers.entries()).find(
         // Find a key-value pair that is not the user's own socket.id
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -122,7 +123,7 @@ const startApolloServer = async () => {
         const [socketId, peerId] = opponent;
         socket.emit("opponentId", { opponentId: peerId });
         console.log(`📤 Sent opponentId: ${peerId} to ${from}`);
-        console.log("socket ID", socketId)
+        console.log("socket ID", socketId);
       } else {
         console.warn("❗ No opponent available");
         socket.emit("opponentId", { opponentId: null });
