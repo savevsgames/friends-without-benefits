@@ -1,5 +1,5 @@
 import { useGameStore } from "@/store";
-import { runDetectionOnCurrentMedia } from "@/utils/model-utils";
+import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
 // import { runDetectionOnCurrentMedia } from "@/utils/ml5-model-utils"; // ml5 version
 
 const RunDetectionButton = () => {

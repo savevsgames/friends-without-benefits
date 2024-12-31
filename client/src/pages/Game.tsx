@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import Header from "@/components/Header.tsx";
-
 import Canvas from "../components/Canvas.tsx";
 
 import { useGameStore } from "@/store";
@@ -12,6 +11,10 @@ function Game() {
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
   const setCanvasReady = useGameStore((state) => state.setCanvasReady);
 
+  /**
+   *  Ml5 & COCO-SSD Model Loading
+   *
+   * */
   // const loadMl5Model = async () => {
   //   console.log("Loading ml5 model...");
   //   try {
@@ -39,22 +42,71 @@ function Game() {
   //   return () => clearInterval(interval);
   // }, [setCanvasReady]);
 
+  /**
+   *  TFJS & COCO-SSD Model Loading
+   *
+   * */
+  // useEffect(() => {
+  //   const initializeModel = async () => {
+  //     console.log("Loading TensorFlow.js COCO-SSD Model...");
+  //     try {
+  //       const cocoSsd = await window.cocoSsd?.load();
+  //       if (cocoSsd) {
+  //         window.cocoSsd = cocoSsd;
+  //         console.log("COCO-SSD Model successfully loaded!");
+  //       } else {
+  //         console.error("COCO-SSD Model failed to load.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error loading TensorFlow model:", error);
+  //     }
+  //   };
+  //   initializeModel();
+  // }, [setCanvasReady]);
+
+  /**
+   *  TFJS & Custom Model Loading
+   *
+   * */
   useEffect(() => {
     const initializeModel = async () => {
-      console.log("Loading TensorFlow.js COCO-SSD Model...");
+      console.log("Loading YOLO TensorFlow.js Model...");
       try {
-        const cocoSsd = await window.cocoSsd?.load();
-        if (cocoSsd) {
-          window.cocoSsd = cocoSsd;
-          console.log("COCO-SSD Model successfully loaded!");
+        if (window.tf) {
+          const model = await window.tf.loadGraphModel(
+            "/models/fwob-webmodel-1/model.json"
+          );
+          if (model) {
+            window.yoloModel = model; // Attach model to the global window object
+            console.log("YOLO Model successfully loaded!");
+          } else {
+            console.error("YOLO Model failed to load.");
+          }
         } else {
-          console.error("COCO-SSD Model failed to load.");
+          console.error("TensorFlow.js is not available on the window object.");
         }
       } catch (error) {
-        console.error("Error loading TensorFlow model:", error);
+        console.error("Error loading YOLO model:", error);
       }
     };
+
+    // Check if the model is already loaded
+    if (window.yoloModel) {
+      console.log("YOLO Model already loaded!");
+      return;
+    }
+
+    // Otherwise, poll every 100ms to check if the model is available
+    const interval = setInterval(() => {
+      if (window.yoloModel) {
+        clearInterval(interval);
+        console.log("YOLO Model detected in window object.");
+      }
+    }, 100);
+
     initializeModel();
+
+    return () => clearInterval(interval);
   }, [setCanvasReady]);
 
   return (
