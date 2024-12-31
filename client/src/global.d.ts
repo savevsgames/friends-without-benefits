@@ -14,6 +14,7 @@ declare global {
     // Adding `tf` to the window object for TensorFlow.js
     tf: typeof import("@tensorflow/tfjs"); // Reference to TensorFlow.js loaded via script
     yoloModel?: TFGraphModel; // YOLO Model loaded globally
+    cvsModel?: cvstfjs.ObjectDetectionModel //cvstfjs model
   }
 }
 

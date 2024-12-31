@@ -11,7 +11,11 @@ interface Prediction {
 
 // Custom YOLO classes - can add more as needed
 const YOLO_CLASSES: { [key: number]: string } = {
-  0: "sunglasses",
+    0: "Fork",
+    1: "Headphones",
+    2: "Mug",
+    3: "Remote",
+    4: "Toothbrush"
 };
 
 /**
@@ -163,7 +167,7 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
     return;
   }
 
-  const model = window.yoloModel;
+  const model = window.cvsModel;
   if (!model) {
     console.log("YOLO model not loaded. Cannot run detection.");
     return;
@@ -187,7 +191,7 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
 
   const detectFrame = async () => {
     try {
-      if (!window.yoloModel) {
+      if (!window.cvsModel) {
         console.error("Model not loaded");
         return;
       }
@@ -195,14 +199,14 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
       // Construct input tensor for shape [416,416]
       const inputTensor = window.tf.browser
         .fromPixels(videoElement)
-        .resizeNearestNeighbor([416, 416])
+        .resizeNearestNeighbor([320, 320])
         .toFloat()
         .div(255)
         .expandDims(0);
 
       // Run inference with custom model that does NMS and returns multiple output tensors
       // e.g., [boxes, scores, classes, validDetections]
-      const predictions = (await window.yoloModel.executeAsync(
+      const predictions = (await window.cvsModel.executeAsync(
         inputTensor
       )) as tf.Tensor[];
 
