@@ -1,9 +1,8 @@
 import Header from "../components/Header.tsx";
 import { useState } from "react";
 
-// import queries here once done
 import { QUERY_ME } from "@/utils/queries.ts";
-import { useAuthStore, useUserSession } from "@/store.ts";
+import { useAuthStore } from "@/store.ts";
 import { useQuery } from "@apollo/client";
 
 function Profile() {
@@ -12,13 +11,9 @@ function Profile() {
     "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
   );
   const loggedIn = useAuthStore((state) => state.isLoggedIn);
-  const userId = useUserSession((state) => state.user?.id);
 
-  const { loading, data } = useQuery(QUERY_ME, {
-    variables: {
-      userId: userId,
-    },
-  });
+  // const user = useUserSession((state) => state.user)
+  const { loading, data } = useQuery(QUERY_ME);
 
   if (!loggedIn) {
     return (
@@ -31,6 +26,7 @@ function Profile() {
   }
 
   const user = data?.me || null;
+  console.log("user data from the query:", user);
 
   // TODO: this will have to change to update the user's avatar, and the save the avatar to the backend
   // I think I need a mutation to be able to do a post request to the db
@@ -58,7 +54,7 @@ function Profile() {
           <div className="md:w-2/5 flex flex-col items-center justify-center p-6 border-b md:border-b-0 md:border-r">
             <img
               className="rounded-full w-34 h-34 object-cover mb-4 border-4 border-teal-900"
-              alt="profile pic"
+              alt="user avatar"
               src={picture}
             />
             <label
@@ -82,9 +78,9 @@ function Profile() {
               {[
                 { label: "Username:", value: user?.username },
                 { label: "Email:", value: user?.email },
-                { label: "Started On:", value: user?.createdAt },
-                { label: "Player ID:", value: user?.id },
-                { label: "Shortest Round:", value: user?.shortestRound },
+                // { label: "Started On:", value: user?.createdAt },
+                { label: "Player ID:", value: user?._id },
+                { label: "Shortest Round:", value: user?.shortestRound || null },
                 { label: "Rounds Played:", value: "Rounds Played" },
               ].map((item, index) => (
                 <li key={index} className="grid grid-cols-3 gap-x-2 text-left">

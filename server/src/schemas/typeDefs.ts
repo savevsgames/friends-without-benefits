@@ -51,10 +51,12 @@ const typeDefs = `
     users: [User]
     games: [Game]
     topTen: [User]
+    me: User
   }
   
   type Mutation {
-    addUser(input: AddUserInput): User!
+    addUser(input: AddUserInput): Auth
+    login(username: String!, password: String!): Auth
     addFriend(input: AddFriendInput): MutateResponse!
     createGame(input: CreateGameInput): Game!
     updateGame(input: UpdateGameInput): Game!

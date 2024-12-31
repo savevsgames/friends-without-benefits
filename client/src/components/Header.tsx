@@ -28,14 +28,14 @@ export default function Header() {
 
   const icon = (theme: string) => {
     if (theme === "light") {
-      return <IoMoon style={{ color: "gray" }} />;
+      return <IoMoon size={22} style={{ color: "black" }} />;
     } else {
-      return <IoSunny style={{ color: "black" }} />;
+      return <IoSunny size={22} style={{ color: "white" }} />;
     }
   };
 
   return (
-    <nav className="bg-zinc-50 dark:from-black dark:via-neutral-950 dark:to-teal-950 z-0">
+    <nav className="bg-zinc-50 dark:bg-teal-950 z-0">
       <div className="mx-auto max-w-9xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -74,11 +74,11 @@ export default function Header() {
                     className={classNames(
                       location.pathname === item.page
                         ? "text-neutral-950 underline underline-offset-4 dark:text-white dark:underline"
-                        : "text-neutral-950 hover:underline  dark:text-gray-400 dark:hover:text-white dark:hover:underline",
+                        : "text-neutral-950 hover:underline  dark:text-white dark:hover:text-white dark:hover:underline",
                       "px-3 py-2 font-bold text-sm sm:text-base md:text-sm lg:text-base"
                     )}
                   >
-                    {item.name}
+                    {item.name.toUpperCase()}
                   </Link>
                 ))}
               </div>
@@ -96,7 +96,7 @@ export default function Header() {
           {/* Profile dropdown */}
           <div className="relative ml-3">
             <Menu as="div" className="relative">
-              <MenuButton className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+              <MenuButton className="flex rounded-full bg-neutral-950 dark:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                 <span className="sr-only">Open user menu</span>
                 <img
                   className="h-8 w-8 rounded-full"
