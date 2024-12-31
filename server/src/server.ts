@@ -10,6 +10,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { createServer } from "node:http";
 import { ExpressPeerServer } from "peer";
 import cors from "cors";
+import { authenticateToken } from "./utils/auth.js";
 
 // Apollo Server Initialization
 const apolloServer = new ApolloServer({
@@ -35,7 +36,12 @@ const startApolloServer = async () => {
   );
 
   // GraphQL
-  app.use("/graphql", expressMiddleware(apolloServer));
+  app.use(
+    "/graphql",
+      expressMiddleware(apolloServer as any, {
+      context: authenticateToken as any,
+    })
+  );
 
   // Create HTTP Server
   const httpServer = createServer(app);

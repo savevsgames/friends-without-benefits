@@ -1,10 +1,24 @@
 import { Game, User } from "../models/index.js";
+import { signToken } from "../utils/auth.js";
 import {
+  AuthenticationError,
   GQLMutationError,
   GQLQueryError,
 } from "../utils/graphQLErrorThrower.js";
 
 import bcrypt from "bcrypt";
+
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  password: string;
+  avatar?: string;
+}
+
+interface Context {
+  user: User;
+}
 
 const resolvers = {
   Query: {
@@ -67,6 +81,18 @@ const resolvers = {
         throw GQLQueryError("games", error);
       }
     },
+    me: async (
+      _parent: unknown,
+      _args: unknown,
+      context: Context
+    ): Promise<User | null> => {
+      if (context.user) {
+        // If user is authenticated, return their user data
+        return await User.findOne({ _id: context.user._id });
+      }
+      // If not authenticated, throw an authentication error
+      throw AuthenticationError("Not Authenticated");
+    },
   },
 
   Mutation: {
@@ -95,6 +121,32 @@ const resolvers = {
         throw GQLMutationError("addUser", error);
       }
     },
+    login: async (
+      _parent: unknown,
+      { username, password }: { username: string; password: string }
+    ): Promise<{ token: string; user: User }> => {
+      // find a user by their email
+      const user = await User.findOne({ username });
+
+      if (!user) {
+        throw AuthenticationError("Failure logging in");
+      }
+
+      const correctPw = await user.isCorrectPw(password);
+      console.log(correctPw);
+      console.log(password);
+
+      if (!correctPw) {
+        throw AuthenticationError(
+          "Failure logging in-password incorrect debug"
+        );
+      }
+
+      const token = signToken(user.username, user.email, user._id);
+
+      return { token, user };
+    },
+
     addFriend: async (_: any, { input }: any) => {
       const { userID, friendID } = input;
 

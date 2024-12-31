@@ -27,6 +27,7 @@ import LoadVideoButton from "./buttons/LoadVideoButton";
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
+
   // const user = useUserSession((state) => state.user)
   const sidebarIcon = () => {
     if (isCollapsed) {
@@ -40,7 +41,7 @@ const SideBar = () => {
     <>
       <Sidebar
         collapsed={isCollapsed}
-        className="bg-zinc-100 h-screen absolute top-0 left-0 z-30"
+        className="bg-zinc-100  dark:bg-teal-950 h-screen absolute top-0 left-0 z-30"
       >
         {/* Hamburger Button to open the sidebar or X button to close it */}
         <div className="flex justify-center py-4">
@@ -102,6 +103,7 @@ const SideBar = () => {
           </SubMenu>
 
           {/* Single Menu Item */}
+
           <MenuItem icon={<FaPeopleGroup size={24} />}>
             <MultiPlayerModal />
           </MenuItem>

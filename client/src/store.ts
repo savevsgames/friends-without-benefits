@@ -109,8 +109,6 @@ type User = {
   email: string;
   password?: string;
   avatar: string;
-  friends: string[];
-  createdAt: string;
   shortestRound: string;
 };
 
@@ -124,16 +122,7 @@ export const useUserSession = create(
   persist<SessionState>(
     (set) => ({
       // our main state
-      user: {
-        id: "",
-        username: "",
-        email: "",
-        password: "",
-        avatar: "",
-        friends: [],
-        createdAt: "",
-        shortestRound: "",
-      },
+      user: null,
 
       // action to retrieve user from token
       UserDataFromToken: () => {
@@ -144,7 +133,7 @@ export const useUserSession = create(
         }
       },
 
-      // action to cleat the user
+      // action to clear the user
       clearUser: () => set({ user: null }),
     }),
     {
