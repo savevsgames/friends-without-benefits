@@ -1,10 +1,20 @@
 import { Game, User } from "../models/index.js";
+import { signToken } from "../utils/auth.js";
 import {
+  AuthenticationError,
   GQLMutationError,
   GQLQueryError,
 } from "../utils/graphQLErrorThrower.js";
 
 import bcrypt from "bcrypt";
+
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  password: string;
+  avatar?: string;
+}
 
 const resolvers = {
   Query: {
@@ -95,6 +105,32 @@ const resolvers = {
         throw GQLMutationError("addUser", error);
       }
     },
+    login: async (
+      _parent: unknown,
+      { email, password }: { email: string; password: string }
+    ): Promise<{ token: string; user: User }> => {
+      // find a user by their email
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        throw AuthenticationError("Failure logging in-user doesnt exist debug");
+      }
+
+      const correctPw = await user.isCorrectPw(password);
+      console.log(correctPw);
+      console.log(password);
+
+      if (!correctPw) {
+        throw AuthenticationError(
+          "Failure logging in-password incorrect debug"
+        );
+      }
+
+      const token = signToken(user.username, user.email, user._id);
+
+      return { token, user };
+    },
+
     addFriend: async (_: any, { input }: any) => {
       const { userID, friendID } = input;
 

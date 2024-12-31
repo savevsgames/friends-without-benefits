@@ -59,7 +59,7 @@ function Game() {
 
   return (
     <>
-      <div className="grid grid-cols-[auto,1fr] h-screen overflow-auto bg-zinc-50 dark:bg-gradient-to-r dark:from-black dark:via-neutral-950 dark:to-teal-950">
+      <div className="grid grid-cols-[auto,1fr] h-screen overflow-auto bg-zinc-50 dark:bg-teal-950">
         {/* Sidebar */}
         <div className="h-full flex-none">
           <SideBar />
