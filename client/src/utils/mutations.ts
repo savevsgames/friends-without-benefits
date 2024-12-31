@@ -21,6 +21,10 @@ export const LOGIN_USER = gql`
         _id
         email
         username
+        avatar
+        shortestRound {
+          duration
+        }
       }
     }
   }

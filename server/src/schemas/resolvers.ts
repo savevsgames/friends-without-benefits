@@ -16,6 +16,10 @@ interface User {
   avatar?: string;
 }
 
+interface Context {
+  user: User;
+}
+
 const resolvers = {
   Query: {
     // querying all users
@@ -77,6 +81,18 @@ const resolvers = {
         throw GQLQueryError("games", error);
       }
     },
+    me: async (
+      _parent: unknown,
+      _args: unknown,
+      context: Context
+    ): Promise<User | null> => {
+      if (context.user) {
+        // If user is authenticated, return their user data
+        return await User.findOne({ _id: context.user._id });
+      }
+      // If not authenticated, throw an authentication error
+      throw AuthenticationError("Not Authenticated");
+    },
   },
 
   Mutation: {
@@ -113,7 +129,7 @@ const resolvers = {
       const user = await User.findOne({ username });
 
       if (!user) {
-        throw AuthenticationError("Failure logging in-user doesnt exist debug");
+        throw AuthenticationError("Failure logging in");
       }
 
       const correctPw = await user.isCorrectPw(password);

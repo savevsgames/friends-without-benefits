@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document } from "mongoose";
 import bcrypt from "bcrypt";
 
 interface IUser extends Document {
@@ -10,6 +10,7 @@ interface IUser extends Document {
   updatedAt: Date;
   friends: Schema.Types.ObjectId[];
   shortestRound: Schema.Types.ObjectId;
+  avatar: string;
   isCorrectPw(password: string): Promise<boolean>;
 }
 
@@ -19,40 +20,45 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true,
     },
     password: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+    },
+    avatar: {
+      type: String,
+      default:
+        "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541",
     },
     friends: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: false
-      }
+        ref: "User",
+        required: false,
+      },
     ],
     shortestRound: {
       type: Schema.Types.ObjectId,
-      ref: 'Game',
-      required: false
-    }
+      ref: "Game",
+      required: false,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
 // set up pre-save middleware to create password
-userSchema.pre<IUser>('save', async function (next) {
-  if (this.isNew || this.isModified('password')) {
+userSchema.pre<IUser>("save", async function (next) {
+  if (this.isNew || this.isModified("password")) {
     const saltRounds = 10;
     this.password = await bcrypt.hash(this.password, saltRounds);
   }
@@ -60,10 +66,11 @@ userSchema.pre<IUser>('save', async function (next) {
   next();
 });
 // compare incoming password with the existing hashed password
-userSchema.methods.isCorrectPw = async function (password: string): Promise<boolean> {
-  return bcrypt.compare(password, this.password)
+userSchema.methods.isCorrectPw = async function (
+  password: string
+): Promise<boolean> {
+  return bcrypt.compare(password, this.password);
 };
-
 
 const User = model<IUser>("User", userSchema);
 
