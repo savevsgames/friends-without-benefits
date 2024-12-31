@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import Header from "@/components/Header.tsx";
-
+// import * as cvstfjs from '@microsoft/customvision-tfjs';
 import Canvas from "../components/Canvas.tsx";
 
 import { useGameStore } from "@/store";
@@ -8,47 +8,13 @@ import { useGameStore } from "@/store";
 // import { loadModel } from "@/utils/ml5-model-utils.ts";
 import SideBar from "@/components/SideBar.tsx";
 import { enableWebcam } from "@/utils/model-utils";
+// import { model } from "@tensorflow/tfjs";
+
+declare const cvstfjs: any;
 
 function Game() {
     const setCanvasReady = useGameStore((state: any) => state.setCanvasReady);
     const modelRef = useRef<any>(null);
-  
-    const processYOLOPredictions = (predictionArray: any) => {
-      const GRID_SIZE = 13;
-      const NUM_CLASSES = 5; 
-      const boxes = [];
-      
-      for (let i = 0; i < GRID_SIZE; i++) {
-        for (let j = 0; j < GRID_SIZE; j++) {
-          const output = predictionArray[0][i][j];
-          const objectness = output[4];
-          
-          if (objectness > 0.5) { // Confidence threshold
-            const x = (output[0] + j) / GRID_SIZE;
-            const y = (output[1] + i) / GRID_SIZE;
-            const w = Math.exp(output[2]) / GRID_SIZE;
-            const h = Math.exp(output[3]) / GRID_SIZE;
-            
-            // Get class probabilities
-            const classes = output.slice(5, 5 + NUM_CLASSES);
-            const classIndex = classes.indexOf(Math.max(...classes));
-            const confidence = classes[classIndex];
-            
-            if (confidence > 0.5) {
-              boxes.push({
-                x: x - w/2,
-                y: y - h/2,
-                width: w,
-                height: h,
-                class: classIndex,
-                confidence
-              });
-            }
-          }
-        }
-      }
-      return boxes;
-    };
   
     useEffect(() => {
       let animationFrameId: number;
@@ -58,9 +24,7 @@ function Game() {
         if (!stream) return;
   
         const videoElement = document.getElementById("video-output") as HTMLVideoElement;
-        console.log('Video element found:', !!videoElement, 'Playing:', !videoElement?.paused);
         const canvas = document.getElementById("canvas-container")?.querySelector("canvas");
-        console.log('Canvas found:', !!canvas);
         
         if (!videoElement || !canvas) {
           console.error("Required elements not found");
@@ -72,50 +36,50 @@ function Game() {
   
         try {
           console.log('Loading model...');
-          modelRef.current = await (window as any).tf.loadGraphModel('./src/assets/model.json');
-          console.log('Model loaded successfully');
+          window.cvsModel = new cvstfjs.ObjectDetectionModel();
+          await window.cvsModel.loadModelAsync('/models/tfjs/model.json');
+          modelRef.current = window.cvsModel;
+          console.log('Model loaded successfully cvstfjs');
+          console.log(modelRef.current)
   
           const detect = async () => {
-            console.log('Starting detection...');
-            if (!modelRef.current || !videoElement) {
-              console.log('Missing refs:', { model: !!modelRef.current, video: !!videoElement });
-              return;
-            }
+            if (!modelRef.current || !videoElement) return;
   
             try {
-              const tfImg = (window as any).tf.browser.fromPixels(videoElement);
-              const resized = (window as any).tf.image.resizeBilinear(tfImg, [416, 416]);
-              const expandedImg = resized.expandDims(0);
-              
-              const predictions = await modelRef.current.predict(expandedImg);
-              const predictionArray = await predictions.array();
-              const boxes = processYOLOPredictions(predictionArray);
-              
-              // Draw detections
+              const result = await modelRef.current.executeAsync(videoElement);
+              console.log('Detection result:', result);
+              const [boxes, scores, classes] = result;
+
+
+            //   if (!Array.isArray(result)) {
+            //     console.error('Expected array result from detection');
+            //     return;
+            //   }
+              // Clear and draw video frame
               ctx.clearRect(0, 0, canvas.width, canvas.height);
               ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
               
-              boxes.forEach(box => {
-                const x = box.x * canvas.width;
-                const y = box.y * canvas.height;
-                const width = box.width * canvas.width;
-                const height = box.height * canvas.height;
+              // Draw predictions
+              boxes.forEach((box: number[], index: number) => {
+                const score = scores[index];
+                if (score < 0.5) return; // Confidence threshold
+          
+                const [y1, x1, y2, x2] = box;
+                const width = (x2 - x1) * canvas.width;
+                const height = (y2 - y1) * canvas.height;
                 
                 ctx.strokeStyle = '#00ff00';
                 ctx.lineWidth = 2;
-                ctx.strokeRect(x, y, width, height);
+                ctx.strokeRect(x1 * canvas.width, y1 * canvas.height, width, height);
                 ctx.fillStyle = '#00ff00';
-                ctx.fillText(`Class ${box.class} (${Math.round(box.confidence * 100)}%)`, x, y - 5);
+                ctx.fillText(`Class ${classes[index]} (${Math.round(score * 100)}%)`, 
+                  x1 * canvas.width, y1 * canvas.height - 5);
               });
-  
-              tfImg.dispose();
-              resized.dispose();
-              expandedImg.dispose();
-              predictions.dispose();
+          
             } catch (error) {
               console.error('Detection error:', error);
             }
-  
+          
             animationFrameId = requestAnimationFrame(detect);
           };
   

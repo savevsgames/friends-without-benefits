@@ -5,8 +5,8 @@ import { Route, Routes } from "react-router-dom";
 
 import Landing from "./pages/Landing.tsx";
 import Error from "./pages/Error.tsx";
-// import Game from "./pages/Gametfjs.tsx";
-import Game from "./pages/Game.tsx";
+import Game from "./pages/Gametfjs.tsx";
+// import Game from "./pages/Game.tsx";
 import LeaderBoard from "./pages/LeaderBoard";
 import Profile from "./pages/Profile.tsx";
 import Login from "./pages/Login.tsx";
