@@ -10,10 +10,34 @@ declare global {
     ml5: ml5Library; // Adding `ml5` to the window object for ml5.js
     ml5Loaded?: boolean; // Flag to check if ml5.js has been loaded
     myMl5Detector?: ml5ObjectDetector; // Adding `myMl5Detector` to the window object for ml5.js object detection
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tf: any; // Adding `tf` to the window object for TensorFlow.js
+
+    // Adding `tf` to the window object for TensorFlow.js
+    tf: typeof import("@tensorflow/tfjs"); // Reference to TensorFlow.js loaded via script
+    yoloModel?: TFGraphModel; // YOLO Model loaded globally
   }
 }
+
+/**
+ * TFJS Library Interface
+ */
+// Graph Model for TensorFlow.js
+interface TFGraphModel {
+  /**
+   * Runs inference on the input and returns a single tensor or an array of tensors.
+   */
+  executeAsync: (
+    input: tf.Tensor | tf.Tensor[]
+  ) => Promise<tf.Tensor | tf.Tensor[]>;
+
+  /**
+   * Runs inference on the input and returns a tensor or an array of tensors.
+   */
+  execute: (input: tf.Tensor | tf.Tensor[]) => tf.Tensor | tf.Tensor[];
+}
+
+/**
+ * OpenCV.js Module Loading Interface
+ */
 
 // Define the OpenCVModule interface based on the runtime properties we're using
 interface OpenCVModule {
@@ -21,12 +45,23 @@ interface OpenCVModule {
   onRuntimeInitialized?: () => void; // Callback function for runtime initialization
 }
 
-// Define Prediction Type - Custom Prediction type for our in game scavenger hunt
+// ml5 coco Prediction Type -Premade Prediction model type for our in game scavenger hunt
+// interface Prediction {
+//   bbox: [number, number, number, number]; // [x, y, width, height]
+//   class: string;
+//   score: number;
+// }
+
+// TFJS custom model prediction type - Custom Prediction type for our in game scavenger hunt
 interface Prediction {
   bbox: [number, number, number, number]; // [x, y, width, height]
-  class: string;
-  score: number;
+  label: string; // Mapped from class index
+  score: number; // Confidence score
 }
+
+/**
+ * Ml5 Library Interface
+ */
 
 // ml5 Prediction for Classification - For re-training cocoSsd with user items (in testing) to make custom models
 interface ml5Prediction {
