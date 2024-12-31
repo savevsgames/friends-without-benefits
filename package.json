@@ -20,7 +20,8 @@
   "author": "Thomas Stemler, Souad Hassen-Bouzouita, Dario Zambrano, Greg Barker",
   "license": "MIT",
   "dependencies": {
-    "apollo-client": "^2.6.10"
+    "apollo-client": "^2.6.10",
+    "react-modal": "^3.16.3"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
