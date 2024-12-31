@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { UserLogin } from "../interfaces/UserLogin.tsx";
 import { useAuthStore, useUserSession } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
-import { LOGIN_USER } from "../utils/mutations";
+import { LOGIN_USER } from "../utils/mutations.ts";
 import { useMutation } from "@apollo/client";
 
 const Login: React.FC = () => {
@@ -11,30 +11,32 @@ const Login: React.FC = () => {
   // define the state variables
   const [form, setForm] = useState<UserLogin>({ username: "", password: "" });
   const [err, setErr] = useState<string | null>(null);
-  const login = useAuthStore((state) => state.login);
+  const loginState = useAuthStore((state) => state.login);
+
+  // useMutation hook to login a user
+  const [login, { error }] = useMutation(LOGIN_USER);
+
   useUserSession.getState().UserDataFromToken();
 
   // function handleInputChange for the form inputs
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target; //get the user input
     setForm({ ...form, [name]: value }); // set the form state
-    console.log(setForm);
   };
-
-  // useMutation hook to login a user
-  const [userLogin, { error }] = useMutation(LOGIN_USER);
 
   // function to handle the form submission
   const handleFormSubmit = async (event: FormEvent) => {
     event.preventDefault();
-
+    console.log(form);
     try {
-      const { data } = await userLogin({
+      const { data } = await login({
         variables: {
           ...form,
         },
       });
-      login(data.userLogin.token); // if the token is valid it'll set isLoggedIn to true
+      console.log("data from mutation is", data);
+      loginState(data.login.token); // if the token is valid it'll set isLoggedIn to true and sets the token on localstorage
+
       navigate("/game"); // once isLogged is is true, it'll navigate to the game page
     } catch (err) {
       console.error(error || err);
@@ -67,7 +69,7 @@ const Login: React.FC = () => {
           className="flex flex-col box-border w-full max-w-sm"
           onSubmit={handleFormSubmit}
         >
-          {/* Username field */}
+          {/* username field */}
           <div className="flex flex-col mb-4">
             <label className="text-sm md:text-base text-gray-800 dark:text-slate-50 font-medium mb-2">
               Username:

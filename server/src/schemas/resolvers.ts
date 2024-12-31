@@ -107,10 +107,10 @@ const resolvers = {
     },
     login: async (
       _parent: unknown,
-      { email, password }: { email: string; password: string }
+      { username, password }: { username: string; password: string }
     ): Promise<{ token: string; user: User }> => {
       // find a user by their email
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ username });
 
       if (!user) {
         throw AuthenticationError("Failure logging in-user doesnt exist debug");
