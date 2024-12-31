@@ -1,12 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "../store"; // Import Zustand store
 import MultiplayerChat from "./MultiplayerChat";
 import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
-import GameStoreLiveFeed from "./GameStoreLiveFeed";
+// import GameStoreLiveFeed from "./GameStoreLiveFeed";
+// import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { gameState, videoPlaying } = useGameStore(); // Access Zustand state
+
+  const [welcomeImageLoaded, setWelcomeImageLoaded] = useState(false);
 
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
@@ -97,22 +100,85 @@ export const Canvas = () => {
 
     loadOpenCV();
   }, [setCanvasReady]);
-
   // Return the canvas component when currentMediaRef changes and type is set to an image or video
+
+  // TEMPORARY - FOR MAKING SURE THE CANVAS WORKS - LOADS AN IMAGE TO CANVAS ON FIRST LOAD
+  // Onload, load the welcome image as a file and display it on the canvas
+  const welcomeImgPath = "/assets/household_items_01.png";
+  useEffect(() => {
+    if (welcomeImageLoaded) return; // Ensure this runs only once
+
+    const loadWelcomeImage = async () => {
+      const imageElement = document.getElementById(
+        "image-output"
+      ) as HTMLImageElement;
+      const canvasElement = document.getElementById(
+        "canvas-main"
+      ) as HTMLCanvasElement;
+      const canvasContainer = document.getElementById(
+        "canvas-container"
+      ) as HTMLDivElement;
+
+      try {
+        // Fetch the image as a Blob
+        const response = await fetch(welcomeImgPath);
+        if (!response.ok) throw new Error("Failed to fetch the image");
+
+        const blob = await response.blob();
+        const file = new File([blob], "household_items_01.png", {
+          type: "image/png",
+        });
+
+        // Set the image source
+        imageElement.src = URL.createObjectURL(file);
+
+        // Wait for image to load
+        imageElement.onload = () => {
+          console.log(
+            `Image loaded: ${imageElement.naturalWidth}x${imageElement.naturalHeight}`
+          );
+
+          // Resize canvas-container dynamically
+          canvasContainer.style.height = `${imageElement.clientHeight}px`;
+
+          // Set canvas dimensions to match image
+          canvasElement.width = imageElement.naturalWidth;
+          canvasElement.height = imageElement.naturalHeight;
+
+          console.log("Canvas and container resized to image dimensions:", {
+            Cwidth: canvasElement.width,
+            Cheight: canvasElement.height,
+          });
+        };
+
+        imageElement.onerror = () => {
+          console.error("Failed to load the image into #image-output");
+        };
+      } catch (error) {
+        console.error("Error loading the image:", error);
+      }
+
+      setWelcomeImageLoaded(true); // Mark image as loaded
+    };
+
+    loadWelcomeImage();
+  }, [welcomeImageLoaded]);
 
   return (
     <div
       id="game-container"
       style={{
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "row",
         alignItems: "stretch",
+        minWidth: "300px",
+        minHeight: "300px",
       }}
     >
       <div
         id="canvas-container"
         className="relative w-full"
-        style={{ overflow: "hidden", maxHeight: "calc(100vh - 400px)" }}
+        style={{ overflow: "hidden", maxWidth: "60vw", maxHeight: "90vh" }}
       >
         <canvas
           id="canvas-main"
@@ -167,25 +233,21 @@ export const Canvas = () => {
             zIndex: 100,
           }}
         >
-          <GameStoreLiveFeed />
+          {/* <GameStoreLiveFeed /> */}
         </div>
       </div>
-      {/* New Div Below Canvas */}
+      {/* New Div Right of Canvas */}
       <div
-        className="relative z-20 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-md rounded-lg"
+        className="relative z-20 p-4"
         style={{
           marginTop: "10px",
         }}
       >
-        <h3 className="text-xl font-bold text-gray-700 dark:text-gray-200 my-2 underline-offset-4 underline">
-          This is an option for the multiplayer video/chat area.
-        </h3>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateRows: "2fr 5fr",
             gap: "2rem",
-            border: "1px solid black",
           }}
         >
           <div className="border-2 border-black background-teal-200 dark:bg-teal-950">

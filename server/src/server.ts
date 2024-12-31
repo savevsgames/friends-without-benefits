@@ -118,6 +118,7 @@ const startApolloServer = async () => {
       console.log(`🔍 Opponent ID requested by: ${from}`);
       // Find the first available opponent - later we can implement an
       // array where all connected users and loop through them
+      console.log("Connected Users", connectedUsers);
       const opponent = Array.from(connectedUsers.entries()).find(
         // Find a key-value pair that is not the user's own socket.id
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

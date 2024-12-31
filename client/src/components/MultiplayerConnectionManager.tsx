@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGameStore, useMultiplayerStore } from "@/store";
 import { Peer } from "peerjs";
-import io from "socket.io-client";
+// import io from "socket.io-client";
 // Repeatable functions to connect to Socket.IO and PeerJS
 import { initializeSocket } from "@/utils/multiplayer-utils";
 import { enableWebcam } from "@/utils/model-utils";
@@ -29,64 +29,45 @@ const MultiplayerConnectionManager: React.FC = () => {
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
-  useEffect(() => {
-    // Initialize socket.io connection with POLLING first to avoid CORS and blocking issues and provide more compatibility and fallback
-    const socketIo = io("http://localhost:3001", {
-      path: "/socket.io",
-      transports: ["polling", "websocket"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-
-    socketIo.on("connect", () => {
-      console.log("✅ Socket.IO Connected:", socketIo.id);
-      setSocket(socketIo);
-    });
-
-    socketIo.on("disconnect", () => {
-      console.log("❌ Socket.IO Disconnected");
-    });
-
-    socketIo.on("connect_error", (error: Error) => {
-      console.error("❗ Socket.IO Connection Error:", error);
-    });
-
-    // Save socket instance to store when the socket responds to one of the events
-    setSocket(socketIo);
-
-    return () => {
-      // Cleanup function to drop socket.io connection
-      socketIo.disconnect();
-    };
-  }, [setSocket]);
-
   // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
   // USING BUTTON CLICK TO TRIGGER CONNECTION
-  // Currently initializes without a peer ID, will be assigned one after connection (undefined)
 
   const handlePeerJSInitialization = () => {
-    // TODO: Check store first to see if peer exists? or disable button if peer exists?
+    const { socket, playerId } = useMultiplayerStore.getState();
+    if (!socket) {
+      console.error("❌ Socket.IO connection not established.");
+      return;
+    }
     console.log("Initializing PeerJS connection...");
+    // TODO: Check store first to see if peer exists? or disable button if peer exists?
+    const peerJs =
+      useMultiplayerStore.getState().peer ||
+      new Peer({
+        host: "localhost",
+        port: 3001,
+        path: "/peerjs",
+      });
+    // Make sure local scope syncs with store
 
-    const peerJs = new Peer({
-      host: "localhost",
-      port: 3001,
-      path: "/peerjs",
-    });
+    setPeer(peerJs);
+    console.log("✅ PeerJS Connection established.");
 
     // When peer is initialized, update the store with the peerId and player ID and set connection status
     peerJs.on("open", (id) => {
       console.log("PeerJS connection established with ID:", id);
+
       setPlayerId(id); // Save player ID to store
+      console.log("🆔 Player ID:", playerId);
+
       setRoomId(id); // Set the room ID to the local peer ID
+      console.log("🏠 Room ID:", roomId);
+
       setPeer(peerJs); // Save peer instance to store
     });
 
     // Log data when a peer connection is established
     peerJs.on("connection", (conn) => {
       console.log("Peer connection is incoming: ", conn.peer);
-      setIsConnected(true);
 
       conn.on("data", (data) => {
         console.log("Received data from peer: ", data);
@@ -99,7 +80,7 @@ const MultiplayerConnectionManager: React.FC = () => {
 
     peerJs.on("error", (err) => {
       console.error("PeerJS Error:", err);
-      peerJs.destroy();
+      // peerJs.destroy(); // because this is in a modal, we don't want to destroy the peer connection
     });
   };
 
@@ -108,13 +89,21 @@ const MultiplayerConnectionManager: React.FC = () => {
     enableWebcam(true);
     setCurrentMediaType("webcam");
     // Create a multiplayer game
-    if (!roomId) {
-      console.error("❌ Room ID not found. Please initialize a room.");
+    const peer = useMultiplayerStore.getState().peer;
+    if (!peer) {
+      console.error("❌ PeerJS is not initialized.");
       return;
     }
-    setRoomId(roomId); // Set the room ID to the local peer ID
-    setIsHost(true); // Set this client as the host
-    console.log("🏠 Room Created. Room ID:", roomId);
+
+    if (!peer.id) {
+      console.error("❌ PeerJS ID is not available yet. Try again.");
+      return;
+    }
+
+    // Set the room ID and mark as Host
+    setRoomId(peer.id);
+    setIsHost(true);
+    console.log("🏠 Room Created. Room ID:", peer.id);
   };
 
   const handleJoinMultiplayerRoom = () => {
@@ -134,6 +123,7 @@ const MultiplayerConnectionManager: React.FC = () => {
       console.log("🔗 Connected to Room:", inputRoomId);
       conn.send("🎥 PeerJS Connection Established!");
       setIsConnected(true);
+      setRoomId(inputRoomId);
       // TODO:
       // We need a to sync the game state from the host to the challenger here.
       // Since the game state is created when start game is clicked
@@ -233,14 +223,14 @@ const MultiplayerConnectionManager: React.FC = () => {
     );
 
     // Listen for chat messages
-    // socket.on("chat-message", (data: { sender: string; message: string }) => {
-    //   console.log("💬 Chat Message Received:", data);
-    //   useMultiplayerStore.getState().addChatMessage(data);
-    // });
+    socket.on("chat-message", (data: { sender: string; message: string }) => {
+      console.log("💬 Chat Message Received:", data);
+      useMultiplayerStore.getState().addChatMessage(data);
+    });
 
     return () => {
       socket.off("stateUpdate");
-      // socket.off("chat-message");
+      socket.off("chat-message");
     };
   }, []);
 
