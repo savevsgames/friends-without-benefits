@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
 import { ADD_USER } from "../utils/mutations";
 import { useMutation } from "@apollo/client";
+import { Link } from "react-router-dom";
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ const SignUp: React.FC = () => {
   });
   const [err, setErr] = useState<string | null>(null);
   const login = useAuthStore((state) => state.login);
+  // useMutation hook to sign up a user
+  const [addUser, { error }] = useMutation(ADD_USER);
 
   // function handleInputChange for the form inputs
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,20 +27,17 @@ const SignUp: React.FC = () => {
     // console.log(setForm);
   };
 
-  // useMutation hook to login a user
-  const [addUser, { error }] = useMutation(ADD_USER);
-
   // function to handle the form submission
   const handleFormSubmit = async (event: FormEvent) => {
     event.preventDefault();
     try {
       const { data } = await addUser({
         variables: {
-          ...form,
+          input: {... form}
         },
       });
       login(data.addUser.token); // this will set the isLoggedIn state to true once the token is valid
-      navigate("/login"); // once isLogged is is true, it'll navigate to the login page
+      navigate("/game"); // once isLogged is is true, it'll navigate to the login page
     } catch (err) {
       console.error(error || err);
       setErr("Error Signing in");
@@ -63,6 +63,7 @@ const SignUp: React.FC = () => {
             <span className="text-teal-950 dark:text-slate-50 text-2xl">B</span>
           </h2>
         </div>
+
         <h1 className="lg:text-4xl md:text-3xl sm:xl font-bold text-teal-900 dark:text-slate-100 mb-6">
           Let's Get Started!
         </h1>
@@ -129,9 +130,9 @@ const SignUp: React.FC = () => {
           <p className="text-l text-gray-700 dark:text-slate-50 font-small pr-2">
             Already have an account?
           </p>
-          <button className="underline text-teal-900 dark:text-teal-400 font-small">
+          <Link to="/login" className="underline text-teal-900 dark:text-teal-400 font-small">
             Log in
-          </button>
+          </Link>
         </div>
       </div>
 

@@ -38,7 +38,8 @@ const startApolloServer = async () => {
   // GraphQL
   app.use(
     "/graphql",
-      expressMiddleware(apolloServer as any, {
+      expressMiddleware(apolloServer as any
+        , {
       context: authenticateToken as any,
     })
   );
