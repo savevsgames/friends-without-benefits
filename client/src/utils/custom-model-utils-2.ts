@@ -1,22 +1,153 @@
 // Note: Utility functions for the application
+// import * as tf from "@tensorflow/tfjs";
 import { useGameStore } from "@/store";
-import * as tf from "@tensorflow/tfjs";
 // import { useMultiplayerStore } from "@/store";
 
 interface Prediction {
-  bbox: [number, number, number, number]; // [x, y, width, height]
+  bbox: [number, number, number, number];
   class: string;
   score: number;
 }
 
-// Custom YOLO classes - can add more as needed
+// interface RawPredictions {
+//   boxes: number[][][];
+//   scores: number[][][];
+//   classes: number[][][];
+// }
+
+// interface Model {
+//   executeAsync: (input: HTMLVideoElement) => Promise<RawPredictions>;
+// }
+
+// interface DetectionCallback {
+//   (predictions: Prediction[]): void;
+// }
+
+/**
+ * Load the TF.js model from a given URL or local path.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const cvstfjs: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// declare const customTFModel: any;
+export async function loadModel() {
+  try {
+    // We store the model as a global or module-level variable
+    window.cvsModel = new cvstfjs.ObjectDetectionModel();
+    await window.cvsModel.loadModelAsync("/models/tfjs/model.json");
+    console.log("TF.js model loaded successfully!", window.cvsModel);
+  } catch (error) {
+    console.error("Error loading TF model:", error);
+  }
+}
+
+/**
+ * Get the loaded model or null if not loaded yet
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getModel(): any | null {
+  if (window.cvsModel) {
+    // Return the model if it's already loaded
+    return window.cvsModel ?? null;
+  }
+  return null;
+}
+
 const YOLO_CLASSES: { [key: number]: string } = {
-    0: "Fork",
-    1: "Headphones",
-    2: "Mug",
-    3: "Remote",
-    4: "Toothbrush"
+  0: "Fork",
+  1: "Headphones",
+  2: "Mug",
+  3: "Remote",
+  4: "Toothbrush",
 };
+
+/**
+ * Convert raw model output [boxes, scores, classes]
+ * from normalized coords -> pixel coords [x, y, w, h].
+ *
+ * Typically, boxes = [ [y1, x1, y2, x2], ... ] in normalized range [0..1].
+ */
+function formatPredictions(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rawPredictions: any[],
+  videoElement: HTMLVideoElement,
+  threshold = 0.15 // TODO: Make this configurable?
+): Prediction[] {
+  if (!rawPredictions || rawPredictions.length < 3) {
+    console.warn("Raw predictions array is invalid.", rawPredictions);
+    return [];
+  }
+
+  console.log("Raw predictions:", rawPredictions);
+  // DEBUGGING INFO: ACTUAL OUTPUT FROM MODEL
+  //   [
+  //     [
+  //         [
+  //             0.21632200479507446,
+  //             0.024378687143325806,
+  //             0.758617103099823,
+  //             0.9370595216751099
+  //         ],
+  //         [
+  //             0.559609055519104,
+  //             0.06952086091041565,
+  //             1.0044176578521729,
+  //             0.977522611618042
+  //         ]
+  //     ],
+  //     [
+  //         0.05153145641088486,
+  //         0.015005435794591904
+  //     ],
+  //     [
+  //         1,
+  //         1
+  //     ]
+  // ]
+
+  // Destructure arrays
+  const [boxes, scores, classes] = rawPredictions;
+  // boxes => [ [y1, x1, y2, x2], [y1, x1, y2, x2], ... ]
+  // scores => [score1, score2, ...]
+  // classes => [classIndex1, classIndex2, ...]
+  if (!boxes.length || !scores.length || !classes.length) {
+    console.warn("No valid detections found in the arrays.");
+    return [];
+  }
+
+  // Actual video resolution
+  const vidW = videoElement.videoWidth;
+  const vidH = videoElement.videoHeight;
+
+  const results: Prediction[] = [];
+
+  // Loop over each detection
+  for (let i = 0; i < boxes.length; i++) {
+    const score = scores[i];
+    if (score < threshold) continue; // skip below threshold
+
+    // Each box is [y1, x1, y2, x2] in normalized coords
+    const [y1, x1, y2, x2] = boxes[i];
+
+    // Convert normalized coords => pixel coords
+    const x = x1 * vidW;
+    const y = y1 * vidH;
+    const width = (x2 - x1) * vidW;
+    const height = (y2 - y1) * vidH;
+
+    const classIndex = classes[i];
+    // e.g. YOLO_CLASSES: { 0: "Fork", 1: "Headphones", ... }
+    const label = YOLO_CLASSES[classIndex] ?? "unknown";
+
+    results.push({
+      bbox: [x, y, width, height],
+      class: label,
+      score,
+    });
+  }
+
+  return results;
+}
 
 /**
  * Maps class names to specific colors for bounding boxes.
@@ -154,118 +285,109 @@ export const drawBoundingBoxes = (predictions: Prediction[]): void => {
 };
 
 /**
- * Run detection on the current media in the canvas.
- * Uses the store to access the current media type and video playing status.
+ * Runs detection on a single frame
  */
-export const runDetectionOnCurrentMedia = async (): Promise<void> => {
-  const { currentMediaType } = useGameStore.getState();
+const detectFrame = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  model: any,
+  videoElement: HTMLVideoElement,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callback: (predictions: Prediction[]) => void
+) => {
+  if (!model) return;
 
-  if (!currentMediaType) {
-    console.log(
-      "Invalid media type or no media type selected. Cannot run detection."
+  // Filter predictions based on confidence
+  const confidenceThreshold = 0.1;
+
+  try {
+    // Get Raw Prediction Data
+    const raw = await model.executeAsync(videoElement);
+    // Execute model on current frame
+    const predictions = formatPredictions(
+      raw,
+      videoElement,
+      confidenceThreshold
     );
-    return;
-  }
-
-  const model = window.cvsModel;
-  if (!model) {
-    console.log("YOLO model not loaded. Cannot run detection.");
-    return;
-  }
-
-  const canvasElement = document.getElementById(
-    "canvas-main"
-  ) as HTMLCanvasElement;
-  const videoElement = document.getElementById(
-    "video-output"
-  ) as HTMLVideoElement;
-
-  if (!videoElement || !canvasElement) {
-    console.error("Video or Canvas element not found.");
-    return;
-  }
-
-  // Set canvas dimensions
-  canvasElement.width = videoElement.videoWidth || 640;
-  canvasElement.height = videoElement.videoHeight || 480;
-
-  const detectFrame = async () => {
-    try {
-      if (!window.cvsModel) {
-        console.error("Model not loaded");
-        return;
-      }
-      const videoPlaying = useGameStore.getState().videoPlaying;
-      // Construct input tensor for shape [416,416]
-      const inputTensor = window.tf.browser
-        .fromPixels(videoElement)
-        .resizeNearestNeighbor([320, 320])
-        .toFloat()
-        .div(255)
-        .expandDims(0);
-
-      // Run inference with custom model that does NMS and returns multiple output tensors
-      // e.g., [boxes, scores, classes, validDetections]
-      const predictions = (await window.cvsModel.executeAsync(
-        inputTensor
-      )) as tf.Tensor[];
-
-      // Extract & parse detection outputs
-      const boxes = (await predictions[0].array()) as number[][][]; // shape [batch, maxDet, 4]
-      const scores = (await predictions[1].array()) as number[][];
-      const classes = (await predictions[2].array()) as number[][];
-      const countArr = (await predictions[3].data()) as Float32Array; // [batch], number of valid detections
-      const validDetections = countArr[0];
-
-      // Convert each detection to Prediction type
-      // boxes[0][i] = [x1, y1, x2, y2]
-      const mappedPredictions: Prediction[] = [];
-      for (let i = 0; i < validDetections; i++) {
-        const [x1, y1, x2, y2] = boxes[0][i];
-        const labelIndex = classes[0][i];
-        const score = scores[0][i];
-
-        // Convert [x1,y1,x2,y2] → [x, y, width, height]
-        const width = x2 - x1;
-        const height = y2 - y1;
-
-        mappedPredictions.push({
-          bbox: [x1, y1, width, height],
-          class: YOLO_CLASSES[labelIndex] || "unknown",
-          score,
-        });
-      }
-
-      // Draw bounding boxes
-      drawBoundingBoxes(mappedPredictions);
-
-      // Cleanup Tensors
-      window.tf.dispose([inputTensor, ...predictions]);
-
-      // Recursive call
-      if (!videoElement.paused && videoPlaying) {
-        requestAnimationFrame(detectFrame);
-      }
-    } catch (error) {
-      console.error("Error during NMS-based YOLO inference:", error);
+    // Call callback with predictions for drawing
+    if (predictions.length > 0) {
+      callback(predictions);
     }
-  };
-
-  // 9. Start detection on next animation frame
-  requestAnimationFrame(detectFrame);
+    console.log("Predictions before RETURN in detectFrame():", predictions);
+    return predictions;
+  } catch (error) {
+    console.error("Detection error:", error);
+    return [];
+  }
 };
 
 /**
- * Stop detection and clear canvas
+ * Main detection loop
+ */
+export const runDetectionOnCurrentMedia = async (): Promise<void> => {
+  const { currentMediaType, videoPlaying, setActiveDetectionLoop } =
+    useGameStore.getState();
+  const model = window.cvsModel; // or from your context/hook
+
+  if (!currentMediaType || !model) {
+    console.log("Missing required elements for detection");
+    return;
+  }
+
+  const videoElement = document.getElementById(
+    "video-output"
+  ) as HTMLVideoElement;
+  if (!videoElement) {
+    console.error("Video element not found");
+    return;
+  }
+
+  // Clear any existing detection loop if still running
+  let lastDetectionTime = 0;
+  const DETECTION_INTERVAL = 100; // 10 FPS
+
+  const detectionLoop = async (timestamp: number) => {
+    if (timestamp - lastDetectionTime >= DETECTION_INTERVAL) {
+      await detectFrame(model, videoElement, drawBoundingBoxes);
+      lastDetectionTime = timestamp;
+    }
+
+    if (currentMediaType !== "image" && !videoElement.paused && videoPlaying) {
+      const loopId = requestAnimationFrame(detectionLoop);
+      setActiveDetectionLoop(loopId); // ✅ Set activeDetectionLoop in Zustand
+    }
+  };
+
+  if (currentMediaType !== "image") {
+    const loopId = requestAnimationFrame(detectionLoop);
+    setActiveDetectionLoop(loopId); // ✅ Set activeDetectionLoop when the loop starts
+  } else {
+    await detectFrame(model, videoElement, drawBoundingBoxes);
+    setActiveDetectionLoop(null); // No loop for images
+  }
+};
+
+/**
+ * Stops the detection loop
  */
 export const stopDetection = (): void => {
+  const { activeDetectionLoop, setActiveDetectionLoop } =
+    useGameStore.getState();
+
+  if (activeDetectionLoop) {
+    // Cancel the active detection loop
+    cancelAnimationFrame(activeDetectionLoop);
+    setActiveDetectionLoop(null);
+  }
+
   const canvasElement = document.getElementById(
     "canvas-main"
   ) as HTMLCanvasElement;
   if (!canvasElement) return;
 
-  const ctx = canvasElement.getContext("2d");
-  if (ctx) {
-    ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  const context = canvasElement.getContext("2d");
+  if (context) {
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
   }
+
+  console.log("Detection loop stopped and activeDetectionLoop cleared.");
 };
