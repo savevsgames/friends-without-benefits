@@ -24,6 +24,11 @@ import PlayStopVideoButton from "./buttons/PlayStopVideoButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import LoadVideoButton from "./buttons/LoadVideoButton";
 // import { useUserSession } from "@/store";
+import { useGameStore } from "@/store";
+
+export const useIsDetectionActive = () => {
+  return useGameStore((state) => state.activeDetectionLoop !== null);
+};
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -36,6 +41,9 @@ const SideBar = () => {
       return <FaTimes size={22} />;
     }
   };
+
+  // A hook to check if the detection loop is active and display with/near the button to detect
+  const isDetectionActive = useIsDetectionActive();
 
   return (
     <>
@@ -92,6 +100,11 @@ const SideBar = () => {
             </MenuItem>
             <MenuItem icon={<FaVideo />}>
               <LoadVideoButton />
+            </MenuItem>
+            <MenuItem>
+              <div>
+                Detection: {isDetectionActive ? "Active 🟢" : "Stopped 🔴"}
+              </div>
             </MenuItem>
           </SubMenu>
 

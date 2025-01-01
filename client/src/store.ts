@@ -22,6 +22,7 @@ export interface IGameState {
   videoPlaying: boolean; // Flag to indicate if the video is playing
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
   currentMediaType: "image" | "video" | "webcam" | null;
+  activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
   // State Setters
   setGameState: (newState: string) => void;
@@ -29,6 +30,7 @@ export interface IGameState {
   setVideoPlaying: (playing: boolean) => void;
   setCurrentMediaRef: (ref: string | null) => void;
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
+  setActiveDetectionLoop: (iteration: number | null) => void;
   addPlayer: (id: string, player: Player) => void;
 
   // Socket IO / Zustand Actions to set opponent player state
@@ -43,12 +45,15 @@ export const useGameStore = create<IGameState>((set) => ({
   videoPlaying: false,
   currentMediaRef: null,
   currentMediaType: null,
+  activeDetectionLoop: null,
   players: {},
   setGameState: (newState) => set({ gameState: newState }),
   setCanvasReady: (ready) => set({ canvasReady: ready }),
   setVideoPlaying: (playing) => set({ videoPlaying: playing }),
   setCurrentMediaRef: (ref) => set({ currentMediaRef: ref }),
   setCurrentMediaType: (type) => set({ currentMediaType: type }),
+  setActiveDetectionLoop: (iteration) =>
+    set({ activeDetectionLoop: iteration }),
   addPlayer: (id, player) =>
     set((state) => ({
       players: { ...state.players, [id]: player },

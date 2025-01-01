@@ -12,28 +12,26 @@ declare global {
     myMl5Detector?: ml5ObjectDetector; // Adding `myMl5Detector` to the window object for ml5.js object detection
 
     // Adding `tf` to the window object for TensorFlow.js
-    tf: typeof import("@tensorflow/tfjs"); // Reference to TensorFlow.js loaded via script
-    yoloModel?: TFGraphModel; // YOLO Model loaded globally
-    cvsModel?: cvstfjs.ObjectDetectionModel //cvstfjs model
+    tf: typeof import("@tensorflow/tfjs");
+    cvstfjs: {
+      ObjectDetectionModel: new () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        loadModelAsync: (path: string) => Promise<any>;
+        executeAsync: (
+          input: HTMLImageElement | HTMLVideoElement
+        ) => Promise<[number[][], number[], number[]]>;
+      };
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cvsModel: any;
   }
 }
 
-/**
- * TFJS Library Interface
- */
-// Graph Model for TensorFlow.js
-interface TFGraphModel {
-  /**
-   * Runs inference on the input and returns a single tensor or an array of tensors.
-   */
-  executeAsync: (
-    input: tf.Tensor | tf.Tensor[]
-  ) => Promise<tf.Tensor | tf.Tensor[]>;
-
-  /**
-   * Runs inference on the input and returns a tensor or an array of tensors.
-   */
-  execute: (input: tf.Tensor | tf.Tensor[]) => tf.Tensor | tf.Tensor[];
+// TFJS custom model prediction type - Custom Prediction type for our in game scavenger hunt
+interface Prediction {
+  bbox: [number, number, number, number]; // [x, y, width, height]
+  label: string; // Mapped from class index
+  score: number; // Confidence score
 }
 
 /**
@@ -44,20 +42,6 @@ interface TFGraphModel {
 interface OpenCVModule {
   calledRun?: boolean; // Flag to check if the runtime has been initialized
   onRuntimeInitialized?: () => void; // Callback function for runtime initialization
-}
-
-// ml5 coco Prediction Type -Premade Prediction model type for our in game scavenger hunt
-// interface Prediction {
-//   bbox: [number, number, number, number]; // [x, y, width, height]
-//   class: string;
-//   score: number;
-// }
-
-// TFJS custom model prediction type - Custom Prediction type for our in game scavenger hunt
-interface Prediction {
-  bbox: [number, number, number, number]; // [x, y, width, height]
-  label: string; // Mapped from class index
-  score: number; // Confidence score
 }
 
 /**
