@@ -10,10 +10,33 @@ declare global {
     ml5: ml5Library; // Adding `ml5` to the window object for ml5.js
     ml5Loaded?: boolean; // Flag to check if ml5.js has been loaded
     myMl5Detector?: ml5ObjectDetector; // Adding `myMl5Detector` to the window object for ml5.js object detection
+
+    // Adding `tf` to the window object for TensorFlow.js
+    tf: typeof import("@tensorflow/tfjs");
+    cvstfjs: {
+      ObjectDetectionModel: new () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        loadModelAsync: (path: string) => Promise<any>;
+        executeAsync: (
+          input: HTMLImageElement | HTMLVideoElement
+        ) => Promise<[number[][], number[], number[]]>;
+      };
+    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tf: any; // Adding `tf` to the window object for TensorFlow.js
+    cvsModel: any;
   }
 }
+
+// TFJS custom model prediction type - Custom Prediction type for our in game scavenger hunt
+interface Prediction {
+  bbox: [number, number, number, number]; // [x, y, width, height]
+  label: string; // Mapped from class index
+  score: number; // Confidence score
+}
+
+/**
+ * OpenCV.js Module Loading Interface
+ */
 
 // Define the OpenCVModule interface based on the runtime properties we're using
 interface OpenCVModule {
@@ -21,12 +44,9 @@ interface OpenCVModule {
   onRuntimeInitialized?: () => void; // Callback function for runtime initialization
 }
 
-// Define Prediction Type - Custom Prediction type for our in game scavenger hunt
-interface Prediction {
-  bbox: [number, number, number, number]; // [x, y, width, height]
-  class: string;
-  score: number;
-}
+/**
+ * Ml5 Library Interface
+ */
 
 // ml5 Prediction for Classification - For re-training cocoSsd with user items (in testing) to make custom models
 interface ml5Prediction {

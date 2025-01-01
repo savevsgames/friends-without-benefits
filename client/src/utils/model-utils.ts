@@ -2,6 +2,12 @@
 import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
 
+interface Prediction {
+  bbox: [number, number, number, number]; // [x, y, width, height]
+  class: string;
+  score: number;
+}
+
 /**
  * Load a given image file into the canvas.
  * @param file File object to load
@@ -246,12 +252,8 @@ export const colorForLabels = (className: string) => {
   return colors[className] || colors.default;
 };
 
-/**
- * Draws bounding boxes around detected objects on the media source.
- * @param predictions Array of predictions from the model
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const drawBoundingBoxes = (predictions: any): void => {
+
+export const drawBoundingBoxes = (predictions: Prediction[]): void => {
   const canvasElement = document.getElementById(
     "canvas-main"
   ) as HTMLCanvasElement;
@@ -313,21 +315,9 @@ export const drawBoundingBoxes = (predictions: any): void => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     predictions.forEach((prediction: any) => {
-      // Map your existing properties to the ones the function expects
-      prediction.bbox = [
-        prediction.x,
-        prediction.y,
-        prediction.width,
-        prediction.height,
-      ];
-      prediction.className = prediction.label;
-      prediction.score = prediction.confidence;
-
-      // const { bbox, class: className, score: confScore } = prediction;
+      const { bbox, class: className, score: confScore } = prediction;
       // Use raw coordinates from prediction - they're already in source dimensions
-      const [x, y, width, height] = prediction.bbox;
-      const className = prediction.className;
-      const confScore = prediction.score;
+      const [x, y, width, height] = bbox.map((val: number) => val);
       const color = colorForLabels(className);
 
       // Draw bounding box and label box
@@ -511,6 +501,7 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
   }
   await detectFrame();
 };
+
 
 /**
  * Stop detection and clear canvas

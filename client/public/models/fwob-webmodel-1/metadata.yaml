@@ -1,0 +1,14 @@
+description: Ultralytics best model trained on /content/CustomObjectSearch-1/data.yaml
+author: Ultralytics
+date: '2024-12-31T13:35:46.799116'
+version: 8.3.55
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: sunglasses
