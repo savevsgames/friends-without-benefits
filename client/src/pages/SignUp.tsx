@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
 import { ADD_USER } from "../utils/mutations";
 import { useMutation } from "@apollo/client";
+import { Link } from "react-router-dom";
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -129,9 +130,9 @@ const SignUp: React.FC = () => {
           <p className="text-l text-gray-700 dark:text-slate-50 font-small pr-2">
             Already have an account?
           </p>
-          <button className="underline text-teal-900 dark:text-teal-400 font-small">
+          <Link to="/login" className="underline text-teal-900 dark:text-teal-400 font-small">
             Log in
-          </button>
+          </Link>
         </div>
       </div>
 

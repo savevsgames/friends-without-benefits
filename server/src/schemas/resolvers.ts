@@ -6,7 +6,6 @@ import {
   GQLQueryError,
 } from "../utils/graphQLErrorThrower.js";
 
-import bcrypt from "bcrypt";
 
 interface User {
   _id: string;
