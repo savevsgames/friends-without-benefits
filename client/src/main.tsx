@@ -16,6 +16,7 @@ import App from "./App.tsx";
 // Using useContext and hook to provide the model to the Game component
 import { ModelProvider } from "./components/ModelProvider.tsx";
 
+
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
   <BrowserRouter>

@@ -3,6 +3,8 @@ import { useThemeStore } from "@/store";
 import { IoMoon } from "react-icons/io5";
 import { IoSunny } from "react-icons/io5";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
+import { useUserSession } from "@/store";
+import { useAuthStore } from "@/store";
 
 // page navigations
 const navigation = [
@@ -25,6 +27,8 @@ export default function Header() {
 
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const theme = useThemeStore((state) => state.theme);
+  const clearUser = useUserSession((state) => state.clearUser);
+  const logout = useAuthStore((state) => state.logout);
 
   const icon = (theme: string) => {
     if (theme === "light") {
@@ -112,10 +116,16 @@ export default function Header() {
                         to={item.page}
                         className={classNames(
                           active
-                            ? "bg-gray-100 text-blue-600"
+                            ? "bg-gray-100 text-teal-600"
                             : "text-gray-700",
                           "block px-4 py-2 text-sm"
                         )}
+                        onClick={() => {
+                          if (item.name === "Sign Out") {
+                            clearUser();
+                            logout();
+                          }
+                        }}
                       >
                         {item.name}
                       </Link>
