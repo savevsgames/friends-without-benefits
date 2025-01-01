@@ -12,6 +12,7 @@ interface IUser extends Document {
   shortestRound: Schema.Types.ObjectId;
   avatar: string;
   isCorrectPw(password: string): Promise<boolean>;
+  isAdmin: Boolean;
 }
 
 const userSchema = new Schema<IUser>(
@@ -49,6 +50,10 @@ const userSchema = new Schema<IUser>(
       type: Schema.Types.ObjectId,
       ref: "Game",
       required: false,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
   },
   {
