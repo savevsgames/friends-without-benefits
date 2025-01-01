@@ -31,7 +31,7 @@ export const GQLMutationError = (mutationName: string, error: any) => {
 }
 
 export const AuthenticationError = (error: any) => {
-  return new GraphQLError('Authentication Error at login or signup', {
+  return new GraphQLError('Authentication Error', {
     extensions: {
       code: 'AUTHENTICATION_ERROR',
       originalError: error

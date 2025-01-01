@@ -96,27 +96,31 @@ const resolvers = {
   },
 
   Mutation: {
-    addUser: async (_: any, { input }: any) => {
+    addUser: async (
+      _: any,
+      { input }: any
+    ): Promise<{ token: string; user: User }> => {
       const { username, email, password } = input;
-
+      console.log("username:", username, "password", password, "email:", email);
       try {
         // Check if the email is already in use
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
           throw new Error("Email already in use");
         }
 
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         // Create a new user
-        const newUser = await User.create({
+        const user = await User.create({
           username,
           email,
-          password: hashedPassword,
+          password,
         });
+        console.log("new user from addUser is", user);
+        const token = signToken(user.username, user.email, user._id);
+        console.log("token is from addUser", token);
 
-        return newUser;
+        return { token, user };
       } catch (error) {
         throw GQLMutationError("addUser", error);
       }
@@ -133,13 +137,11 @@ const resolvers = {
       }
 
       const correctPw = await user.isCorrectPw(password);
-      console.log(correctPw);
-      console.log(password);
+      console.log("the password you entered is:", password);
+      console.log("is the password matching the database's?:", correctPw);
 
       if (!correctPw) {
-        throw AuthenticationError(
-          "Failure logging in-password incorrect debug"
-        );
+        throw AuthenticationError("Failure logging in");
       }
 
       const token = signToken(user.username, user.email, user._id);
