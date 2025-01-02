@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { SignUpData } from "../interfaces/SignUpData.tsx";
+import { SignUpData } from "../interfaces/SignUpData";
 import { useAuthStore } from "@/store.ts";
 import { useNavigate } from "react-router-dom";
 import { ADD_USER } from "../utils/mutations";
