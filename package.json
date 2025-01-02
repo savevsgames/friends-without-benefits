@@ -18,7 +18,7 @@
     "start:client": "npm --prefix client run preview",
     "clean": "rimraf node_modules client/node_modules server/node_modules client/dist server/dist",
     "render-build": "npm run setup && npm run build",
-    "render:build-clean": "npm run clean && npm run render-build",
+    "render:build-clean": "npm i && npm run clean && npm run render-build",
     "deploy-test-start": "concurrently \"cd server && npm run start\" \"npx cypress run --browser electron\"",
     "test": "npx cypress run --browser electron",
     "test-component": "npx cypress run --component",
