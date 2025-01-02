@@ -9,9 +9,14 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "allowJs": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client"],
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
+    /* Bundler mode CHANGED TO NODE BECAUSE OF RENDER */
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
