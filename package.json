@@ -16,9 +16,9 @@
     "start": "concurrently --kill-others-on-fail \"npm run start:server\" \"npm run start:client\"",
     "start:server": "npm --prefix server run start",
     "start:client": "npm --prefix client run preview",
-    "clean": "rimraf node_modules client/node_modules server/node_modules client/dist server/dist",
+    "clean": "rm -rf node_modules dist server/node_modules client/node_modules",
     "render-build": "npm run setup && npm run build",
-    "render:build-clean": "npm i && npm run clean && npm run render-build",
+    "render:build-clean": "npm run clean && npm run render-build",
     "deploy-test-start": "concurrently \"cd server && npm run start\" \"npx cypress run --browser electron\"",
     "test": "npx cypress run --browser electron",
     "test-component": "npx cypress run --component",
@@ -31,12 +31,10 @@
     "concurrently": "^9.1.0",
     "npm-run-all": "^4.1.5",
     "react-modal": "^3.16.3",
-    "rimraf": "^6.0.1"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
     "npm-run-all": "^4.1.5",
-    "rimraf": "^6.0.1"
   },
   "include": [
     "server/**/*",
