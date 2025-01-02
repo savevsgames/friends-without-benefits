@@ -2,5 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 body {
-    overflow: hidden;
+  overflow: hidden;
 }
+
+/* This file has been copied and manually 
+placed into /public for deployment 
+
+If you plan on updating this file, you 
+must also update the file in public 
+but overwriting it with the new file. 
+Ensure the file in public is the most 
+up to date version at all times.
+
+*/
