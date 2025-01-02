@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import path from "path";
 
 // Determine environment: Vite will use development mode with -> npm run dev
 // To run production mode use -> npm run build
@@ -59,5 +60,11 @@ export default defineConfig({
         secure: !isDevelopment,
       },
     },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+    dedupe: ["react", "react-dom"], // Ensures no duplicate instances of React are loaded
   },
 });
