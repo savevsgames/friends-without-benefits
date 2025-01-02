@@ -62,10 +62,6 @@ function Home() {
                   onInit={(typewriter) => {
                     typewriter
                       .typeString("Coming soon..")
-                      .callFunction(() => {
-                        console.log("String typed out!");
-                      })
-
                       .start()
                       .pauseFor(50)
                       .deleteAll();
@@ -107,10 +103,6 @@ function Home() {
                   onInit={(typewriter) => {
                     typewriter
                       .typeString("Coming soon..")
-                      .callFunction(() => {
-                        console.log("String typed out!");
-                      })
-
                       .start()
                       .pauseFor(50)
                       .deleteAll();

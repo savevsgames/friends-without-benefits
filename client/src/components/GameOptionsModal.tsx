@@ -72,7 +72,7 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
         <div className="flex justify-end mt-6">
           <button
             onClick={onClose}
-            className="border-2 border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors duration-300 text-xs"
+            className="border-2 border-gray-300 text-gray-700 px-4 py-1 rounded-md hover:bg-gray-200 transition-colors duration-300 text-xs"
           >
             Close
           </button>
