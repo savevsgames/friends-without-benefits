@@ -1,7 +1,7 @@
 import express from "express";
 import path from "node:path";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import type { Request, Response } from "express";
 import db from "./config/connection.js";
 import { ApolloServer } from "@apollo/server";
@@ -17,8 +17,6 @@ import { authenticateToken } from "./utils/auth.js";
 // Define __dirname manually
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-
 
 // Apollo Server Initialization
 const apolloServer = new ApolloServer({
@@ -46,8 +44,7 @@ const startApolloServer = async () => {
   // GraphQL
   app.use(
     "/graphql",
-      expressMiddleware(apolloServer as any
-        , {
+    expressMiddleware(apolloServer as any, {
       context: authenticateToken as any,
     })
   );
@@ -161,9 +158,11 @@ const startApolloServer = async () => {
   });
   app.use("/peerjs", peerServer);
 
-  // Serve static files in production
   if (process.env.NODE_ENV === "production") {
-    // Catch all other routes and return the index file
+    // Serve static files from the client build directory
+    app.use(express.static(path.join(__dirname, "../client/dist")));
+
+    // Catch all other routes and return the index.html file
     app.get("*", (_req: Request, res: Response) => {
       res.sendFile(path.join(__dirname, "../client/dist/index.html"));
     });
