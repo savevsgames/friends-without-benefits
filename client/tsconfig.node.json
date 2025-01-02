@@ -25,7 +25,10 @@
     "src/**/*.tsx",
     "src/types/*.d.ts",
     "src/**/*.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    "node_modules/@vitejs/plugin-react",
+    "node_modules/vite-plugin-static-copy",
+    "node_modules/vite-tsconfig-paths"
   ],
   "exclude": ["node_modules", "dist"]
 }
