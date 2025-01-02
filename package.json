@@ -16,8 +16,7 @@
     "start": "concurrently --kill-others-on-fail \"npm run start:server\" \"npm run start:client\"",
     "start:server": "npm --prefix server run start",
     "start:client": "npm --prefix client run preview",
-    "render-build": "npm run install:all && npm run build"
-
+    "render-build": "npm run install && npm run build"
   },
   "author": "Thomas Stemler, Souad Hassen-Bouzouita, Dario Zambrano, Greg Barker",
   "license": "MIT",
