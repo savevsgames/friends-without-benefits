@@ -1,7 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { useThemeStore } from "@/store";
-import { IoMoon } from "react-icons/io5";
-import { IoSunny } from "react-icons/io5";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import { useUserSession } from "@/store";
 import { useAuthStore } from "@/store";
@@ -25,18 +22,10 @@ export default function Header() {
   const location = useLocation();
   console.log("current path:", location.pathname);
 
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
-  const theme = useThemeStore((state) => state.theme);
+
   const clearUser = useUserSession((state) => state.clearUser);
   const logout = useAuthStore((state) => state.logout);
 
-  const icon = (theme: string) => {
-    if (theme === "light") {
-      return <IoMoon size={22} style={{ color: "black" }} />;
-    } else {
-      return <IoSunny size={22} style={{ color: "white" }} />;
-    }
-  };
 
   return (
     <nav className="bg-zinc-50 dark:bg-teal-950 z-0">
@@ -88,14 +77,6 @@ export default function Header() {
               </div>
             </div>
           </div>
-
-          {/* Theme toggle */}
-          <button
-            onClick={() => toggleTheme()}
-            className="font-bold tracking-widest px-7 flex flex-row items-center"
-          >
-            {icon(theme)}
-          </button>
 
           {/* Profile dropdown */}
           <div className="relative ml-3">
