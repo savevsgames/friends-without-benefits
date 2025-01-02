@@ -4,7 +4,7 @@
   "description": "Object Recognition Scavenger Hunt",
   "main": "index.js",
   "scripts": {
-    "install:all": "npm-run-all --parallel install:server install:client",
+    "install": "cd server && npm i && cd ../client && npm i",
     "install:server": "npm --prefix server install",
     "install:client": "npm --prefix client install",
     "dev": "concurrently --kill-others-on-fail \"npm run dev:server\" \"npm run dev:client\"",
@@ -17,7 +17,7 @@
     "start:server": "npm --prefix server run start",
     "start:client": "npm --prefix client run preview",
     "render-build": "npm run install:all && npm run build"
-    
+
   },
   "author": "Thomas Stemler, Souad Hassen-Bouzouita, Dario Zambrano, Greg Barker",
   "license": "MIT",
