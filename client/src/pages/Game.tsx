@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Header from "@/components/Header.tsx";
 import Canvas from "../components/Canvas.tsx";
+import Footer from "@/components/Footer.tsx";
 
 import { useGameStore } from "@/store";
 import MultiplayerInitializer from "@/components/MulitplayerInitializer.ts";
@@ -54,6 +55,7 @@ function Game() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

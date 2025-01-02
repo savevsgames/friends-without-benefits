@@ -38,7 +38,7 @@ const Login: React.FC = () => {
       console.log("data from mutation is", data);
       loginState(data.login.token); // if the token is valid it'll set isLoggedIn to true and sets the token on localstorage
 
-      navigate("/game"); // once isLogged is is true, it'll navigate to the game page
+      navigate("/home"); // once isLogged is is true, it'll navigate to the game page
     } catch (err) {
       console.error(error || err);
       setErr("Error Logging in");

@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer.tsx";
 import Header from "../components/Header.tsx";
 import SideBar from "@/components/SideBar.tsx";
 
@@ -11,6 +12,7 @@ function LeaderBoard() {
           <SideBar />
         </div>
       </div>
+      <Footer/>
     </>
   );
 }

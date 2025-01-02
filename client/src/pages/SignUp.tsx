@@ -33,11 +33,11 @@ const SignUp: React.FC = () => {
     try {
       const { data } = await addUser({
         variables: {
-          input: {... form}
+          input: { ...form },
         },
       });
       login(data.addUser.token); // this will set the isLoggedIn state to true once the token is valid
-      navigate("/game"); // once isLogged is is true, it'll navigate to the login page
+      navigate("/home"); // once isLogged is is true, it'll navigate to the login page
     } catch (err) {
       console.error(error || err);
       setErr("Error Signing in");
@@ -130,7 +130,10 @@ const SignUp: React.FC = () => {
           <p className="text-l text-gray-700 dark:text-slate-50 font-small pr-2">
             Already have an account?
           </p>
-          <Link to="/login" className="underline text-teal-900 dark:text-teal-400 font-small">
+          <Link
+            to="/login"
+            className="underline text-teal-900 dark:text-teal-400 font-small"
+          >
             Log in
           </Link>
         </div>
