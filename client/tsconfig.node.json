@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "typeRoots": ["./src/*", "./node_modules/@types"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -25,10 +26,7 @@
     "src/**/*.tsx",
     "src/types/*.d.ts",
     "src/**/*.ts",
-    "vite.config.ts",
-    "node_modules/@vitejs/plugin-react",
-    "node_modules/vite-plugin-static-copy",
-    "node_modules/vite-tsconfig-paths"
+    "vite.config.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

@@ -9,7 +9,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types", "./src/types/custom.d.ts"],
     "allowJs": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
