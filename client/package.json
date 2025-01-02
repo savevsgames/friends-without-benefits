@@ -7,7 +7,7 @@
     "setup": "npm install",
     "watch": "tsc -w",
     "dev": "concurrently \"tsc -w\" \"vite\"",
-    "build": "tsc -p tsconfig.app.json && vite build",
+    "build": "npx tsc -p tsconfig.app.json && npx vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
