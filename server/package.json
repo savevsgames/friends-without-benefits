@@ -5,6 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
+    "setup": "npm install",
     "build": "tsc",
     "build:watch": "tsc -w",
     "start": "node dist/server.js",
