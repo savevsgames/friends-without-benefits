@@ -2,9 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware"; // this is a zustand middleware to persist login throughout the app
 import AuthService from "./utils/auth.ts";
 import Peer from "peerjs";
-import { Socket as SocketIOClient } from "socket.io-client";
+// import { Socket } from "socket.io-client";
 import io from "socket.io-client";
-// Dynamically infer the socket type from the io() function
 type SocketIOClient = ReturnType<typeof io>;
 
 // Player extends User type with additional game-related properties
@@ -16,6 +15,29 @@ interface Player {
   // Need to add more relevant props like items to find, etc.
 }
 
+// MODEL STORE
+interface IModelState {
+  isLoading: boolean;
+  error: Error | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  model: any | null;
+  // Setters
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: Error | null) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setModel: (model: any | null) => void;
+}
+
+export const useModelStore = create<IModelState>((set) => ({
+  isLoading: false,
+  error: null,
+  model: null,
+  setLoading: (isLoading) => set({ isLoading }),
+  setError: (error) => set({ error }),
+  setModel: (model) => set({ model }),
+}));
+
+// GAME STORE - SINGLE & MULTIPLAYER
 export interface IGameState {
   gameState: string; // "setup", "playing", "gameover"
   canvasReady: boolean; // Flag to indicate if the canvas is ready for drawing
@@ -24,6 +46,7 @@ export interface IGameState {
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
+
   // State Setters
   setGameState: (newState: string) => void;
   setCanvasReady: (ready: boolean) => void;
@@ -47,34 +70,47 @@ export const useGameStore = create<IGameState>((set) => ({
   currentMediaType: null,
   activeDetectionLoop: null,
   players: {},
-  setGameState: (newState) => set({ gameState: newState }),
-  setCanvasReady: (ready) => set({ canvasReady: ready }),
-  setVideoPlaying: (playing) => set({ videoPlaying: playing }),
-  setCurrentMediaRef: (ref) => set({ currentMediaRef: ref }),
-  setCurrentMediaType: (type) => set({ currentMediaType: type }),
-  setActiveDetectionLoop: (iteration) =>
-    set({ activeDetectionLoop: iteration }),
-  addPlayer: (id, player) =>
+  setGameState: (newState) => {
+    set({ gameState: newState });
+  },
+  setCanvasReady: (ready) => {
+    set({ canvasReady: ready });
+  },
+  setVideoPlaying: (playing) => {
+    set({ videoPlaying: playing });
+  },
+  setCurrentMediaRef: (ref) => {
+    set({ currentMediaRef: ref });
+  },
+  setCurrentMediaType: (type) => {
+    set({ currentMediaType: type });
+  },
+  setActiveDetectionLoop: (iteration) => {
+    set({ activeDetectionLoop: iteration });
+  },
+  addPlayer: (id, player) => {
     set((state) => ({
       players: { ...state.players, [id]: player },
-    })),
-
-  removePlayer: (id: string) =>
+    }));
+  },
+  removePlayer: (id: string) => {
     set((state) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [id]: _data, ...rest } = state.players;
       return { players: { ...rest } };
-    }),
+    });
+  },
   // Local update and emit via Socket.IO to challenger
   outgoingUpdate: (updates) => {
     set((state) => ({ ...state, ...updates }));
     const socket = useMultiplayerStore.getState().socket;
     socket?.emit("stateUpdate", { store: "game", updates });
+    console.log("📤 Outgoing Game Store update:", updates);
   },
-
   // Apply updates from Socket.IO
   incomingUpdate: (updates) => {
     set((state) => ({ ...state, ...updates }));
+    console.log("📥 Incoming Game Store update:", updates);
   },
 }));
 
@@ -166,7 +202,7 @@ export const useThemeStore = create(
   )
 );
 
-// MULTI-PLAYER STORE
+// MULTI-PLAYER STORE - EXTENDS GAME STORE IN MULTIPLAYER MODE
 export interface IMultiplayerState {
   playerId: string | null; // Unique player identifier (from PeerJS)
   peer: Peer | null; // PeerJS instance for WebRTC connections
@@ -208,9 +244,18 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   chatMessages: [],
   gameStartTime: null,
   inviteLink: null,
-  setPlayerId: (id) => set({ playerId: id }),
-  setPeer: (peer) => set({ peer }),
-  setSocket: (socket) => set({ socket }),
+  setPlayerId: (id) => {
+    console.log("🆔 Player ID set in store:", id);
+    set({ playerId: id });
+  },
+  setPeer: (peer) => {
+    console.log("✅ PeerJS set in store");
+    set({ peer });
+  },
+  setSocket: (socket) => {
+    console.log("✅ Socket.IO set in store");
+    set({ socket });
+  },
   addPlayer: (id, data) =>
     set((state) => ({
       players: { ...state.players, [id]: data },
@@ -222,20 +267,42 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
 
       return { players: { ...rest } };
     }),
-  setIsConnected: (connected) => set({ isConnected: connected }),
-  setRoomId: (id) => set({ roomId: id }),
-  setIsHost: (isHost) => set({ isHost }),
-  setWebcamEnabled: (enabled) => set({ webcamEnabled: enabled }),
-  addChatMessage: (message) =>
-    set((state) => ({ chatMessages: [...state.chatMessages, message] })),
-  setInviteLink: (link) => set({ inviteLink: link }),
-  setGameStartTime: (time) => set({ gameStartTime: time }),
+  setIsConnected: (connected) => {
+    console.log(`🔗 Connection status updated: ${connected}`);
+    set({ isConnected: connected });
+  },
+  setRoomId: (id) => {
+    console.log("🏠 Room ID set in store:", id);
+    set({ roomId: id });
+  },
+  setIsHost: (isHost) => {
+    console.log(`🎮 Host status updated: ${isHost}`);
+    set({ isHost });
+  },
+  setWebcamEnabled: (enabled) => {
+    console.log(`🎥 Webcam enabled: ${enabled}`);
+    set({ webcamEnabled: enabled });
+  },
+  addChatMessage: (message) => {
+    console.log("💬 Chat message added:", message);
+    set((state) => ({ chatMessages: [...state.chatMessages, message] }));
+  },
+  setInviteLink: (link) => {
+    console.log("🔗 Invite link generated:", link);
+    set({ inviteLink: link });
+  },
+  setGameStartTime: (time) => {
+    console.log("🕒 Game start time set:", time);
+    set({ gameStartTime: time });
+  },
   outgoingUpdate: (updates) => {
     set((state) => ({ ...state, ...updates }));
     const socket = useMultiplayerStore.getState().socket;
     socket?.emit("stateUpdate", { store: "multiplayer", updates });
+    console.log("📤 Outgoing Multiplayer Store update:", updates);
   },
   incomingUpdate: (updates) => {
     set((state) => ({ ...state, ...updates }));
+    console.log("📥 Incoming Multiplayer Store update:", updates);
   },
 }));

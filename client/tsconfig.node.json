@@ -5,6 +5,7 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "typeRoots": ["./src/*"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -20,5 +21,12 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "src",
+    "src/**/*.tsx",
+    "src/**/*.ts",
+    "src/types/*.d.ts",
+    "vite.config.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

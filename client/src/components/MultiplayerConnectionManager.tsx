@@ -185,7 +185,7 @@ const MultiplayerConnectionManager: React.FC = () => {
       enableWebcam();
       setCurrentMediaType("webcam");
     }
-  }, [isConnected]);
+  }, [isConnected, setCurrentMediaType, roomId, setRoomId]);
 
   useEffect(() => {
     const socket = useMultiplayerStore.getState().socket;

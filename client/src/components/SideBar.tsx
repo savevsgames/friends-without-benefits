@@ -24,11 +24,7 @@ import PlayStopVideoButton from "./buttons/PlayStopVideoButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import LoadVideoButton from "./buttons/LoadVideoButton";
 // import { useUserSession } from "@/store";
-import { useGameStore } from "@/store";
-
-export const useIsDetectionActive = () => {
-  return useGameStore((state) => state.activeDetectionLoop !== null);
-};
+import { useIsDetectionActive } from "@/hooks/useIsDetectionActive";
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
