@@ -19,7 +19,6 @@
     "@mui/material": "^6.3.0",
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-converter": "^4.22.0",
-    "@tensorflow/tfjs-node": "^4.22.0",
     "autoprefixer": "^10.4.20",
     "jwt-decode": "^4.0.0",
     "next-themes": "^0.4.4",
@@ -35,6 +34,7 @@
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^3.4.16",
     "tw-elements-react": "^1.0.0-alpha-end",
+    "typewriter-effect": "^2.21.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {

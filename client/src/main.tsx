@@ -11,10 +11,12 @@ import LeaderBoard from "./pages/LeaderBoard";
 import Profile from "./pages/Profile.tsx";
 import Login from "./pages/Login.tsx";
 import SignUp from "./pages/SignUp.tsx";
+import Home from "./pages/Home.tsx"
 
 import App from "./App.tsx";
 // Using useContext and hook to provide the model to the Game component
 import { ModelProvider } from "./components/ModelProvider.tsx";
+
 
 
 createRoot(document.getElementById("root")!).render(
@@ -25,6 +27,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<App />}>
           {/* nested routes within the app are: */}
           <Route index element={<Landing />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/profile" element={<Profile />} />
