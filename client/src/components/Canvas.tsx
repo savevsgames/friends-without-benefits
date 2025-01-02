@@ -95,7 +95,8 @@ export const Canvas = () => {
 
       // Update Zustand state to indicate the canvas is ready
       setCanvasReady(true);
-      console.log("Game State: ");
+      console.log("Canvas is ready: ", useGameStore.getState().canvasReady);
+      console.log("Game State: ", useGameStore.getState().gameState);
     };
 
     loadOpenCV();
