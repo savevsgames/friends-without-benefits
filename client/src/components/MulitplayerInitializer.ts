@@ -77,7 +77,15 @@ const MultiplayerInitializer: React.FC = () => {
       socketIo.disconnect();
       peerJs.destroy();
     };
-  }, [setSocket, setPeer, setPlayerId, setIsConnected]);
+  }, [
+    setSocket,
+    setPeer,
+    setPlayerId,
+    setIsConnected,
+    roomId,
+    playerId,
+    setRoomId,
+  ]);
 
   return null;
 };

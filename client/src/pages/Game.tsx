@@ -7,7 +7,7 @@ import { useGameStore } from "@/store";
 import MultiplayerInitializer from "@/components/MulitplayerInitializer.ts";
 // import { loadModel } from "@/utils/custom-model-utils-2.ts";
 import SideBar from "@/components/SideBar.tsx";
-import { useModel } from "@/components/ModelProvider.tsx";
+import { useModel } from "@/hooks/useModelStore.ts";
 
 function Game() {
   // We store the model as a global or module-level variable

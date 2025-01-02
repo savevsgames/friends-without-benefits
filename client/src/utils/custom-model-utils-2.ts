@@ -28,8 +28,7 @@ interface Prediction {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const cvstfjs: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// declare const customTFModel: any;
+
 export async function loadModel() {
   try {
     // We store the model as a global or module-level variable
@@ -291,7 +290,6 @@ const detectFrame = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   model: any,
   videoElement: HTMLVideoElement,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: (predictions: Prediction[]) => void
 ) => {
   if (!model) return;

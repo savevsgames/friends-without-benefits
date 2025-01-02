@@ -1,4 +1,4 @@
-import { UserLogin } from "./UserLogin.tsx";
+import { UserLogin } from "./UserLogin";
 
 export interface SignUpData extends UserLogin {
   email: string;

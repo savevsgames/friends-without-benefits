@@ -23,7 +23,10 @@ const SignUp: React.FC = () => {
   // function handleInputChange for the form inputs
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target; //get the user input
-    setForm({ ...form, [name]: value }); // set the form state
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: value,
+    })); // set the form state by adding the new input to the previous state
     // console.log(setForm);
   };
 
@@ -92,10 +95,10 @@ const SignUp: React.FC = () => {
               Email Address:
             </label>
             <input
-              type="text"
+              type="email"
               name="email"
-              value={(form.email as string) || ""}
-              id="username"
+              value={form.email}
+              id="email"
               required
               onChange={handleInputChange}
               className="box-border w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:outline-none"

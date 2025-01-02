@@ -16,6 +16,29 @@ interface Player {
   // Need to add more relevant props like items to find, etc.
 }
 
+// MODEL STORE
+interface IModelState {
+  isLoading: boolean;
+  error: Error | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  model: any | null;
+  // Setters
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: Error | null) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setModel: (model: any | null) => void;
+}
+
+export const useModelStore = create<IModelState>((set) => ({
+  isLoading: false,
+  error: null,
+  model: null,
+  setLoading: (isLoading) => set({ isLoading }),
+  setError: (error) => set({ error }),
+  setModel: (model) => set({ model }),
+}));
+
+// GAME STORE - SINGLE & MULTIPLAYER
 export interface IGameState {
   gameState: string; // "setup", "playing", "gameover"
   canvasReady: boolean; // Flag to indicate if the canvas is ready for drawing
@@ -24,6 +47,7 @@ export interface IGameState {
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
+
   // State Setters
   setGameState: (newState: string) => void;
   setCanvasReady: (ready: boolean) => void;
@@ -166,7 +190,7 @@ export const useThemeStore = create(
   )
 );
 
-// MULTI-PLAYER STORE
+// MULTI-PLAYER STORE - EXTENDS GAME STORE IN MULTIPLAYER MODE
 export interface IMultiplayerState {
   playerId: string | null; // Unique player identifier (from PeerJS)
   peer: Peer | null; // PeerJS instance for WebRTC connections
