@@ -13,10 +13,9 @@
     "allowJs": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["vite/client"],
 
-    /* Bundler mode CHANGED TO NODE BECAUSE OF RENDER */
-    "moduleResolution": "node",
+    /* Bundler mode */
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
