@@ -1,7 +1,7 @@
 import ReactModal from "react-modal";
 import { useNavigate } from "react-router-dom";
 
-// Set the app element for accessibility
+
 ReactModal.setAppElement("#root");
 
 interface GameOptionsModalProps {

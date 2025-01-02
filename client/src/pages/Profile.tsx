@@ -4,6 +4,7 @@ import { useState } from "react";
 import { QUERY_ME } from "@/utils/queries.ts";
 import { useAuthStore } from "@/store.ts";
 import { useQuery } from "@apollo/client";
+import Footer from "@/components/Footer.tsx";
 
 function Profile() {
   // set a default profile picture placeholder until changed by the user
@@ -94,6 +95,7 @@ function Profile() {
           </div>
         </div>
       </div>
+      <Footer/>
     </>
   );
 }

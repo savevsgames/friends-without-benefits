@@ -2,8 +2,15 @@ import { IoMdSettings } from "react-icons/io";
 import { useThemeStore } from "@/store";
 import { IoMoon } from "react-icons/io5";
 import { IoSunny } from "react-icons/io5";
+import { useState } from "react";
+import SettingsModal from "./SettingsModal";
 
 const Footer = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const theme = useThemeStore((state) => state.theme);
   const icon = (theme: string) => {
@@ -26,8 +33,9 @@ const Footer = () => {
         className="flex h-auto w-auto cursor-pointer items-center justify-center gap-4 p-1"
         aria-label="Settings"
       >
-        <IoMdSettings size={22} />
+        <IoMdSettings size={22} onClick={openModal} />
       </div>
+      <SettingsModal isOpen={isModalOpen} onClose={closeModal} />
     </nav>
   );
 };
