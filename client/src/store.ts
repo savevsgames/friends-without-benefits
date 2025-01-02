@@ -2,9 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware"; // this is a zustand middleware to persist login throughout the app
 import AuthService from "./utils/auth.ts";
 import Peer from "peerjs";
-import { Socket as SocketIOClient } from "socket.io-client";
+// import { Socket } from "socket.io-client";
 import io from "socket.io-client";
-// Dynamically infer the socket type from the io() function
 type SocketIOClient = ReturnType<typeof io>;
 
 // Player extends User type with additional game-related properties
