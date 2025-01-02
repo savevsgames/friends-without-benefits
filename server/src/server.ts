@@ -1,5 +1,7 @@
 import express from "express";
 import path from "node:path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import type { Request, Response } from "express";
 import db from "./config/connection.js";
 import { ApolloServer } from "@apollo/server";
@@ -11,6 +13,12 @@ import { createServer } from "node:http";
 import { ExpressPeerServer } from "peer";
 import cors from "cors";
 import { authenticateToken } from "./utils/auth.js";
+
+// Define __dirname manually
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
 
 // Apollo Server Initialization
 const apolloServer = new ApolloServer({
