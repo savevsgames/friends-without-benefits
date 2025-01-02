@@ -6,6 +6,7 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 // Determine environment: Vite will use development mode with -> npm run dev
 // To run production mode use -> npm run build
 const isDevelopment = process.env.NODE_ENV === "development";
+
 const backendURL = isDevelopment
   ? "http://localhost:3001"
   : "https://friends-without-benefits.onrender.com";
