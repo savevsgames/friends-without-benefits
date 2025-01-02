@@ -1,61 +1,47 @@
-import { useState, useEffect } from "react";
-
-interface ModelStatus {
-  isLoading: boolean;
-  error: Error | null;
-  //   eslint-disable-next-line @typescript-eslint/no-explicit-any
-  model: any | null;
-}
+import { useEffect, useState, useCallback } from "react";
+import { useModelStore } from "@/store";
 
 // Monitor the status of the Custom Vision model initialization
 export const useCustomVisionModel = () => {
-  const [status, setStatus] = useState<ModelStatus>({
-    isLoading: true,
-    error: null,
-    model: null,
-  });
+  const setLoading = useModelStore((state) => state.setLoading);
+  const setError = useModelStore((state) => state.setError);
+  const setModel = useModelStore((state) => state.setModel);
 
-  // Global scope check for script loading in index.html
   const [dependenciesLoaded, setDependenciesLoaded] = useState(false);
+
   // Check if required libraries are loaded
   const checkDependencies = (): boolean => {
     return Boolean(window.tf && window.cvstfjs);
   };
 
-  // Initialize model
-  const initializeModel = async () => {
+  // InitializeModel is wrapped with useCallback 
+  // Ensures it only updates when setLoading, setError, or setModel change
+  const initializeModel = useCallback(async () => {
     try {
-      // Model Initialization Status update {isLoading: true, error: null, model: null}
-      setStatus((prev) => ({ ...prev, isLoading: true }));
+      setLoading(true);
 
       // Azure Custom Vision Object Detection model
       window.cvsModel = new window.cvstfjs.ObjectDetectionModel();
       await window.cvsModel.loadModelAsync("/models/tfjs/model.json");
 
-      setStatus({
-        isLoading: false,
-        error: null,
-        model: window.cvsModel,
-      });
+      setModel(window.cvsModel);
+      setError(null);
+      setLoading(false);
 
       console.log("Custom Vision model loaded successfully!");
     } catch (error) {
-      // Set loading and error states if model fails to load
-      setStatus({
-        isLoading: false,
-        error: error as Error,
-        model: null,
-      });
+      setError(error as Error);
+      setModel(null);
+      setLoading(false);
+
       console.error("Error loading Custom Vision model:", error);
     }
-  };
+  }, [setLoading, setError, setModel]);
 
-  // Check for dependencies on mount and when they change
+  // Check for dependencies on mount
   useEffect(() => {
     const checkInterval = setInterval(() => {
-      // Make sure necessary scripts are loaded
       if (checkDependencies()) {
-        // Now we can trigger the model initialization
         setDependenciesLoaded(true);
         clearInterval(checkInterval);
       }
@@ -64,12 +50,17 @@ export const useCustomVisionModel = () => {
     return () => clearInterval(checkInterval);
   }, []);
 
-  // Load model once [dependencies] are available / setDependenciesLoaded(true) in useEffect above
+  // Load model once dependencies are available
   useEffect(() => {
     if (dependenciesLoaded) {
       initializeModel();
     }
-  }, [dependenciesLoaded]);
+  }, [dependenciesLoaded, initializeModel]);
 
-  return status;
+  // Return Zustand state for reference if needed
+  return {
+    isLoading: useModelStore((state) => state.isLoading),
+    error: useModelStore((state) => state.error),
+    model: useModelStore((state) => state.model),
+  };
 };

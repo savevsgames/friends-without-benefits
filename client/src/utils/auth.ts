@@ -29,6 +29,8 @@ class AuthService {
       }
       return false;
     } catch (err) {
+      // TODO: es-lint error here for not using err -> added console.log to remove error temporarily
+      console.log("Token is expired", err);
       return false;
     }
   }

@@ -5,9 +5,11 @@ import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
 import PlayStopVideoButton from "@/components/buttons/PlayStopVideoButton.tsx";
 import PauseVideoButton from "@/components/buttons/PauseVideoButton.tsx";
 
-interface ControlPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
+// interface ControlPanelProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export const ControlPanel: React.FC<ControlPanelProps> = (props) => {
+export const ControlPanel: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+  props
+) => {
   return (
     <div
       {...props}

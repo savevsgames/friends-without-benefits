@@ -6,7 +6,7 @@ import {
   InMemoryCache,
   createHttpLink,
 } from "@apollo/client";
-import { setContext } from "@apollo/client/Link/context";
+import { setContext } from "@apollo/client/link/context";
 
 import { useEffect } from "react";
 import { useThemeStore } from "./store";
