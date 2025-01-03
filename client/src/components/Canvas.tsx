@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "../store"; // Import Zustand store
 import MultiplayerChat from "./MultiplayerChat";
 import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
+import ScavengerGame from "./ScavengerGameLogic";
 // import GameStoreLiveFeed from "./GameStoreLiveFeed";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
@@ -249,6 +250,7 @@ export const Canvas = () => {
             zIndex: 100,
           }}
         >
+          <ScavengerGame />
           {/* <GameStoreLiveFeed /> */}
         </div>
       </div>

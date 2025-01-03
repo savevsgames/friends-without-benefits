@@ -48,6 +48,7 @@ export interface IGameState {
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
   isSingle: boolean;
   isMulti: boolean;
+  foundItems: number; //0-5 
 
   // State Setters
   setGameState: (newState: string) => void;
@@ -59,6 +60,7 @@ export interface IGameState {
   addPlayer: (id: string, player: Player) => void;
   setIsSingle: (value: boolean) => void;
   setIsMulti: (value: boolean) => void;
+  setFoundItems: (numberFound: number) => void;
 
   // Socket IO / Zustand Actions to set opponent player state
   outgoingUpdate: (updates: Partial<IGameState>) => void;
@@ -73,6 +75,7 @@ export const useGameStore = create<IGameState>((set) => ({
   currentMediaRef: null,
   currentMediaType: null,
   activeDetectionLoop: null,
+  foundItems: 0,
   players: {},
   isSingle: false,
   isMulti: false,
@@ -93,6 +96,9 @@ export const useGameStore = create<IGameState>((set) => ({
   },
   setActiveDetectionLoop: (iteration) => {
     set({ activeDetectionLoop: iteration });
+  },
+  setFoundItems: (numberFound)  => {
+    set({ foundItems: numberFound });
   },
   addPlayer: (id, player) => {
     set((state) => ({
