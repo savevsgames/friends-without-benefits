@@ -26,3 +26,4 @@ jobs:
           curl "$PROD_WEBHOOK"
 
       # Can run final tests here (production service is live)
+      # "Smoke Tests" can be run if they don't interrupt the service
