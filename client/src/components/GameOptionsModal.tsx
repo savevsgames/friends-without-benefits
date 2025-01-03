@@ -1,6 +1,5 @@
 import ReactModal from "react-modal";
-import { useNavigate } from "react-router-dom";
-
+import { useGameStore } from "@/store";
 
 ReactModal.setAppElement("#root");
 
@@ -13,7 +12,26 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const navigate = useNavigate();
+  const setIsSingle = useGameStore((state) => state.setIsSingle);
+  const setIsMulti = useGameStore((state) => state.setIsMulti);
+  const handleSelection = (mode: "single" | "multi") => {
+    console.log("selected game mode is", mode)
+    if (mode === "single") {
+      setIsSingle(true);
+      setIsMulti(false);
+    } else if (mode === "multi") {
+      setIsMulti(true);
+      setIsSingle(false);
+    }
+    onClose();
+  };
+
+  const singlePlayer = useGameStore((state) => state.isSingle);
+  const multiPlayer = useGameStore((state) => state.isMulti);
+
+  console.log("Single Player game activated?", singlePlayer);
+  console.log("Multi Player game activated?", multiPlayer);
+
   return (
     <div>
       <ReactModal
@@ -46,7 +64,7 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
           {/* Single Player */}
           <button
             className="flex-1 border-2 border-neutral-500 p-2 rounded-md text-center transition-colors duration-300 hover:bg-neutral-100"
-            onClick={() => navigate("/game")}
+            onClick={() => handleSelection("single")}
           >
             <p className="text-base font-semibold text-teal-900 whitespace-nowrap">
               Single-Player
@@ -54,16 +72,12 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
           </button>
 
           {/* MultiPlayer */}
-          <button className="flex-1 border-2 border-neutral-500 p-2 rounded-md text-center transition-colors duration-300 hover:bg-neutral-100">
+          <button
+            className="flex-1 border-2 border-neutral-500 p-2 rounded-md text-center transition-colors duration-300 hover:bg-neutral-100"
+            onClick={() => handleSelection("multi")}
+          >
             <p className="text-base font-semibold text-teal-900 whitespace-nowrap">
               Multi-Player
-            </p>
-          </button>
-
-          {/* Join Game */}
-          <button className="flex-1 border-2 border-neutral-500 p-2 rounded-md text-center transition-colors duration-300 hover:bg-neutral-100">
-            <p className="text-base font-semibold text-teal-900 whitespace-nowrap">
-              Join Game
             </p>
           </button>
         </div>

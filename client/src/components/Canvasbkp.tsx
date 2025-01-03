@@ -11,10 +11,6 @@ export const Canvas = () => {
 
   const [welcomeImageLoaded, setWelcomeImageLoaded] = useState(false);
 
-  const singlePlayer = useGameStore((state) => state.isSingle);
-  console.log("is the canvas seeing the game as singleplayer?", singlePlayer);
-  const multiPlayer = useGameStore((state) => state.isMulti);
-  console.log("is the canvas seeing the game as multiplayer?", multiPlayer);
 
 
   // Canvas clearing interval for bounding boxes for video only
@@ -179,20 +175,13 @@ export const Canvas = () => {
         flexDirection: "row",
         alignItems: "stretch",
         minWidth: "300px",
-        height: "calc(100vh-64px)",
+        minHeight: "300px",
       }}
     >
       <div
         id="canvas-container"
         className="relative w-full"
-        style={{
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          maxWidth: singlePlayer ? "100vw" : "60vw",
-          maxHeight: singlePlayer ? "100vh" : "90vh",
-          flex: singlePlayer ? "1 1 auto" : "initial",
-        }}
+        style={{ overflow: "hidden", maxWidth: "60vw", maxHeight: "90vh" }}
       >
         <canvas
           id="canvas-main"
@@ -203,7 +192,7 @@ export const Canvas = () => {
             top: "0",
             left: "0",
             width: "100%",
-            height: "100%",
+            height: "auto",
             zIndex: 10,
           }}
         ></canvas>
@@ -217,7 +206,6 @@ export const Canvas = () => {
             width: "100%",
             height: "auto",
             zIndex: 2,
-            objectFit: "contain",
           }}
           playsInline
           muted
@@ -233,7 +221,6 @@ export const Canvas = () => {
             width: "100%",
             height: "auto",
             zIndex: 1,
-            objectFit: "contain",
           }}
           crossOrigin="anonymous"
         />
@@ -253,28 +240,25 @@ export const Canvas = () => {
         </div>
       </div>
       {/* New Div Right of Canvas */}
-      {multiPlayer && (
+      <div
+        className="relative z-20 p-4"
+        style={{
+          marginTop: "10px",
+        }}
+      >
         <div
-          className="relative z-20 p-4"
           style={{
-            marginTop: "10px",
-            flex: "1 1 auto",
+            display: "grid",
+            gridTemplateRows: "2fr 5fr",
+            gap: "2rem",
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateRows: "2fr 5fr",
-              gap: "2rem",
-            }}
-          >
-            <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
-              <MultiplayerVideoFeed />
-            </div>
-            <MultiplayerChat />
+          <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
+            <MultiplayerVideoFeed />
           </div>
+          <MultiplayerChat />
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -25,10 +25,18 @@ import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import LoadVideoButton from "./buttons/LoadVideoButton";
 // import { useUserSession } from "@/store";
 import { useIsDetectionActive } from "@/hooks/useIsDetectionActive";
+import { useGameStore, useUserSession } from "@/store";
+
+
+
+// const multiPlayer = useGameStore((state) => state.isMulti);
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
-
+  const user = useUserSession((state) => state.user?.data);
+  const upperUsername = user?.username.toUpperCase()
+  console.log("users username is", user?.username)
+  const singlePlayer = useGameStore((state) => state.isSingle);
   // const user = useUserSession((state) => state.user)
   const sidebarIcon = () => {
     if (isCollapsed) {
@@ -52,6 +60,7 @@ const SideBar = () => {
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-2 bg-transparent rounded-md focus:outline-none"
+            aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           >
             {sidebarIcon()}
           </button>
@@ -59,7 +68,7 @@ const SideBar = () => {
         <Menu>
           {/* user profile picture and username */}
           <div
-            className={`transition-opacity duration-300 ${
+            className={`flex flex-col items-center mb-3 ${
               isCollapsed ? "hidden" : "block"
             }`}
           >
@@ -69,34 +78,45 @@ const SideBar = () => {
                 src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
                 className="w-1/2 h-1/2 cursor-pointer rounded-full mb-2"
               ></img>
-              <h1 className="my-2 text-center">User Username</h1>
+              <h1 className="my-2 text-center font-semibold">
+                HELLO {upperUsername}!
+              </h1>
             </div>
           </div>
 
           {/* Control Panel SubMenu */}
+          {!singlePlayer && (
+            <SubMenu
+              label="Control Panel"
+              icon={<IoLogoGameControllerA size={26} />}
+              className="z-21"
+            >
+              <MenuItem icon={<FaImage />}>
+                <LoadImageButton />
+              </MenuItem>
+              <MenuItem icon={<FaPause />}>
+                <PauseVideoButton />
+              </MenuItem>
+              <MenuItem icon={<FaPlay />}>
+                <PlayStopVideoButton />
+              </MenuItem>
+              <MenuItem icon={<FaVideo />}>
+                <LoadVideoButton />
+              </MenuItem>
+            </SubMenu>
+          )}
           <SubMenu
-            label="Control Panel"
+            label="player's Control Panel"
             icon={<IoLogoGameControllerA size={26} />}
             className="z-21"
           >
-            <MenuItem icon={<FaImage />}>
-              <LoadImageButton />
-            </MenuItem>
-            <MenuItem icon={<FaPause />}>
-              <PauseVideoButton />
-            </MenuItem>
             <MenuItem icon={<RiWebcamFill />}>
               <LoadWebcamButton />
-            </MenuItem>
-            <MenuItem icon={<FaPlay />}>
-              <PlayStopVideoButton />
             </MenuItem>
             <MenuItem icon={<FaHourglassStart />}>
               <RunDetectionButton />
             </MenuItem>
-            <MenuItem icon={<FaVideo />}>
-              <LoadVideoButton />
-            </MenuItem>
+
             <MenuItem>
               <div>
                 Detection: {isDetectionActive ? "Active 🟢" : "Stopped 🔴"}

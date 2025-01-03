@@ -46,6 +46,8 @@ export interface IGameState {
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
+  isSingle: boolean;
+  isMulti: boolean;
 
   // State Setters
   setGameState: (newState: string) => void;
@@ -55,6 +57,8 @@ export interface IGameState {
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   setActiveDetectionLoop: (iteration: number | null) => void;
   addPlayer: (id: string, player: Player) => void;
+  setIsSingle: (value: boolean) => void;
+  setIsMulti: (value: boolean) => void;
 
   // Socket IO / Zustand Actions to set opponent player state
   outgoingUpdate: (updates: Partial<IGameState>) => void;
@@ -70,6 +74,8 @@ export const useGameStore = create<IGameState>((set) => ({
   currentMediaType: null,
   activeDetectionLoop: null,
   players: {},
+  isSingle: false,
+  isMulti: false,
   setGameState: (newState) => {
     set({ gameState: newState });
   },
@@ -92,6 +98,12 @@ export const useGameStore = create<IGameState>((set) => ({
     set((state) => ({
       players: { ...state.players, [id]: player },
     }));
+  },
+  setIsSingle: (value) => {
+    set({ isSingle: value, isMulti: !value });
+  },
+  setIsMulti: (value) => {
+    set({ isMulti: value, isSingle: !value });
   },
   removePlayer: (id: string) => {
     set((state) => {
@@ -143,8 +155,8 @@ export const useAuthStore = create(
     }
   )
 );
-
-type User = {
+// had to do it this way because of the way the decoded is being decoded. 
+interface UserData {
   id: string;
   username: string;
   email: string;
@@ -152,6 +164,11 @@ type User = {
   avatar: string;
   shortestRound: string;
 };
+interface User {
+  data: UserData;
+  iat?: number;
+  exp?: number
+}
 
 type SessionState = {
   user: User | null;

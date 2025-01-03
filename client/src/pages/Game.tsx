@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header.tsx";
 import Canvas from "../components/Canvas.tsx";
 import Footer from "@/components/Footer.tsx";
@@ -8,10 +8,18 @@ import MultiplayerInitializer from "@/components/MulitplayerInitializer.ts";
 // import { loadModel } from "@/utils/custom-model-utils-2.ts";
 import SideBar from "@/components/SideBar.tsx";
 import { useModel } from "@/hooks/useModelStore.ts";
+import GameOptionsModal from "@/components/GameOptionsModal.tsx";
 
 function Game() {
-  // We store the model as a global or module-level variable
 
+  // for the modal, have the initial state as true to open on load.
+  const [isModalOpen, setIsModalOpen] = useState(true);
+
+
+  // const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  // We store the model as a global or module-level variable
   const { isLoading, error, model } = useModel();
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
   const setCanvasReady = useGameStore((state) => state.setCanvasReady);
@@ -55,6 +63,7 @@ function Game() {
           </div>
         </div>
       </div>
+      <GameOptionsModal isOpen={isModalOpen} onClose={closeModal} />;
       <Footer />
     </>
   );

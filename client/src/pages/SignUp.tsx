@@ -43,7 +43,7 @@ const SignUp: React.FC = () => {
       navigate("/home"); // once isLogged is is true, it'll navigate to the login page
     } catch (err) {
       console.error(error || err);
-      setErr("Error Signing in");
+      setErr("Error Signing Up");
     }
 
     setForm({
