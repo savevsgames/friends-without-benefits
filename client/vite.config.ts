@@ -15,6 +15,7 @@ const backendURL = isDevelopment
   : "https://friends-without-benefits.onrender.com";
 
 export default defineConfig({
+  envDir: "./environment",
   plugins: [
     react(),
     tsconfigPaths(),
