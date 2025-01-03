@@ -1,0 +1,30 @@
+name: Deploy To Production
+
+on:
+  push:
+    branches: [production]
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  ci:
+    name: Deploy Production To Render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Project Dependencies
+        run: |
+          npm install && npm run setup
+          npm run test
+
+      - name: Build App
+        run: npm run render-build
+
+      - name: Deploy
+        # Only run this step if the branch is staging
+        if: github.ref == 'refs/heads/staging'
+        env:
+          deploy_url: ${{ secrets.RENDER_PRODUCTION_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
