@@ -1,5 +1,6 @@
 import ReactModal from "react-modal";
 import { useGameStore } from "@/store";
+import { useState } from "react";
 
 ReactModal.setAppElement("#root");
 
@@ -14,8 +15,14 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
 }) => {
   const setIsSingle = useGameStore((state) => state.setIsSingle);
   const setIsMulti = useGameStore((state) => state.setIsMulti);
+  const [hasConsented, setHasConsented] = useState(false); // State for consent
+
   const handleSelection = (mode: "single" | "multi") => {
-    console.log("selected game mode is", mode)
+    if (!hasConsented) {
+      alert("You must provide consent to proceed!");
+      return;
+    }
+    console.log("Selected game mode is", mode);
     if (mode === "single") {
       setIsSingle(true);
       setIsMulti(false);
@@ -26,11 +33,9 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
     onClose();
   };
 
-  const singlePlayer = useGameStore((state) => state.isSingle);
-  const multiPlayer = useGameStore((state) => state.isMulti);
-
-  console.log("Single Player game activated?", singlePlayer);
-  console.log("Multi Player game activated?", multiPlayer);
+  const handleConsentChange = () => {
+    setHasConsented((prev) => !prev);
+  };
 
   return (
     <div>
@@ -81,6 +86,27 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
             </p>
           </button>
         </div>
+
+        {/* Consent Checkbox */}
+        <div className="mt-4">
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={hasConsented}
+              onChange={handleConsentChange}
+              className="form-checkbox h-4 w-4 text-teal-600 transition duration-150 ease-in-out"
+            />
+            <span className="text-sm">
+              I consent to sharing my camera and acknowledge that the developers
+              are not responsible for any content displayed.
+            </span>
+          </label>
+        </div>
+
+        {/* Warning Message */}
+        <p className="font-normal text-xs mt-2">
+          This will default to a single-player game if no option is selected!
+        </p>
 
         {/* Close button (aligned to the right) */}
         <div className="flex justify-end mt-6">

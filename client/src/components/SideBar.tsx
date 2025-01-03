@@ -23,19 +23,17 @@ import RunDetectionButton from "./buttons/RunDetectionButton";
 import PlayStopVideoButton from "./buttons/PlayStopVideoButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import LoadVideoButton from "./buttons/LoadVideoButton";
-// import { useUserSession } from "@/store";
+import StartGameButton from "./buttons/StartGameButton";
 import { useIsDetectionActive } from "@/hooks/useIsDetectionActive";
 import { useGameStore, useUserSession } from "@/store";
-
-
 
 // const multiPlayer = useGameStore((state) => state.isMulti);
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const user = useUserSession((state) => state.user?.data);
-  const upperUsername = user?.username.toUpperCase()
-  console.log("users username is", user?.username)
+  const upperUsername = user?.username.toUpperCase();
+  console.log("users username is", user?.username);
   const singlePlayer = useGameStore((state) => state.isSingle);
   // const user = useUserSession((state) => state.user)
   const sidebarIcon = () => {
@@ -87,7 +85,7 @@ const SideBar = () => {
           {/* Control Panel SubMenu */}
           {!singlePlayer && (
             <SubMenu
-              label="Control Panel"
+              label="Game Control"
               icon={<IoLogoGameControllerA size={26} />}
               className="z-21"
             >
@@ -103,20 +101,23 @@ const SideBar = () => {
               <MenuItem icon={<FaVideo />}>
                 <LoadVideoButton />
               </MenuItem>
+              <MenuItem icon={<RiWebcamFill />}>
+                <LoadWebcamButton />
+              </MenuItem>
+
+              <MenuItem icon={<FaHourglassStart />}>
+                <RunDetectionButton />
+              </MenuItem>
             </SubMenu>
           )}
           <SubMenu
-            label="player's Control Panel"
+            label="Game Control"
             icon={<IoLogoGameControllerA size={26} />}
             className="z-21"
           >
-            <MenuItem icon={<RiWebcamFill />}>
-              <LoadWebcamButton />
-            </MenuItem>
             <MenuItem icon={<FaHourglassStart />}>
-              <RunDetectionButton />
+              <StartGameButton />
             </MenuItem>
-
             <MenuItem>
               <div>
                 Detection: {isDetectionActive ? "Active 🟢" : "Stopped 🔴"}
