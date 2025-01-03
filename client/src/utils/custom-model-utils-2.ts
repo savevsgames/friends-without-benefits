@@ -28,7 +28,7 @@ interface Prediction {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const cvstfjs: any;
-const { setFoundItems, foundItems } = useGameStore.getState();
+// const { setFoundItems, foundItems } = useGameStore.getState();
 
 export async function loadModel() {
   try {
@@ -287,6 +287,9 @@ export const drawBoundingBoxes = (predictions: Prediction[]): void => {
 const recentPredictions: number[] = [];
 
 const updateRecentPredictions = (confidence: number): void => {
+  const { foundItems } = useGameStore.getState();
+  const setFoundItems = useGameStore.getState().setFoundItems;
+  
   if (recentPredictions.length >= 4) {
     recentPredictions.shift();
   }
@@ -314,6 +317,8 @@ const detectFrame = async (
 ) => {
   if (!model) return;
 
+  const { foundItems } = useGameStore.getState();
+
   // Filter predictions based on confidence
   const confidenceThreshold = 0.5; //changed from .1
 
@@ -333,6 +338,9 @@ const detectFrame = async (
       const correctObjectPrediction = predictions.find(
         (prediction) => prediction.class === YOLO_CLASSES[foundItems]
       );
+
+      console.log("correctObjectPrediction: ", correctObjectPrediction)
+      console.log("Class to look for: ", YOLO_CLASSES[foundItems] )
 
       if (correctObjectPrediction) {
         updateRecentPredictions(correctObjectPrediction.score)
