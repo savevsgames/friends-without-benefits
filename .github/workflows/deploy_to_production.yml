@@ -1,14 +1,13 @@
 name: Deploy To Production
-
+# Triggered when code is merged/pushed into production
+# Tests can be run at final production endpoint once deployed
+# https://friends-without-benefits.onrender.com
 on:
   push:
     branches: [production]
-  pull_request:
-    branches:
-      - staging
 
 jobs:
-  ci:
+  deploy_production:
     name: Deploy Production To Render
     runs-on: ubuntu-latest
     steps:
@@ -20,10 +19,10 @@ jobs:
       - name: Build App
         run: npm run render-build
 
-      - name: Deploy
-        # Only run this step if the branch is staging
-        if: github.ref == 'refs/heads/staging'
+      - name: Deploy to Production
         env:
-          deploy_url: ${{ secrets.RENDER_PRODUCTION_DEPLOY_HOOK_URL }}
+          PROD_WEBHOOK: ${{ secrets.RENDER_PRODUCTION_DEPLOY_HOOK_URL }}
         run: |
-          curl "$deploy_url"
+          curl "$PROD_WEBHOOK"
+
+      # Can run final tests here (production service is live)

@@ -1,0 +1,27 @@
+name: Deploy To Staging
+
+on:
+  # This will run whenever code is merged/pushed into main
+  # Deploys to staging and Render Hook is triggered to staging environment
+  # e2e tests can be run here - https://friends-without-benefits-1.onrender.com
+  push:
+    branches: [main]
+
+jobs:
+  deploy_staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Project Dependencies
+        run: |
+          npm install && npm run setup
+
+      - name: Build App
+        run: npm run render-build
+
+      - name: Deploy to Staging
+        env:
+          STAGING_WEBHOOK: ${{ secrets.RENDER_STAGING_DEPLOY_HOOK_URL }}
+        run: |
+          # WebHook to trigger deployment to Render Staging Environment
+          curl "$STAGING_WEBHOOK"
