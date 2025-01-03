@@ -158,7 +158,7 @@ const startApolloServer = async () => {
   });
   app.use("/peerjs", peerServer);
 
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV !== "development") {
     // Serve static files from the client build directory
     app.use(express.static(path.join(__dirname, "../client/dist")));
 
