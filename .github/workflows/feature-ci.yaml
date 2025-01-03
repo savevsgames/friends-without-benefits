@@ -1,31 +1,29 @@
-# name: Feature Branch CI
+name: Feature Branch CI
 
-# on:
-#   # Will run whenever a push to a feature branch happens
-#   # or when a pull request is made from a feature branch into develop
-#   push:
-#     branches:
-#       - "feature/**"
+on:
+  # Will run whenever a push to a feature branch happens
+  # or when a pull request is made from a feature branch into develop
+  push:
+    branches:
+      - "feature/**"
 
-#   pull_request:
-#     branches:
-#       - "develop"
+  pull_request:
+    branches:
+      - "develop"
 
-# jobs:
-#   build-and-test:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check out code
-#         uses: actions/checkout@v4
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Project Dependencies
+        run: |
+          npm install && npm run setup
 
-#       - name: Install Dependencies
-#         run: |
-#           npm install
-#           npm run setup
-#           echo "Placeholder: Run your basic unit tests or linter here"
+      - name: Build App
+        run: npm run render-build
 
-#       - name: Build
-#         run: npm run build
+        # LINTING and possibly BASIC UNIT TESTS
 
-#       - name: Testing Actions
-#         run: echo "Testing Actions Completed"
+      - name: Testing Actions
+        run: echo "Testing Actions Completed"

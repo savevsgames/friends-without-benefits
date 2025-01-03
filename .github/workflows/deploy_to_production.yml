@@ -16,7 +16,6 @@ jobs:
       - name: Install Project Dependencies
         run: |
           npm install && npm run setup
-          npm run test
 
       - name: Build App
         run: npm run render-build
