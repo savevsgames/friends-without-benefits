@@ -1,0 +1,29 @@
+name: Feature Branch CI
+
+on:
+  # Will run whenever a push to a feature branch happens
+  # or when a pull request is made from a feature branch into develop
+  push:
+    branches:
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - "develop"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Project Dependencies
+        run: |
+          npm install && npm run setup
+
+      - name: Build App
+        run: npm run render-build
+
+        # LINTING and possibly BASIC UNIT TESTS
+
+      - name: Testing Actions
+        run: echo "Testing Actions Completed"

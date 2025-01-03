@@ -1,0 +1,29 @@
+name: Deploy To Production
+# Triggered when code is merged/pushed into production
+# Tests can be run at final production endpoint once deployed
+# https://friends-without-benefits.onrender.com
+on:
+  push:
+    branches: [production]
+
+jobs:
+  deploy_production:
+    name: Deploy Production To Render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Project Dependencies
+        run: |
+          npm install && npm run setup
+
+      - name: Build App
+        run: npm run render-build
+
+      - name: Deploy to Production
+        env:
+          PROD_WEBHOOK: ${{ secrets.RENDER_PRODUCTION_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$PROD_WEBHOOK"
+
+      # Can run final tests here (production service is live)
+      # "Smoke Tests" can be run if they don't interrupt the service
