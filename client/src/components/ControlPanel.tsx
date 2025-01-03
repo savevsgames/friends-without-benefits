@@ -1,6 +1,6 @@
 import RunDetectionButton from "@/components/buttons/RunDetectionButton.tsx";
 
-import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
+// import LoadWebcamButton from "@/components/buttons/LoadWebcamButton.tsx";
 
 export const ControlPanel: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   
@@ -13,7 +13,7 @@ export const ControlPanel: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       }}
     >
       {/* Buttons */}
-      <LoadWebcamButton />
+      {/* <LoadWebcamButton /> */}
 
       <RunDetectionButton />
       {/* <LoadImageButton /> */}

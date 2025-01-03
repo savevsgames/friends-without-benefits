@@ -32,9 +32,9 @@ export const Canvas = () => {
   // Tutorial modal content
   const tutorialContent = [
     "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
-    "Use your webcam to scan your surroundings for items.",
-    "Click 'Start Game' to begin the hunt! Stats and Timer will be displayed on the screen! be FAST.",
-    "Good luck and have fun!",
+    "Use your webcam to scan your surroundings for items to be shown on the screen.",
+    "Keep an eye on the timer and find the items quickly!",
+    "Click 'Start Game' to begin the hunt! Good luck and have fun!",
   ];
 
   const handleNextStep = () => {
@@ -212,7 +212,7 @@ export const Canvas = () => {
       {/* tutorial modal */}
       {tutorialStep > 0 && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          className="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50 space-x-4"
           style={{ pointerEvents: "auto" }}
         >
           <div
@@ -227,7 +227,9 @@ export const Canvas = () => {
             <p className="mb-6">{tutorialContent[tutorialStep - 1]}</p>
 
             {tutorialStep === 2 ? (
-              <LoadWebcamButton />
+              <LoadWebcamButton
+                onComplete={() => setTutorialStep((prev) => prev + 1)}
+              />
             ) : (
               <button
                 onClick={handleNextStep}
@@ -236,6 +238,7 @@ export const Canvas = () => {
                 {tutorialStep === tutorialContent.length ? "Finish" : "Next"}
               </button>
             )}
+
           </div>
         </div>
       )}

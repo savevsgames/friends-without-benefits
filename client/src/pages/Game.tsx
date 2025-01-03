@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Header from "@/components/Header.tsx";
+// import Header from "@/components/Header.tsx";
 import Canvas from "../components/Canvas.tsx";
 import Footer from "@/components/Footer.tsx";
 

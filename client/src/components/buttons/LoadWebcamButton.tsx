@@ -1,7 +1,7 @@
 import { toggleWebcam } from "@/utils/model-utils";
 import { useGameStore } from "@/store";
 
-const LoadWebcamButton = () => {
+const LoadWebcamButton = ({ onComplete}: {onComplete? : () => void}) => {
 
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
@@ -29,18 +29,22 @@ const LoadWebcamButton = () => {
       setCurrentMediaRef(null);
       setVideoPlaying(false);
     }
+
+    if (onComplete) onComplete();
   };
+
+
 
   return (
     <div>
       <button
-        className="flex items-center justify-between gap-2 px-3 py-2 rounded-full bg-gray-100 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200  pointer-events-auto text-center font-semibold"
+        className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
         id="enable-webcam"
         name="enable-webcam"
         disabled={!canvasReady}
         onClick={handleWebcamToggle}
       >
-        {!videoPlaying ? "Click to get you prepped! 🎦" : "Quit Game 🚫"}
+        {!videoPlaying ? "Webcam On" : "Quit Game 🚫"}
       </button>
       {/* Hidden video element for capturing webcam stream */}
       <video
