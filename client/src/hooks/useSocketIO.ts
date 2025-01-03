@@ -5,12 +5,21 @@ import io from "socket.io-client";
 export const useSocketIO = () => {
   const { setSocket } = useMultiplayerStore();
 
+  const isDevelopment = import.meta.env.MODE === "development";
+
   useEffect(() => {
-    const socketIo = io("http://localhost:3001", {
-      path: "/socket.io",
-      transports: ["polling", "websocket"],
-      reconnection: true,
-    });
+    const socketIo = isDevelopment
+      ? io("http://localhost:3001", {
+          path: "/socket.io",
+          transports: ["polling", "websocket"],
+          reconnection: true,
+        })
+      : io({
+          // No URL means "connect to the current origin"
+          path: "/socket.io",
+          transports: ["polling", "websocket"],
+          reconnection: true,
+        });
 
     socketIo.on("connect", () => {
       console.log("✅ Socket.IO Connected:", socketIo.id);
