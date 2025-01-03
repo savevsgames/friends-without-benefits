@@ -21,10 +21,12 @@ const RunDetectionButton = () => {
   // END OF TEMPORARY STYLING
   const canvasReady = useGameStore((state) => state.canvasReady);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
+  const setGameSate = useGameStore((state) => state.setGameState)
 
   const handleDetection = () => {
     console.log(`Running Detection on ${currentMediaType}...`);
     if (currentMediaType) runDetectionOnCurrentMedia();
+    setGameSate("playing");
   };
 
   return (

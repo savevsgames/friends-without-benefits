@@ -158,7 +158,7 @@ const startApolloServer = async () => {
   });
   app.use("/peerjs", peerServer);
 
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV !== "development") {
     // Serve static files from the client build directory
     app.use(express.static(path.join(__dirname, "../client/dist")));
 
@@ -167,14 +167,29 @@ const startApolloServer = async () => {
       res.sendFile(path.join(__dirname, "../client/dist/index.html"));
     });
   }
-
-  // Start the server
-  httpServer.listen(PORT, () => {
-    console.log(`✅ Server is running on port ${PORT}`);
-    console.log(`🛠️ GraphQL: http://localhost:${PORT}/graphql`);
-    console.log(`🔗 Socket.IO: http://localhost:${PORT}/socket.io`);
-    console.log(`🔗 PeerJS: http://localhost:${PORT}/peerjs`);
-  });
+  if (process.env.NODE_ENV === "development") {
+    // Start the server locally
+    httpServer.listen(PORT, () => {
+      console.log(`✅ Server is running on port ${PORT}`);
+      console.log(`🛠️ GraphQL: http://localhost:${PORT}/graphql`);
+      console.log(`🔗 Socket.IO: http://localhost:${PORT}/socket.io`);
+      console.log(`🔗 PeerJS: http://localhost:${PORT}/peerjs`);
+    });
+  } else {
+    // Start the server on Render
+    httpServer.listen(PORT, () => {
+      console.log(`✅ Server is running on port ${PORT}`);
+      console.log(
+        `🛠️ GraphQL: https://friends-without-benefits.onrender.com/graphql`
+      );
+      console.log(
+        `🔗 Socket.IO: https://friends-without-benefits.onrender.com/socket.io`
+      );
+      console.log(
+        `🔗 PeerJS: https://friends-without-benefits.onrender.com/peerjs`
+      );
+    });
+  }
 };
 
 startApolloServer();

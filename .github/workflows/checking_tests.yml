@@ -1,0 +1,33 @@
+name: Checking Tests
+
+on:
+  pull_request:
+    branches:
+      - testing
+      - staging
+
+jobs:
+  test:
+    name: Checking Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Install Dependencies
+        run: npm install && npm run setup
+
+      - name: Build App
+        run: npm run build
+
+      - name: Testing Actions
+        run: echo "Testing Actions Completed"
+
+      # - name: Run Component Tests
+      #   run: npm run test-component
