@@ -12,13 +12,13 @@ const GameStates = () => {
       }}
     >
       {/* Game State */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-200 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
         <span>🎮 Game State:</span>
         <span className="font-semibold truncate">{gameState}</span>
       </div>
 
       {/* Media Type */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-200 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
         <span>📹 Media Type:</span>
         <span className="font-semibold truncate">
           {currentMediaType || "N/A"}
@@ -26,7 +26,7 @@ const GameStates = () => {
       </div>
 
       {/* Canvas Ready */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-200 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
         <span>🖌️ Canvas Ready:</span>
         <span className="font-semibold truncate">
           {canvasReady ? "Yes" : "No"}
@@ -34,7 +34,7 @@ const GameStates = () => {
       </div>
 
       {/* Single Player */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-200 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
         <span>👤 Single Player:</span>
         <span className="font-semibold truncate">
           {isSingle ? "Enabled" : "Disabled"}
@@ -42,7 +42,7 @@ const GameStates = () => {
       </div>
 
       {/* Multi Player */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-200 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
         <span>👥 Multi Player:</span>
         <span className="font-semibold truncate">
           {isMulti ? "Enabled" : "Disabled"}

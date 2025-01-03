@@ -5,6 +5,7 @@ import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
 import ScavengerGame from "./ScavengerGameLogic";
 import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
+import LoadWebcamButton from "./buttons/LoadWebcamButton.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -14,9 +15,8 @@ export const Canvas = () => {
   const [welcomeImageLoaded, setWelcomeImageLoaded] = useState(false);
 
   const singlePlayer = useGameStore((state) => state.isSingle);
-  console.log("is the canvas seeing the game as singleplayer?", singlePlayer);
+
   const multiPlayer = useGameStore((state) => state.isMulti);
-  console.log("is the canvas seeing the game as multiplayer?", multiPlayer);
 
   // manage tutorial steps
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
@@ -225,12 +225,17 @@ export const Canvas = () => {
           >
             <h2 className="text-xl font-bold mb-4">Kick-Off Time!</h2>
             <p className="mb-6">{tutorialContent[tutorialStep - 1]}</p>
-            <button
-              onClick={handleNextStep}
-              className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
-            >
-              {tutorialStep === tutorialContent.length ? "Finish" : "Next"}
-            </button>
+
+            {tutorialStep === 2 ? (
+              <LoadWebcamButton />
+            ) : (
+              <button
+                onClick={handleNextStep}
+                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+              >
+                {tutorialStep === tutorialContent.length ? "Finish" : "Next"}
+              </button>
+            )}
           </div>
         </div>
       )}
