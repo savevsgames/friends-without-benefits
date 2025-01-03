@@ -6,10 +6,12 @@ export const usePeerJS = () => {
   const { setPeer, setPlayerId, setRoomId, setIsConnected } =
     useMultiplayerStore();
 
+  const isDevelopment = import.meta.env.MODE === "development";
+
   useEffect(() => {
     const peerJs = new Peer({
-      host: "localhost",
-      port: 3001,
+      host: isDevelopment ? "localhost" : window.location.hostname,
+      port: isDevelopment ? 3001 : 443, //standard HTTPS on port 443 for all requests, regardless of the server’s internal port
       path: "/peerjs",
     });
 
