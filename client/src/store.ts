@@ -46,6 +46,7 @@ export interface IGameState {
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
+  foundItems: number; //0-5 
 
   // State Setters
   setGameState: (newState: string) => void;
@@ -55,6 +56,7 @@ export interface IGameState {
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   setActiveDetectionLoop: (iteration: number | null) => void;
   addPlayer: (id: string, player: Player) => void;
+  setFoundItems: (numberFound: number) => void;
 
   // Socket IO / Zustand Actions to set opponent player state
   outgoingUpdate: (updates: Partial<IGameState>) => void;
@@ -69,6 +71,7 @@ export const useGameStore = create<IGameState>((set) => ({
   currentMediaRef: null,
   currentMediaType: null,
   activeDetectionLoop: null,
+  foundItems: 0,
   players: {},
   setGameState: (newState) => {
     set({ gameState: newState });
@@ -87,6 +90,9 @@ export const useGameStore = create<IGameState>((set) => ({
   },
   setActiveDetectionLoop: (iteration) => {
     set({ activeDetectionLoop: iteration });
+  },
+  setFoundItems: (numberFound)  => {
+    set({ foundItems: numberFound });
   },
   addPlayer: (id, player) => {
     set((state) => ({

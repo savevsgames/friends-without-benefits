@@ -28,6 +28,7 @@ interface Prediction {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const cvstfjs: any;
+const { setFoundItems, foundItems } = useGameStore.getState();
 
 export async function loadModel() {
   try {
@@ -126,7 +127,7 @@ function formatPredictions(
     if (score < threshold) continue; // skip below threshold
 
     // Each box is [y1, x1, y2, x2] in normalized coords
-    const [y1, x1, y2, x2] = boxes[i];
+    const [x1, y1, x2, y2] = boxes[i];
 
     // Convert normalized coords => pixel coords
     const x = x1 * vidW;
@@ -283,6 +284,25 @@ export const drawBoundingBoxes = (predictions: Prediction[]): void => {
   }
 };
 
+const recentPredictions: number[] = [];
+
+const updateRecentPredictions = (confidence: number): void => {
+  if (recentPredictions.length >= 4) {
+    recentPredictions.shift();
+  }
+  recentPredictions.push(confidence)
+
+  if (recentPredictions.length === 4) {
+    const avgConf = recentPredictions.reduce((acc, val) => acc + val, 0) / 4;
+
+    if (avgConf >= 0.8) {
+      setFoundItems(foundItems + 1);
+      console.log("Confidence met, changing to next item.");
+      recentPredictions.length = 0;
+    }
+  }
+}
+
 /**
  * Runs detection on a single frame
  */
@@ -295,7 +315,7 @@ const detectFrame = async (
   if (!model) return;
 
   // Filter predictions based on confidence
-  const confidenceThreshold = 0.1;
+  const confidenceThreshold = 0.5; //changed from .1
 
   try {
     // Get Raw Prediction Data
@@ -309,7 +329,16 @@ const detectFrame = async (
     // Call callback with predictions for drawing
     if (predictions.length > 0) {
       callback(predictions);
+
+      const correctObjectPrediction = predictions.find(
+        (prediction) => prediction.class === YOLO_CLASSES[foundItems]
+      );
+
+      if (correctObjectPrediction) {
+        updateRecentPredictions(correctObjectPrediction.score)
+      }
     }
+  
     console.log("Predictions before RETURN in detectFrame():", predictions);
     return predictions;
   } catch (error) {
