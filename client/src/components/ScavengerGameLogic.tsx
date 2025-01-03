@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useGameStore } from "@/store";
+import ReactModal from "react-modal";
 
 const ScavengerGame: React.FC = () => {
     const gameState = useGameStore((state) => state.gameState);
@@ -42,7 +43,7 @@ const ScavengerGame: React.FC = () => {
     }, [gameState]);
 
     if (!canvasReady || currentMediaType === null || activeDetectionLoop === null) {
-        return <div>Game components not loaded correctly...</div>
+        return <ReactModal>Uhmm try refreshing? not all states are set correctly</ReactModal>
     }
 
     return (

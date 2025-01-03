@@ -77,7 +77,7 @@ export const useGameStore = create<IGameState>((set) => ({
   activeDetectionLoop: null,
   foundItems: 0,
   players: {},
-  isSingle: false,
+  isSingle: true,
   isMulti: false,
   setGameState: (newState) => {
     set({ gameState: newState });

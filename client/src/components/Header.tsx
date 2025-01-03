@@ -56,8 +56,8 @@ export default function Header() {
             </button>
           </div>
 
-          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            {/* Navigation items */}
+          {/* <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start"> */}
+            {/* Navigation items
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4 tracking-widest">
                 {navigation.map((item) => (
@@ -76,10 +76,10 @@ export default function Header() {
                 ))}
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Profile dropdown */}
-          <div className="relative ml-3">
+          <div className="relative ml-3 flex flex-1 justify-end">
             <Menu as="div" className="relative">
               <MenuButton className="flex rounded-full bg-neutral-950 dark:bg-white text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                 <span className="sr-only">Open user menu</span>
