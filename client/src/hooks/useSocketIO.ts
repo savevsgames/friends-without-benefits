@@ -14,7 +14,7 @@ export const useSocketIO = () => {
           transports: ["polling", "websocket"],
           reconnection: true,
         })
-      : io({
+      : io("https://friends-without-benefits.onrender.com/", {
           // No URL means "connect to the current origin"
           path: "/socket.io",
           transports: ["polling", "websocket"],
