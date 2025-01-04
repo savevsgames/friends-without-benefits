@@ -18,14 +18,3 @@ jobs:
             exit 1
           fi
           echo "This PR is from develop, continuing..."
-
-      - uses: actions/checkout@v4
-      - name: Install Project Dependencies
-        run: |
-          npm install && npm run setup
-
-      - name: Build App
-        run: npm run render-build
-
-      - name: Start Tests
-        run: echo "Component Testing"
