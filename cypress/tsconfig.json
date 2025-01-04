@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["cypress", "@types/react", "@testing-library/cypress"],
+    "jsx": "react-jsx"
+  },
+  "include": ["e2e/**/*.tsx", "support/**/*.tsx", "component/**/*.tsx"],
+  "exclude": ["node_modules"]
+}
