@@ -23,18 +23,18 @@ const ScavengerGame = () => {
   const startTimer = useGameStore((state) => state.startTimer);
   const resetGame = useGameStore((state) => state.resetGame);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  // const formatTime = (seconds: number) => {
+  //   const mins = Math.floor(seconds / 60);
+  //   const secs = seconds % 60;
+  //   return `${mins}:${secs.toString().padStart(2, "0")}`;
+  // };
 
   useEffect(() => {
     if (socket) {
       // console.log("socket testing for start game button: ", socket);
       // Server sends the countdown to start the game
       socket.on("startCountdown", (countdown: number) => {
-        console.log("startCountdown event received");
+        console.log("startCountdown event received: ", countdown);
         startCountdown(countdown);
       });
       // When the game is multiplayer, we need to update the ready
@@ -55,40 +55,27 @@ const ScavengerGame = () => {
   }, [numFoundItems, timeRemaining, resetGame]);
 
   useEffect(() => {
-    if (
-      gameState === "countdown" &&
-      canvasReady &&
-      currentMediaType !== null &&
-      activeDetectionLoop !== null &&
-      countdown !== null
-    ) {
+    if (gameState === "countdown" && countdown !== null) {
       console.log("All conditions met. Starting the countdown timer...");
-      // startTimer();
+      //
       const countdownTimer = setInterval(() => {
-        // Subtract 1 from store countdown every 1 s
-        useGameStore
-          .getState()
-          .setCountdown((prev: number | null) =>
-            prev !== null ? prev - 1 : null
-          );
+        const currentCountdown: number | null =
+          useGameStore.getState().countdown;
+        if (currentCountdown !== null && currentCountdown > 0) {
+          // Subtract 1 from the countdown number in the store
+          useGameStore.getState().setCountdown(currentCountdown - 1);
+          console.log("Countdown: ", useGameStore.getState().countdown);
+        } else {
+          console.log("Countdown ended...");
+          clearInterval(countdownTimer);
+          startTimer();
+        }
       }, 1000);
-
-      if (countdown === 0) {
-        console.log("Countdown ended...");
-        clearInterval(countdownTimer);
-        startTimer();
-      }
 
       return () => clearInterval(countdownTimer);
     }
-  }, [
-    gameState,
-    canvasReady,
-    currentMediaType,
-    activeDetectionLoop,
-    startTimer,
-    countdown,
-  ]);
+    // Removed dependencies that will be checked before setting isReady
+  }, [gameState, startTimer, countdown]);
 
   if (
     !canvasReady ||
@@ -98,15 +85,26 @@ const ScavengerGame = () => {
     return (
       <div
         style={{
-          backgroundColor: "blue",
-          color: "white",
-          fontSize: "1.5rem",
-          fontWeight: "bold",
-          margin: "auto",
-          padding: "2rem",
+          display: "flex",
+          width: "100%",
+          height: "100vh",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "rgba(0,0,0,0)",
         }}
       >
-        Game components not loaded yet / detection not running...
+        <div
+          style={{
+            backgroundColor: "blue",
+            color: "white",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            zIndex: 3,
+          }}
+        >
+          <p>INFO: Game components not loaded yet:</p>
+          <p>Detection not running...</p>
+        </div>
       </div>
     );
   }
