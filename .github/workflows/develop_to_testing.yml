@@ -1,10 +1,7 @@
 name: Develop to Testing
 
 on:
-  # Auto-triggered action when dev branch is updated/pushed to
-  push:
-    branches:
-      - "develop"
+  # Auto-triggered action when dev branch is updated/pulled to testing
   pull_request:
     branches:
       - "testing"
@@ -13,6 +10,15 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
+      - name: Ensure PR comes from develop
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if [[ "${{ github.event.pull_request.base.ref }}" != "develop" ]]; then
+            echo "This PR is not from develop, exiting..."
+            exit 1
+          fi
+          echo "This PR is from develop, continuing..."
+
       - uses: actions/checkout@v4
       - name: Install Project Dependencies
         run: |
@@ -21,14 +27,5 @@ jobs:
       - name: Build App
         run: npm run render-build
 
-        # only run if it's a push, not if it's a PR itself
-      - name: Create Pull Request to testing
-        if: ${{ github.event_name == 'push' }}
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: "testing" # The branch we want to merge into
-          head: "develop" # The branch we’re merging from
-          title: "Auto PR: develop → testing"
-          body: "Automated PR from develop to testing after passing checks."
-          branch: "auto/develop-to-testing"
+      - name: Start Tests
+        run: echo "Component Testing"

@@ -4,8 +4,9 @@ on:
   # This will run whenever code is merged/pushed into main
   # Deploys to staging and Render Hook is triggered to staging environment
   # e2e tests can be run here - https://friends-without-benefits-1.onrender.com
-  push:
-    branches: [main]
+  pull_request:
+    branches:
+      - staging
 
 jobs:
   deploy_staging:
@@ -25,3 +26,9 @@ jobs:
         run: |
           # WebHook to trigger deployment to Render Staging Environment
           curl "$STAGING_WEBHOOK"
+
+      - name: Run e2e Staging Tests
+        run: echo "e2e Testing Starts Here"
+
+      - name: Run Component Tests
+        run: echo "Component Testing on the Deployed Site Starts Here"

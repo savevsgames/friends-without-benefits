@@ -13,6 +13,7 @@
     "build": "npm run build:server && npm run build:client",
     "build:server": "npm --prefix server run build",
     "build:client": "npm --prefix client run build",
+    "lint:client": "npm --prefix client run lint",
     "start": "concurrently --kill-others-on-fail \"npm run start:server\" \"npm run start:client\"",
     "start:server": "npm --prefix server run start",
     "start:client": "npm --prefix client run preview",
