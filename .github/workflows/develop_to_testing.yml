@@ -13,7 +13,7 @@ jobs:
       - name: Ensure PR comes from develop
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          if [[ "${{ github.event.pull_request.base.ref }}" != "develop" ]]; then
+          if [[ "${{ github.event.pull_request.head.ref }}" != "develop" ]]; then
             echo "This PR is not from develop, exiting..."
             exit 1
           fi
