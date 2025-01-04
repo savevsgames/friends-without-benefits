@@ -1,4 +1,4 @@
-name: Testing to Main - Auto PR
+name: Testing to Main
 
 on:
   # Testing branch is designed to be an extensive component testing branch

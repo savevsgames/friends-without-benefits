@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - "testing"
-  pull_request:
-    branches:
-      - "main"
 
 jobs:
   test:
@@ -23,14 +20,3 @@ jobs:
         # Add the tests here once Cypress is integrated
       - name: Testing Actions
         run: echo "Testing Actions Completed"
-
-      - name: Create Pull Request to main
-        if: ${{ github.event_name == 'push' }}
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: "main"
-          head: "testing"
-          title: "Auto PR: testing → main"
-          body: "Automated PR from testing to main after passing QA checks."
-          branch: "auto/testing-to-main"
