@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
 import StartGameButton from "./buttons/StartGameButton";
@@ -23,6 +23,25 @@ const ScavengerGame = () => {
   const countdown = useGameStore((state) => state.countdown);
   const startTimer = useGameStore((state) => state.startTimer);
   const resetGame = useGameStore((state) => state.resetGame);
+  const [riddleClass, setRiddleClass] = useState("");
+  const getRiddle = () => {
+    const riddles: Record<string, string> = {
+      Mug: "I hold your drink, be it coffee or tea, find me! ☕",
+      Headphones:
+        "Put me on to hear a tune, I sit on your ears and block out the room, find me! 🎧",
+      Toothbrush:
+        "I help you keep your teeth pearly white, use me in the morning and at night, find me! 🪥",
+      Fork: "I have prongs but I'm not a plug. I sit at the table and help you eat! 🍴",
+      Remote: "I let you switch channels while you relax, find me! 📺",
+    };
+    return riddles[itemsArr[numFoundItems]] || "Scavenge Complete!";
+  };
+  useEffect(() => {
+    // Trigger animation when the riddle changes
+    setRiddleClass("animate-fade-in");
+    const timeout = setTimeout(() => setRiddleClass(""), 1000); // Reset class after animation
+    return () => clearTimeout(timeout);
+  }, [numFoundItems]);
 
   // const formatTime = (seconds: number) => {
   //   const mins = Math.floor(seconds / 60);
@@ -110,7 +129,7 @@ const ScavengerGame = () => {
   ]);
 
   return (
-    <div className="game-container">
+    <div className="game-container flex flex-col items-start text-white rounded-lg shadow-lg z-50 absolute top-36 gap-4 w-72 bg-opacity-90 p-4">
       <div className="game-container">
         {/* gameState of "setup" */}
         {gameState === "setup" && <StartGameButton />}
@@ -121,8 +140,20 @@ const ScavengerGame = () => {
         {/* gameState of "playing" */}
         {gameState === "playing" && (
           <div>
-            <h1>Time: {timeRemaining}</h1>
-            <h1>Find: {itemsArr[numFoundItems] || "Scavenge Complete!"}</h1>
+            <div
+              className={`riddle-box p-4 rounded-lg bg-teal-950 bg-opacity-80 text-center shadow-md ${riddleClass}`}
+            >
+              <h1 className="text-xl font-bold mb-2 text-left">
+                🧩 Solve the Riddle:
+              </h1>
+              <p className="text-lg font-semibold text-left">{getRiddle()}</p>
+            </div>
+
+            {/* Time Remaining */}
+            <div className="time-box p-4 rounded-lg bg-teal-950 bg-opacity-80 text-center shadow-md">
+              <h1 className="text-xl font-bold mb-2">⏳ Time Remaining:</h1>
+              <p className="text-lg font-semibold">{timeRemaining}</p>
+            </div>
           </div>
         )}
         {gameState === "complete" && (
