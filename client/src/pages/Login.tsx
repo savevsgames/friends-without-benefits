@@ -30,15 +30,21 @@ const Login: React.FC = () => {
     event.preventDefault();
     console.log(form);
     try {
+    
       const { data } = await login({
         variables: {
           ...form,
         },
       });
-      console.log("data from mutation is", data);
-      loginState(data.login.token); // if the token is valid it'll set isLoggedIn to true and sets the token on localstorage
+      if (data?.login.token) {
+        console.log("data from mutation is", data);
+        loginState(data.login.token); // if the token is valid it'll set isLoggedIn to true and sets the token on localstorage
 
-      navigate("/home"); // once isLogged is is true, it'll navigate to the game page
+        navigate("/home"); // once isLogged is is true, it'll navigate to the game page
+      } else {
+        setErr("Authentication failed, no token received")
+      }
+
     } catch (err) {
       console.error(error || err);
       setErr("Error Logging in");
