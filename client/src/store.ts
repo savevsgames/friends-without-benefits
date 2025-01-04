@@ -39,7 +39,7 @@ export const useModelStore = create<IModelState>((set) => ({
 
 // GAME STORE - SINGLE & MULTIPLAYER
 export interface IGameState {
-  gameState: string; // "setup", "playing", "gameover"
+  gameState: "setup" | "countdown" | "playing" | "complete";
   canvasReady: boolean; // Flag to indicate if the canvas is ready for drawing
   videoPlaying: boolean; // Flag to indicate if the video is playing
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
@@ -50,10 +50,13 @@ export interface IGameState {
   itemsArr: string[]; // items to find
   foundItemsArr: string[] | null; // Arr to display to users as they find items
   timeRemaining: number; // Time in seconds
+  countdown: number | null; // Countdown in seconds
   timerId: number | null; // Store timer ID
 
   // State Setters
-  setGameState: (newState: string) => void;
+  setGameState: (
+    newState: "setup" | "countdown" | "playing" | "complete"
+  ) => void;
   setCanvasReady: (ready: boolean) => void;
   setVideoPlaying: (playing: boolean) => void;
   setCurrentMediaRef: (ref: string | null) => void;
@@ -64,6 +67,7 @@ export interface IGameState {
   setFoundItemsArr: (index: number) => void;
   startTimer: () => void;
   stopTimer: () => void;
+  setCountdown: (countdown: number | null) => void;
   resetGame: () => void;
 
   // Socket IO / Zustand Actions to set opponent player state
@@ -84,10 +88,9 @@ export const useGameStore = create<IGameState>((set, get) => ({
   foundItemsArr: [],
   timeRemaining: 120,
   timerId: null,
+  countdown: null,
   players: {},
-  setGameState: (newState) => {
-    set({ gameState: newState });
-  },
+  setGameState: (newState) => set({ gameState: newState }),
   setCanvasReady: (ready) => {
     set({ canvasReady: ready });
   },
@@ -115,33 +118,33 @@ export const useGameStore = create<IGameState>((set, get) => ({
       return { foundItemsArr: newArr };
     });
   },
+  setCountdown: (countdown) => set({ countdown }),
   startTimer: () => {
     const currentTimer = get().timerId;
     if (currentTimer !== null) {
       window.clearTimeout(currentTimer);
     }
 
-    set({ timeRemaining: 120 });
+    set({ timeRemaining: 120, gameState: "playing" });
 
     const intervalId = window.setInterval(() => {
       set((state) => {
         const newTime = state.timeRemaining - 1;
 
-        if (newTime <= 0) {
+        if (newTime <= 1) {
           window.clearInterval(intervalId);
           return {
             timeRemaining: 0,
             timerId: null,
-            gameState: "gameover",
+            gameState: "complete",
             numFoundItems: 0,
             foundItemsArr: [],
           };
         }
-
-        return { timeRemaining: newTime };
+        // Since the interval is 1000ms (1 second), we can just subtract 1
+        return { timeRemaining: state.timeRemaining - 1 };
       });
     }, 1000);
-
     set({ timerId: intervalId });
   },
   stopTimer: () => {
@@ -163,6 +166,7 @@ export const useGameStore = create<IGameState>((set, get) => ({
         gameState: "setup",
         numFoundItems: 0,
         foundItemsArr: [],
+        countdown: null,
       };
     });
   },
