@@ -12,11 +12,11 @@ const ScavengerGame = () => {
   );
 
   const gameState = useGameStore((state) => state.gameState);
-  // const canvasReady = useGameStore((state) => state.canvasReady);
-  // const currentMediaType = useGameStore((state) => state.currentMediaType);
-  // const activeDetectionLoop = useGameStore(
-  //   (state) => state.activeDetectionLoop
-  // );
+  const canvasReady = useGameStore((state) => state.canvasReady);
+  const currentMediaType = useGameStore((state) => state.currentMediaType);
+  const activeDetectionLoop = useGameStore(
+    (state) => state.activeDetectionLoop
+  );
   const numFoundItems = useGameStore((state) => state.numFoundItems);
   const itemsArr = useGameStore((state) => state.itemsArr);
   const timeRemaining = useGameStore((state) => state.timeRemaining);
@@ -76,8 +76,7 @@ const ScavengerGame = () => {
           return currentCountdown - 1;
         } else {
           clearInterval(countdownTimer);
-          startTimer(); // Start the main game timer
-          return null; // Reset countdown
+          return 0; // countdown is over
         }
       }, 1000);
     }
@@ -90,37 +89,25 @@ const ScavengerGame = () => {
     };
   }, [gameState, countdown, startTimer]);
 
-  // if (
-  //   !canvasReady ||
-  //   currentMediaType === null ||
-  //   activeDetectionLoop === null
-  // ) {
-  //   return (
-  //     <div
-  //       style={{
-  //         display: "flex",
-  //         width: "100%",
-  //         height: "100vh",
-  //         alignItems: "center",
-  //         justifyContent: "center",
-  //         backgroundColor: "rgba(0,0,0,0)",
-  //       }}
-  //     >
-  //       <div
-  //         style={{
-  //           backgroundColor: "blue",
-  //           color: "white",
-  //           fontSize: "1rem",
-  //           fontWeight: "bold",
-  //           zIndex: 3,
-  //         }}
-  //       >
-  //         <p>INFO: Game components not loaded yet:</p>
-  //         <p>Detection not running...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  useEffect(() => {
+    if (
+      canvasReady &&
+      currentMediaType !== null &&
+      activeDetectionLoop !== null &&
+      gameState === "countdown" &&
+      countdown === 0
+    ) {
+      startTimer();
+      console.log("🚀 THE GAME IS STARTING!!!!");
+    }
+  }, [
+    canvasReady,
+    currentMediaType,
+    activeDetectionLoop,
+    gameState,
+    countdown,
+    startTimer,
+  ]);
 
   return (
     <div className="game-container">
