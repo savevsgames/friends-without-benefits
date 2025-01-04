@@ -118,7 +118,7 @@ export const useGameStore = create<IGameState>((set, get) => ({
       return { foundItemsArr: newArr };
     });
   },
-  setCountdown: (countdown) => set({ countdown }),
+  setCountdown: (countdown: number | null) => set({ countdown }),
   startTimer: () => {
     const currentTimer = get().timerId;
     if (currentTimer !== null) {
