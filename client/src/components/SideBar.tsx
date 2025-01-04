@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
-import { FaBars, FaTimes, FaHourglassStart, FaHome } from "react-icons/fa";
+import { FaBars, FaTimes, FaHome } from "react-icons/fa";
 import { IoLogoGameControllerA } from "react-icons/io";
 import { MdLeaderboard, MdEmojiObjects } from "react-icons/md";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { RiWebcamFill } from "react-icons/ri";
 import { RxTimer } from "react-icons/rx";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
-import RunDetectionButton from "./buttons/RunDetectionButton";
+// import RunDetectionButton from "./buttons/RunDetectionButton";
 import MultiPlayerModal from "./MultiplayerModal";
 import { useIsDetectionActive } from "@/hooks/useIsDetectionActive";
 import { useGameStore, useUserSession } from "@/store";
@@ -20,7 +20,6 @@ const SideBar = () => {
   const upperUsername = user?.username.toUpperCase();
   const singlePlayer = useGameStore((state) => state.isSingle);
   const multiPlayer = useGameStore((state) => state.isMulti);
-
 
   const sidebarIcon = () => {
     return isCollapsed ? <FaBars size={22} /> : <FaTimes size={22} />;
@@ -64,17 +63,17 @@ const SideBar = () => {
             label="Game Control"
             icon={<IoLogoGameControllerA size={26} />}
           >
-            <MenuItem icon={<RiWebcamFill />}>
-              <LoadWebcamButton />
-            </MenuItem>
-            <MenuItem icon={<FaHourglassStart />}>
-              <RunDetectionButton />
-            </MenuItem>
             <MenuItem>
               <div>
                 Detection: {isDetectionActive ? "Active 🟢" : "Inactive 🔴"}
               </div>
             </MenuItem>
+            <MenuItem icon={<RiWebcamFill />}>
+              <LoadWebcamButton variant="sidebar" />
+            </MenuItem>
+            {/* <MenuItem icon={<FaHourglassStart />}>
+              <RunDetectionButton />
+            </MenuItem> */}
           </SubMenu>
         )}
 
@@ -127,7 +126,7 @@ const SideBar = () => {
             <MenuItem icon={<MdEmojiObjects size={26} />}>
               <span>
                 {/* {!isCollapsed && */}
-                  {/* // `Found: ${foundItems}, To Find: ${itemsToFind - foundItems}`} */}
+                {/* // `Found: ${foundItems}, To Find: ${itemsToFind - foundItems}`} */}
               </span>
             </MenuItem>
           </Menu>

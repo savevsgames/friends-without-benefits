@@ -57,7 +57,7 @@ const TutoModal: React.FC<TutorialModalProps> = ({
         </button>
 
         {currentStep === 1 ? ( // use webcam button
-          <LoadWebcamButton onComplete={onNext} />
+          <LoadWebcamButton onComplete={onNext} variant="tuto" />
         ) : (
           <button
             onClick={onNext}

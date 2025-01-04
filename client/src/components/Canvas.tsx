@@ -5,8 +5,8 @@ import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
 import ScavengerGame from "./ScavengerGameLogic";
 import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
-import LoadWebcamButton from "./buttons/LoadWebcamButton.tsx";
 import TutoModal from "./TutoModal.tsx";
+import "../App.css"
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -18,6 +18,8 @@ export const Canvas = () => {
   const singlePlayer = useGameStore((state) => state.isSingle);
 
   const multiPlayer = useGameStore((state) => state.isMulti);
+
+
 
   // manage tutorial steps
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps

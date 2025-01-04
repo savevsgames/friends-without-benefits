@@ -1,8 +1,14 @@
 import { useGameStore } from "@/store";
 
 const GameStates = () => {
-  const { gameState, currentMediaType, canvasReady, isSingle, isMulti } =
-    useGameStore(); // Access Zustand state
+  const {
+    gameState,
+    currentMediaType,
+    canvasReady,
+    videoPlaying,
+    isSingle,
+    isMulti,
+  } = useGameStore(); // Access Zustand state
 
   return (
     <nav
@@ -30,6 +36,13 @@ const GameStates = () => {
         <span>🖌️ Canvas Ready:</span>
         <span className="font-semibold truncate">
           {canvasReady ? "Yes" : "No"}
+        </span>
+      </div>
+      {/* Video playing */}
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-200 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+        <span>🖌️ Video Playing:</span>
+        <span className="font-semibold truncate">
+          {videoPlaying ? "Yes" : "No"}
         </span>
       </div>
 

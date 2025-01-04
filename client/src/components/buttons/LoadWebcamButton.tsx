@@ -1,7 +1,7 @@
 import { toggleWebcam } from "@/utils/model-utils";
 import { useGameStore } from "@/store";
 
-const LoadWebcamButton = ({ onComplete}: {onComplete? : () => void}) => {
+const LoadWebcamButton = ({ variant, onComplete}: {variant: "tuto" | "sidebar", onComplete? : () => void}) => {
 
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
@@ -33,12 +33,16 @@ const LoadWebcamButton = ({ onComplete}: {onComplete? : () => void}) => {
     if (onComplete) onComplete();
   };
 
-
+const variantStyles = {
+  tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
+  sidebar: ""
+}
 
   return (
     <div>
       <button
-        className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+
+        className= {`${variantStyles[variant]}`}
         id="enable-webcam"
         name="enable-webcam"
         disabled={!canvasReady}
