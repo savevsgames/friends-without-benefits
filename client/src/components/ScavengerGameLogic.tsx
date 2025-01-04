@@ -1,10 +1,14 @@
 import { useEffect } from "react";
 import { useGameStore } from "@/store";
-// import { useMultiplayerStore } from "@/store";
+import { useMultiplayerStore } from "@/store";
 // import type { Player } from "@/store";
 
 const ScavengerGame = () => {
-  //   const players = useMultiplayerStore((state) => state.players);
+  const startCountdown = useMultiplayerStore((state) => state.startCountdown);
+  const socket = useMultiplayerStore((state) => state.socket);
+  const updatePlayerReadyStates = useMultiplayerStore(
+    (state) => state.updatePlayerReadyStates
+  );
 
   const gameState = useGameStore((state) => state.gameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
@@ -15,8 +19,15 @@ const ScavengerGame = () => {
   const numFoundItems = useGameStore((state) => state.numFoundItems);
   const itemsArr = useGameStore((state) => state.itemsArr);
   const timeRemaining = useGameStore((state) => state.timeRemaining);
+  const countdown = useGameStore((state) => state.countdown);
   const startTimer = useGameStore((state) => state.startTimer);
   const resetGame = useGameStore((state) => state.resetGame);
+
+  useEffect(() => {
+    if (socket) {
+      console.log("socket: ", socket);
+    }
+  }, []);
 
   useEffect(() => {
     if (numFoundItems >= 5 || timeRemaining === 0) {
