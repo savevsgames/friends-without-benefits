@@ -7,6 +7,10 @@ const MONGODB_URI = process.env.MONGODB_URI || "";
 const MONGODB_URI_MPTESTING = process.env.MONGODB_URI_MPTESTING || "";
 
 const db = async (): Promise<typeof mongoose.connection> => {
+  console.log("Starting database connection...");
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("MONGODB_URI:", process.env.MONGODB_URI);
+  console.log("MONGODB_URI_MPTESTING:", process.env.MONGODB_URI_MPTESTING);
   if (!MONGODB_URI || !MONGODB_URI_MPTESTING) {
     throw new Error("Missing MongoDB URI environment variable!");
   }
@@ -21,6 +25,7 @@ const db = async (): Promise<typeof mongoose.connection> => {
       await mongoose.connect(MONGODB_URI);
       console.log("✅ Connected to MongoDB (Production)");
     } else if (process.env.NODE_ENV === "staging") {
+      console.log("✅ Connecting to MongoDB (Staging)");
       if (!MONGODB_URI_MPTESTING) {
         throw new Error(
           "Missing MongoDB URI environment variable for staging!"
