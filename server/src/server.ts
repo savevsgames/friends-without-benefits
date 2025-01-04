@@ -66,10 +66,17 @@ const startApolloServer = async () => {
   // SOCKET.IO
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: "*", // TODO: for dev -> wildcard
+      origin: [
+        "http://localhost:5173",
+        "https://friends-without-benefits.onrender.com",
+        "https://friends-without-benefits-1.onrender.com",
+      ],
+      methods: ["GET", "POST"],
       credentials: true,
     },
     path: "/socket.io",
+    transports: ["polling", "websocket"],
+    allowEIO3: true, // Legacy support for older browsers
   });
 
   io.on("connection", (socket) => {
@@ -163,7 +170,9 @@ const startApolloServer = async () => {
 
       if (allPlayersReady) {
         console.log("✅ All players are ready. Starting 5-second countdown.");
-        io.emit("startCountdown", { countdown: 5 });
+        // Emit only the number of seconds to start the countdown
+        // This is where the countdown time can be adjusted - 5s for now
+        io.emit("startCountdown", 5);
       }
 
       // Broadcast updated ready states to all clients
@@ -184,9 +193,19 @@ const startApolloServer = async () => {
   const peerServer = ExpressPeerServer(httpServer, {
     path: "/", // internally = "/peerjs/" within Express
     allow_discovery: true,
+    proxied: true,
   });
   app.use("/peerjs", peerServer);
 
+  peerServer.on("connection", (client) => {
+    console.log("🔗 PeerJS Connected:", client.getId());
+  });
+
+  peerServer.on("disconnect", (client) => {
+    console.log("❌ PeerJS Disconnected:", client.getId());
+  });
+
+  // Serve the client build in production
   if (process.env.NODE_ENV !== "development") {
     // Serve static files from the client build directory
     app.use(express.static(path.resolve(__dirname, "../../client/dist")));

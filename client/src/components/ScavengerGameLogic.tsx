@@ -11,11 +11,11 @@ const ScavengerGame = () => {
   );
 
   const gameState = useGameStore((state) => state.gameState);
-  const canvasReady = useGameStore((state) => state.canvasReady);
-  const currentMediaType = useGameStore((state) => state.currentMediaType);
-  const activeDetectionLoop = useGameStore(
-    (state) => state.activeDetectionLoop
-  );
+  // const canvasReady = useGameStore((state) => state.canvasReady);
+  // const currentMediaType = useGameStore((state) => state.currentMediaType);
+  // const activeDetectionLoop = useGameStore(
+  //   (state) => state.activeDetectionLoop
+  // );
   const numFoundItems = useGameStore((state) => state.numFoundItems);
   const itemsArr = useGameStore((state) => state.itemsArr);
   const timeRemaining = useGameStore((state) => state.timeRemaining);
@@ -31,20 +31,29 @@ const ScavengerGame = () => {
 
   useEffect(() => {
     if (socket) {
-      // console.log("socket testing for start game button: ", socket);
-      // Server sends the countdown to start the game
-      socket.on("startCountdown", (countdown: number) => {
-        console.log("startCountdown event received: ", countdown);
-        startCountdown(countdown);
-      });
-      // When the game is multiplayer, we need to update the ready
-      // states of the players in the store when the server sends an update
-      socket.on("updateReadyStates", updatePlayerReadyStates);
+      try {
+        // console.log("socket testing for start game button: ", socket);
+        // Server sends the countdown to start the game
+        socket.on("startCountdown", (countdown: number) => {
+          console.log("startCountdown event received: ", countdown);
+          startCountdown(countdown);
+        });
+        // When the game is multiplayer, we need to update the ready
+        // states of the players in the store when the server sends an update
+        socket.on("updateReadyStates", updatePlayerReadyStates);
 
-      return () => {
-        socket.off("startCountdown");
-        socket.off("updateReadyStates");
-      };
+        socket.on("disconnect", () => {
+          console.warn("Socket IO DISCONNECTED UNEXPECTEDLY");
+        });
+
+        return () => {
+          socket.off("startCountdown");
+          socket.off("updateReadyStates");
+          socket.off("disconnect");
+        };
+      } catch (error) {
+        console.log("Error starting countdown", error);
+      }
     }
   }, [socket, startCountdown, updatePlayerReadyStates]);
 
@@ -55,59 +64,62 @@ const ScavengerGame = () => {
   }, [numFoundItems, timeRemaining, resetGame]);
 
   useEffect(() => {
+    let countdownTimer: NodeJS.Timeout;
+
     if (gameState === "countdown" && countdown !== null) {
-      console.log("All conditions met. Starting the countdown timer...");
-      //
-      const countdownTimer = setInterval(() => {
-        const currentCountdown: number | null =
-          useGameStore.getState().countdown;
+      console.log("🔄 Countdown Started:", countdown);
+
+      countdownTimer = setInterval(() => {
+        const currentCountdown = useGameStore.getState().countdown;
         if (currentCountdown !== null && currentCountdown > 0) {
-          // Subtract 1 from the countdown number in the store
-          useGameStore.getState().setCountdown(currentCountdown - 1);
-          console.log("Countdown: ", useGameStore.getState().countdown);
+          return currentCountdown - 1;
         } else {
-          console.log("Countdown ended...");
           clearInterval(countdownTimer);
-          startTimer();
+          startTimer(); // Start the main game timer
+          return null; // Reset countdown
         }
       }, 1000);
-
-      return () => clearInterval(countdownTimer);
     }
-    // Removed dependencies that will be checked before setting isReady
-  }, [gameState, startTimer, countdown]);
 
-  if (
-    !canvasReady ||
-    currentMediaType === null ||
-    activeDetectionLoop === null
-  ) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          width: "100%",
-          height: "100vh",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "rgba(0,0,0,0)",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "blue",
-            color: "white",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            zIndex: 3,
-          }}
-        >
-          <p>INFO: Game components not loaded yet:</p>
-          <p>Detection not running...</p>
-        </div>
-      </div>
-    );
-  }
+    return () => {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        console.log("🛑 Countdown Timer Cleared");
+      }
+    };
+  }, [gameState, countdown, startTimer]);
+
+  // if (
+  //   !canvasReady ||
+  //   currentMediaType === null ||
+  //   activeDetectionLoop === null
+  // ) {
+  //   return (
+  //     <div
+  //       style={{
+  //         display: "flex",
+  //         width: "100%",
+  //         height: "100vh",
+  //         alignItems: "center",
+  //         justifyContent: "center",
+  //         backgroundColor: "rgba(0,0,0,0)",
+  //       }}
+  //     >
+  //       <div
+  //         style={{
+  //           backgroundColor: "blue",
+  //           color: "white",
+  //           fontSize: "1rem",
+  //           fontWeight: "bold",
+  //           zIndex: 3,
+  //         }}
+  //       >
+  //         <p>INFO: Game components not loaded yet:</p>
+  //         <p>Detection not running...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="game-container">

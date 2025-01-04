@@ -10,8 +10,7 @@ const StartGameButton: React.FC = () => {
 
   console.log("Button [StartGameButton] => isReady before click: ", isReady);
 
-  const handleReadyClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const handleReadyClick = () => {
     // PlayerId is guaranteed to be defined here in our app flow
     // This will go back to the store and update the players object:
     /**
