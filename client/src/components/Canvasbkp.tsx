@@ -2,11 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "../store"; // Import Zustand store
 import MultiplayerChat from "./MultiplayerChat";
 import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
-import ScavengerGame from "./ScavengerGameLogic";
-import GameStates from "./GameStates.tsx";
-import ControlPanel from "./ControlPanel.tsx";
-import TutoModal from "./TutoModal.tsx";
-import "../App.css";
+// import GameStoreLiveFeed from "./GameStoreLiveFeed";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -15,38 +11,8 @@ export const Canvas = () => {
 
   const [welcomeImageLoaded, setWelcomeImageLoaded] = useState(false);
 
-  const singlePlayer = useGameStore((state) => state.isSingle);
 
-  const multiPlayer = useGameStore((state) => state.isMulti);
 
-  // manage tutorial steps
-  const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
-  // Tutorial modal content
-  const tutorialContent = [
-    "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
-    "Use your webcam to scan your surroundings for items to be shown on the screen.",
-    "Keep an eye on the timer and find the items quickly!",
-    "Click 'Start Game' to begin the hunt! Good luck and have fun!",
-  ];
-  // function to handle the tutorial once the single player selection is established
-  // Trigger tutorial when single-player is selected
-  useEffect(() => {
-    if (singlePlayer) {
-      setTutorialStep(1); // Start the tutorial when single-player is activated
-    }
-  }, [singlePlayer]);
-
-  const handleNextStep = () => {
-    if (tutorialStep < tutorialContent.length) {
-      setTutorialStep((prev) => prev + 1);
-    } else {
-      setTutorialStep(0); // End the tutorial
-    }
-  };
-  // handle the skip tuto
-  const handleSkipTuto = () => {
-    setTutorialStep(0);
-  };
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
     if (videoPlaying) {
@@ -124,7 +90,7 @@ export const Canvas = () => {
 
           context.fillStyle = "black";
           context.font = "20px Arial";
-          // context.fillText("SCAVENGER HUNT 2025", 10, 30);
+          context.fillText("SCAVENGER HUNT 2025", 10, 30);
           context.globalAlpha = 1; // Reset transparency
         }
       }
@@ -209,47 +175,27 @@ export const Canvas = () => {
         flexDirection: "row",
         alignItems: "stretch",
         minWidth: "300px",
-        height: "calc(100vh-64px)",
+        minHeight: "300px",
       }}
     >
-      {/* tutorial modal */}
-      <TutoModal
-        isOpen={tutorialStep > 0}
-        content={tutorialContent}
-        currentStep={tutorialStep - 1}
-        onNext={handleNextStep}
-        onSkip={handleSkipTuto}
-        isLastStep={tutorialStep === tutorialContent.length}
-      />
       <div
         id="canvas-container"
-        className="relative w-full h-full"
-        style={{
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          maxWidth: singlePlayer ? "100vw" : "60vw",
-          maxHeight: singlePlayer ? "100vh" : "90vh",
-          flex: singlePlayer ? "1 1 auto" : "initial",
-        }}
+        className="relative w-full"
+        style={{ overflow: "hidden", maxWidth: "60vw", maxHeight: "90vh" }}
       >
         <canvas
           id="canvas-main"
           ref={canvasRef}
           style={{
             display: "block",
-            // position: "absolute",
+            position: "absolute",
             top: "0",
             left: "0",
             width: "100%",
-            height: "100%",
+            height: "auto",
             zIndex: 10,
           }}
         ></canvas>
-        <ControlPanel />
-        <GameStates />
-        <ScavengerGame />
-
         <video
           id="video-output"
           style={{
@@ -260,7 +206,6 @@ export const Canvas = () => {
             width: "100%",
             height: "auto",
             zIndex: 2,
-            objectFit: "contain",
           }}
           playsInline
           muted
@@ -276,7 +221,6 @@ export const Canvas = () => {
             width: "100%",
             height: "auto",
             zIndex: 1,
-            objectFit: "contain",
           }}
           crossOrigin="anonymous"
         />
@@ -296,28 +240,25 @@ export const Canvas = () => {
         </div>
       </div>
       {/* New Div Right of Canvas */}
-      {multiPlayer && (
+      <div
+        className="relative z-20 p-4"
+        style={{
+          marginTop: "10px",
+        }}
+      >
         <div
-          className="relative z-20 p-4"
           style={{
-            marginTop: "10px",
-            flex: "1 1 auto",
+            display: "grid",
+            gridTemplateRows: "2fr 5fr",
+            gap: "2rem",
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateRows: "2fr 5fr",
-              gap: "2rem",
-            }}
-          >
-            <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
-              <MultiplayerVideoFeed />
-            </div>
-            <MultiplayerChat />
+          <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
+            <MultiplayerVideoFeed />
           </div>
+          <MultiplayerChat />
         </div>
-      )}
+      </div>
     </div>
   );
 };

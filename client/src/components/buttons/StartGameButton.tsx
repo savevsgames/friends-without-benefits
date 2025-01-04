@@ -22,7 +22,9 @@ const StartGameButton: React.FC = () => {
 
     setPlayerReady(playerId!, !isReady);
     console.log("Button [StartGameButton] => isReady after click: ", isReady);
+    
   };
+  
 
   return (
     <div
