@@ -391,6 +391,9 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
     set((state) => ({ ...state, ...updates }));
     console.log("📥 Incoming Multiplayer Store update:", updates);
   },
+  // TODO:
+  // This setter can also be used to set more Player properties for the
+  // multiplayer game like avatar, itemsFound, etc.
   setPlayerReady: (id: string, ready: boolean) => {
     set((state) => ({
       players: {
@@ -398,11 +401,14 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
         [id]: { ...state.players[id], isReady: ready },
       },
     }));
+    // use the player's socket to emit the playerReady event
     const socket = useMultiplayerStore.getState().socket;
     socket?.emit("playerReady", { playerId: id });
   },
   updatePlayerReadyStates: (readyStates: Record<string, boolean>) => {
     set((state) => {
+      // Update the ready state for player with [id:string] sent from the server
+      // when allPlayersReady is true => start the countdown
       const updatedPlayers = { ...state.players };
       for (const id in readyStates) {
         if (updatedPlayers[id]) {
@@ -412,6 +418,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       return { players: updatedPlayers };
     });
   },
+  // Countdown sync for multiplayer games
   startCountdown: (countdown: number) => {
     // Access the gameStore to set the countdown
     const setGameState = useGameStore.getState().setGameState;
