@@ -1,5 +1,5 @@
 name: Checking Tests
-
+# This is not being used yet, but if we get actions to auto merge to main we can use this to run tests before merging
 on:
   pull_request:
     branches:
