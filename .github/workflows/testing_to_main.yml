@@ -1,9 +1,10 @@
-name: Testing to Main
+name:
+  Testing to Main
 
-on:
   # Testing branch is designed to be an extensive component testing branch
   # This makes sure that the only branch that can be pulled to main is testing
   # And that all the component tests pass before the merge can complete
+on:
   pull_request:
     branches:
       - "main"
@@ -13,10 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ensure PR comes from testing
-        if: ${{ github.event.pull_request.head.ref != 'testing' }}
         run: |
-          echo "❌ This PR is not coming from the 'testing' branch. Exiting..."
-          exit 1
-      - name: Confirm Valid PR Source
-        run: |
+          echo "Head Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Base Branch: ${{ github.event.pull_request.base.ref }}"
+          if [[ "${{ github.event.pull_request.head.ref }}" != "testing" ]]; then
+            echo "❌ This PR is not coming from the 'testing' branch. Exiting..."
+            exit 1
+          fi
           echo "✅ This PR is correctly coming from the 'testing' branch. Continuing..."
