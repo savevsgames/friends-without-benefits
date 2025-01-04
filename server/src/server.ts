@@ -55,6 +55,9 @@ const startApolloServer = async () => {
   // SocketId -> PeerJS ID mappings for Socket.IO to track connected users
   const connectedUsers = new Map<string, string>();
 
+  // Track ready states for players
+  const playerReadyStates: Record<string, boolean> = {};
+
   // SOCKET.IO
   const io = new SocketIOServer(httpServer, {
     cors: {
@@ -142,10 +145,31 @@ const startApolloServer = async () => {
       }
     });
 
+    // Listen for 'playerReady' event
+    // Record<string, boolean> = {};
+    socket.on("playerReady", ({ playerId }) => {
+      playerReadyStates[playerId] = true;
+      console.log(`🎯 Player ${playerId} is ready.`);
+
+      // Check if all players are ready / all values of the records are true
+      const allPlayersReady = Object.values(playerReadyStates).every(
+        (ready) => ready === true
+      );
+
+      if (allPlayersReady) {
+        console.log("✅ All players are ready. Starting 5-second countdown.");
+        io.emit("startCountdown", { countdown: 5 });
+      }
+
+      // Broadcast updated ready states to all clients
+      io.emit("updateReadyStates", playerReadyStates);
+    });
+
     socket.on("disconnect", () => {
       console.log("❌ Socket.IO Disconnected:", socket.id);
       // Clean up connectedUsers map
       connectedUsers.delete(socket.id);
+      delete playerReadyStates[socket.id];
       // Notify all clients that a peer has disconnected
       socket.broadcast.emit("peer-disconnected", { socketId: socket.id });
     });
