@@ -3,8 +3,8 @@ name: Deploy To Production
 # Tests can be run at final production endpoint once deployed
 # https://friends-without-benefits.onrender.com
 on:
-  push:
-    branches: [production]
+  pull_request:
+    branches: -production
 
 jobs:
   deploy_production:
