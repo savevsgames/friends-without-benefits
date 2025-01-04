@@ -160,11 +160,11 @@ const startApolloServer = async () => {
 
   if (process.env.NODE_ENV !== "development") {
     // Serve static files from the client build directory
-    app.use(express.static(path.join(__dirname, "../client/dist")));
+    app.use(express.static(path.resolve(__dirname, "../../client/dist")));
 
     // Catch all other routes and return the index.html file
     app.get("*", (_req: Request, res: Response) => {
-      res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+      res.sendFile(path.resolve(__dirname, "../../client/dist/index.html"));
     });
   }
   if (process.env.NODE_ENV === "development") {
