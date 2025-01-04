@@ -287,9 +287,9 @@ export const drawBoundingBoxes = (predictions: Prediction[]): void => {
 const recentPredictions: number[] = [];
 
 const updateRecentPredictions = (confidence: number): void => {
-  const { foundItems } = useGameStore.getState();
-  const setFoundItems = useGameStore.getState().setFoundItems;
-  
+  const { numFoundItems } = useGameStore.getState();
+  const setNumFoundItems = useGameStore.getState().setNumFoundItems;
+  const setFoundItemsArr = useGameStore.getState().setFoundItemsArr;
   if (recentPredictions.length >= 4) {
     recentPredictions.shift();
   }
@@ -299,7 +299,8 @@ const updateRecentPredictions = (confidence: number): void => {
     const avgConf = recentPredictions.reduce((acc, val) => acc + val, 0) / 4;
 
     if (avgConf >= 0.8) {
-      setFoundItems(foundItems + 1);
+      setFoundItemsArr(numFoundItems);  
+      setNumFoundItems(numFoundItems + 1);
       console.log("Confidence met, changing to next item.");
       recentPredictions.length = 0;
     }
@@ -317,7 +318,7 @@ const detectFrame = async (
 ) => {
   if (!model) return;
 
-  const { foundItems } = useGameStore.getState();
+  const { numFoundItems } = useGameStore.getState();
 
   // Filter predictions based on confidence
   const confidenceThreshold = 0.5; //changed from .1
@@ -336,11 +337,11 @@ const detectFrame = async (
       callback(predictions);
 
       const correctObjectPrediction = predictions.find(
-        (prediction) => prediction.class === YOLO_CLASSES[foundItems]
+        (prediction) => prediction.class === YOLO_CLASSES[numFoundItems]
       );
 
       console.log("correctObjectPrediction: ", correctObjectPrediction)
-      console.log("Class to look for: ", YOLO_CLASSES[foundItems] )
+      console.log("Class to look for: ", YOLO_CLASSES[numFoundItems] )
 
       if (correctObjectPrediction) {
         updateRecentPredictions(correctObjectPrediction.score)
