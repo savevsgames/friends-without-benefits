@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
 import StartGameButton from "./buttons/StartGameButton";
+import Countdown from "./Countdown";
 
 const ScavengerGame = () => {
   const startCountdown = useMultiplayerStore((state) => state.startCountdown);
@@ -128,11 +129,7 @@ const ScavengerGame = () => {
         {gameState === "setup" && <StartGameButton />}
 
         {/* gameState of "countdown" */}
-        {gameState === "countdown" && countdown !== null && (
-          <div>
-            <h1 className="countdown-number">{countdown}</h1>
-          </div>
-        )}
+        {gameState === "countdown" && countdown !== null && <Countdown />}
 
         {/* gameState of "playing" */}
         {gameState === "playing" && (
