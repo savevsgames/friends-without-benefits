@@ -3,14 +3,24 @@ name: Deploy To Production
 # Tests can be run at final production endpoint once deployed
 # https://friends-without-benefits.onrender.com
 on:
-  push:
-    branches: [production]
+  pull_request:
+    branches: -production
 
 jobs:
   deploy_production:
     name: Deploy Production To Render
     runs-on: ubuntu-latest
     steps:
+      - name: Ensure PR comes from production
+        run: |
+          echo "Head Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Base Branch: ${{ github.event.pull_request.base.ref }}"
+          if [[ "${{ github.event.pull_request.head.ref }}" != "production" ]]; then
+            echo "❌ This PR is not coming from the 'production' branch. Exiting..."
+            exit 1
+          fi
+          echo "✅ This PR is correctly coming from the 'production' branch. Continuing..."
+
       - uses: actions/checkout@v4
       - name: Install Project Dependencies
         run: |

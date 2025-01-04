@@ -1,57 +1,47 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useGameStore } from "@/store";
 import ReactModal from "react-modal";
 
-const ScavengerGame: React.FC = () => {
+const ScavengerGame = () => {
     const gameState = useGameStore((state) => state.gameState);
-    const setGameState = useGameStore((state) => state.setGameState);
     const canvasReady = useGameStore((state) => state.canvasReady);
     const currentMediaType = useGameStore((state) => state.currentMediaType);
     const activeDetectionLoop = useGameStore((state) => state.activeDetectionLoop);
-    const foundItems = useGameStore((state) => state.foundItems);
-    const setFoundItems = useGameStore((state) => state.setFoundItems);
-
-    const items: string[] = [
-        "Fork", "Headphones", "Mug", "Remote", "Toothbrush"
-    ];
-
-    const [time, setTime] = useState<number>(0);
+    const numFoundItems = useGameStore((state) => state.numFoundItems);
+    const itemsArr = useGameStore((state) => state.itemsArr)
+    const timeRemaining = useGameStore((state) => state.timeRemaining);    
+    const startTimer = useGameStore((state) => state.startTimer);
+    const resetGame = useGameStore((state) => state.resetGame);
 
     useEffect(() => {
-        if (foundItems >= 5) {
-            setFoundItems(0);
-            setGameState("gameover");        
+        if (numFoundItems >= 5 || timeRemaining === 0) {
+            resetGame();//this currently sets the game to "setup"       
         }
-    }, [foundItems, setFoundItems, setGameState]);
+    }, [numFoundItems, timeRemaining, resetGame]);
 
     useEffect(() => {
-        let timer: number | null = null;
-        
-        const runTimer = () => {
-            setTime(prevTime => prevTime +1);
-            timer = window.setTimeout(runTimer, 1000);
-        };
-
-        if (gameState === "playing") { 
-            setTime(0);
-            runTimer();
+        if(gameState === "playing" && canvasReady && currentMediaType!== null && activeDetectionLoop !== null) {
+            console.log('All conditions met');
+            startTimer();
         }
-
-        return () => {
-            if (timer !== null) window.clearTimeout(timer)
-        };
-    }, [gameState]);
+    }, [gameState, canvasReady, currentMediaType, activeDetectionLoop, startTimer]);
 
     if (!canvasReady || currentMediaType === null || activeDetectionLoop === null) {
         return <ReactModal>Uhmm try refreshing? not all states are set correctly</ReactModal>
     }
 
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     return (
         <div className="game-container">
             {gameState === "playing" ? (
                 <div>
-                    <h1>Time: {time}</h1>
-                    <h1>Find: {items[foundItems] || "Scavenge Complete!"}</h1>
+                    <h1>Time: {formatTime(timeRemaining)}</h1>
+                    <h1>Find: {itemsArr[numFoundItems] || "Scavenge Complete!"}</h1>
                 </div>
             ) : (
                 <div>Game not started</div>

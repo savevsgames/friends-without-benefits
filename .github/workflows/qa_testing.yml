@@ -1,0 +1,22 @@
+name: QA Testing
+
+on:
+  push:
+    branches:
+      - "testing"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Project Dependencies
+        run: |
+          npm install && npm run setup
+
+      - name: Build App
+        run: npm run render-build
+
+        # Add the tests here once Cypress is integrated
+      - name: Testing Actions
+        run: echo "Testing Actions Completed"

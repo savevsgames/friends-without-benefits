@@ -4,13 +4,24 @@ on:
   # This will run whenever code is merged/pushed into main
   # Deploys to staging and Render Hook is triggered to staging environment
   # e2e tests can be run here - https://friends-without-benefits-1.onrender.com
-  push:
-    branches: [main]
+  pull_request:
+    branches:
+      - staging
 
 jobs:
   deploy_staging:
     runs-on: ubuntu-latest
     steps:
+      - name: Ensure PR comes from main
+        run: |
+          echo "Head Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Base Branch: ${{ github.event.pull_request.base.ref }}"
+          if [[ "${{ github.event.pull_request.head.ref }}" != "main" ]]; then
+            echo "❌ This PR is not coming from the 'main' branch. Exiting..."
+            exit 1
+          fi
+          echo "✅ This PR is correctly coming from the 'main' branch. Continuing..."
+
       - uses: actions/checkout@v4
       - name: Install Project Dependencies
         run: |
@@ -25,3 +36,9 @@ jobs:
         run: |
           # WebHook to trigger deployment to Render Staging Environment
           curl "$STAGING_WEBHOOK"
+
+      - name: Run e2e Staging Tests
+        run: echo "e2e Testing on the Deployed Site Starts Here"
+
+      - name: Run Component Tests
+        run: echo "Component Testing on the Deployed Site Starts Here"
