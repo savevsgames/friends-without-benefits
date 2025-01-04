@@ -25,7 +25,7 @@ const StartGameButton: React.FC = () => {
       onClick={handleReadyClick}
       className={`btn ${isReady ? "btn-disabled" : "btn-primary"}`}
     >
-      {isReady ? "Waiting for other players..." : "Ready Up"}
+      {isReady ? "Waiting for other players..." : "I'm ready to go!"}
     </button>
   );
 };

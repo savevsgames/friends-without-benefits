@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
-// import type { Player } from "@/store";
+import StartGameButton from "./buttons/StartGameButton";
 
 const ScavengerGame = () => {
-  const startCountdown = useMultiplayerStore((state) => state.startCountdown);
+  //   const startCountdown = useMultiplayerStore((state) => state.startCountdown);
   const socket = useMultiplayerStore((state) => state.socket);
-  const updatePlayerReadyStates = useMultiplayerStore(
-    (state) => state.updatePlayerReadyStates
-  );
+  //   const updatePlayerReadyStates = useMultiplayerStore(
+  //     (state) => state.updatePlayerReadyStates
+  //   );
 
   const gameState = useGameStore((state) => state.gameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
@@ -19,13 +19,20 @@ const ScavengerGame = () => {
   const numFoundItems = useGameStore((state) => state.numFoundItems);
   const itemsArr = useGameStore((state) => state.itemsArr);
   const timeRemaining = useGameStore((state) => state.timeRemaining);
-  const countdown = useGameStore((state) => state.countdown);
+  //   const countdown = useGameStore((state) => state.countdown);
   const startTimer = useGameStore((state) => state.startTimer);
   const resetGame = useGameStore((state) => state.resetGame);
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   useEffect(() => {
     if (socket) {
-      console.log("socket: ", socket);
+      console.log("socket testing for start game button: ", socket);
+      // This will update the updateReadyStates and startCountdown in the store if there is a socket
     }
   }, []);
 
@@ -58,14 +65,19 @@ const ScavengerGame = () => {
     currentMediaType === null ||
     activeDetectionLoop === null
   ) {
-    return <div>Game components not loaded correctly...</div>;
+    return <div>Game components not loaded yet / detection not running...</div>;
+  } else if (
+    canvasReady &&
+    currentMediaType !== null &&
+    activeDetectionLoop !== null &&
+    gameState === "setup"
+  ) {
+    return (
+      <div>
+        <StartGameButton />
+      </div>
+    );
   }
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   return (
     <div className="game-container">
