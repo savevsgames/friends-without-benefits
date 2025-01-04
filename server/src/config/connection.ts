@@ -12,18 +12,31 @@ const db = async (): Promise<typeof mongoose.connection> => {
   }
 
   try {
-    // Changed to TESTING database for multiplayer additions
     if (process.env.NODE_ENV === "production") {
+      if (!MONGODB_URI) {
+        throw new Error(
+          "Missing MongoDB URI environment variable for production!"
+        );
+      }
       await mongoose.connect(MONGODB_URI);
-      console.log("Connected to MongoDB");
-    } else {
+      console.log("✅ Connected to MongoDB (Production)");
+    } else if (process.env.NODE_ENV === "staging") {
+      if (!MONGODB_URI_MPTESTING) {
+        throw new Error(
+          "Missing MongoDB URI environment variable for staging!"
+        );
+      }
       await mongoose.connect(MONGODB_URI_MPTESTING);
-      console.log("Connected to MongoDB for multiplayer testing");
+      console.log("✅ Connected to MongoDB for Multiplayer Testing (Staging)");
+    } else {
+      throw new Error(
+        "NODE_ENV is not set to a valid value (production or staging)!"
+      );
     }
 
     return mongoose.connection;
-  } catch (error) {
-    console.error("Database connection error:", error);
+  } catch (error: Error | any) {
+    console.error("❌ Database connection error:", error.message);
     throw error;
   }
 };
