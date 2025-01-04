@@ -46,6 +46,8 @@ export interface IGameState {
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
+  isSingle: boolean;
+  isMulti: boolean;
   numFoundItems: number; // 0-5
   itemsArr: string[]; // items to find
   foundItemsArr: string[] | null; // Arr to display to users as they find items
@@ -63,6 +65,8 @@ export interface IGameState {
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   setActiveDetectionLoop: (iteration: number | null) => void;
   addPlayer: (id: string, player: Player) => void;
+  setIsSingle: (value: boolean) => void;
+  setIsMulti: (value: boolean) => void;
   setNumFoundItems: (numberFound: number) => void;
   setFoundItemsArr: (index: number) => void;
   startTimer: () => void;
@@ -90,6 +94,8 @@ export const useGameStore = create<IGameState>((set, get) => ({
   timerId: null,
   countdown: null,
   players: {},
+  isSingle: true,
+  isMulti: false,
   setGameState: (newState) => set({ gameState: newState }),
   setCanvasReady: (ready) => {
     set({ canvasReady: ready });
@@ -175,6 +181,12 @@ export const useGameStore = create<IGameState>((set, get) => ({
       players: { ...state.players, [id]: player },
     }));
   },
+  setIsSingle: (value) => {
+    set({ isSingle: value, isMulti: !value });
+  },
+  setIsMulti: (value) => {
+    set({ isMulti: value, isSingle: !value });
+  },
   removePlayer: (id: string) => {
     set((state) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -225,8 +237,8 @@ export const useAuthStore = create(
     }
   )
 );
-
-type User = {
+// had to do it this way because of the way the decoded is being decoded. 
+interface UserData {
   id: string;
   username: string;
   email: string;
@@ -234,6 +246,11 @@ type User = {
   avatar: string;
   shortestRound: string;
 };
+interface User {
+  data: UserData;
+  iat?: number;
+  exp?: number
+}
 
 type SessionState = {
   user: User | null;

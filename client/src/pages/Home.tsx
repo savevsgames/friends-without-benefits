@@ -1,14 +1,14 @@
 import HomeHeader from "../components/HomeHeader.tsx";
 import Typewriter from "typewriter-effect";
-import { useState } from "react";
-import GameOptionsModal from "@/components/GameOptionsModal.tsx";
 import Footer from "@/components/Footer.tsx";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  // const openModal = () => setIsModalOpen(true);
+  // const closeModal = () => setIsModalOpen(false);
+  const navigate = useNavigate();
   return (
     <>
       <HomeHeader />
@@ -33,7 +33,7 @@ function Home() {
             <div className="pt-4 text-center">
               <button
                 className="border-2 p-1 text-center border-neutral-500 rounded-sm"
-                onClick={openModal}
+                onClick={() => navigate("/game")}
               >
                 Start Hunting
               </button>
@@ -123,7 +123,7 @@ function Home() {
           </div>
         </div>
       </div>
-      <GameOptionsModal isOpen={isModalOpen} onClose={closeModal} />
+      {/* <GameOptionsModal isOpen={isModalOpen} onClose={closeModal} /> */}
 
       <Footer />
     </>
