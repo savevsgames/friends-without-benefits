@@ -306,6 +306,7 @@ export interface IMultiplayerState {
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
   setWebcamEnabled: (enabled: boolean) => void;
+  setPlayerReady: (id: string, ready: boolean) => void;
   addChatMessage: (message: { sender: string; message: string }) => void;
   setInviteLink: (link: string) => void;
   setGameStartTime: (time: number) => void;
@@ -365,7 +366,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   setWebcamEnabled: (enabled) => {
     console.log(`🎥 Webcam enabled: ${enabled}`);
     set({ webcamEnabled: enabled });
-  },
+  },  
   addChatMessage: (message) => {
     console.log("💬 Chat message added:", message);
     set((state) => ({ chatMessages: [...state.chatMessages, message] }));
@@ -409,4 +410,12 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       return { players: updatedPlayers };
     });
   },
+  startCountdown: (countdown: number) => {
+    // Access the gameStore to set the countdown
+    const setGameState = useGameStore.getState().setGameState;
+    const setCountdown = useGameStore.getState().setCountdown;
+    // This triggers the socket io listener in the server to 
+    setGameState("countdown");
+    setCountdown(countdown);
+},
 }));

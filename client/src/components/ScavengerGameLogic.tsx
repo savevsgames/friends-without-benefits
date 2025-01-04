@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { useGameStore, useMultiplayerStore } from "@/store";
-import type { Player } from "@/store";
+import { useGameStore } from "@/store";
+// import { useMultiplayerStore } from "@/store";
+// import type { Player } from "@/store";
 
 const ScavengerGame = () => {
-  const players = useMultiplayerStore((state) => state.players);
-  const isReady = players.every((player: Player) => player.isReady);
+  //   const players = useMultiplayerStore((state) => state.players);
+
   const gameState = useGameStore((state) => state.gameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
   const currentMediaType = useGameStore((state) => state.currentMediaType);

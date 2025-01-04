@@ -146,11 +146,12 @@ const startApolloServer = async () => {
     });
 
     // Listen for 'playerReady' event
+    // Record<string, boolean> = {};
     socket.on("playerReady", ({ playerId }) => {
       playerReadyStates[playerId] = true;
       console.log(`🎯 Player ${playerId} is ready.`);
 
-      // Check if all players are ready
+      // Check if all players are ready / all values of the records are true
       const allPlayersReady = Object.values(playerReadyStates).every(
         (ready) => ready === true
       );
