@@ -6,6 +6,7 @@ import ScavengerGame from "./ScavengerGameLogic";
 import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
 import LoadWebcamButton from "./buttons/LoadWebcamButton.tsx";
+import TutoModal from "./TutoModal.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -20,7 +21,13 @@ export const Canvas = () => {
 
   // manage tutorial steps
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
-
+  // Tutorial modal content
+  const tutorialContent = [
+    "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
+    "Use your webcam to scan your surroundings for items to be shown on the screen.",
+    "Keep an eye on the timer and find the items quickly!",
+    "Click 'Start Game' to begin the hunt! Good luck and have fun!",
+  ];
   // function to handle the tutorial once the single player selection is established
   // Trigger tutorial when single-player is selected
   useEffect(() => {
@@ -29,20 +36,16 @@ export const Canvas = () => {
     }
   }, [singlePlayer]);
 
-  // Tutorial modal content
-  const tutorialContent = [
-    "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
-    "Use your webcam to scan your surroundings for items to be shown on the screen.",
-    "Keep an eye on the timer and find the items quickly!",
-    "Click 'Start Game' to begin the hunt! Good luck and have fun!",
-  ];
-
   const handleNextStep = () => {
     if (tutorialStep < tutorialContent.length) {
       setTutorialStep((prev) => prev + 1);
     } else {
       setTutorialStep(0); // End the tutorial
     }
+  };
+  // handle the skip tuto
+  const handleSkipTuto = () => {
+    setTutorialStep(0);
   };
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
@@ -210,38 +213,14 @@ export const Canvas = () => {
       }}
     >
       {/* tutorial modal */}
-      {tutorialStep > 0 && (
-        <div
-          className="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50 space-x-4"
-          style={{ pointerEvents: "auto" }}
-        >
-          <div
-            className="bg-white p-6 rounded-lg shadow-lg text-center"
-            style={{
-              width: "500px",
-              top: "50%",
-              overflow: "auto",
-            }}
-          >
-            <h2 className="text-xl font-bold mb-4">Kick-Off Time!</h2>
-            <p className="mb-6">{tutorialContent[tutorialStep - 1]}</p>
-
-            {tutorialStep === 2 ? (
-              <LoadWebcamButton
-                onComplete={() => setTutorialStep((prev) => prev + 1)}
-              />
-            ) : (
-              <button
-                onClick={handleNextStep}
-                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
-              >
-                {tutorialStep === tutorialContent.length ? "Finish" : "Next"}
-              </button>
-            )}
-
-          </div>
-        </div>
-      )}
+      <TutoModal
+        isOpen={tutorialStep > 0}
+        content={tutorialContent}
+        currentStep={tutorialStep - 1}
+        onNext={handleNextStep}
+        onSkip={handleSkipTuto}
+        isLastStep={tutorialStep === tutorialContent.length}
+      />
       <div
         id="canvas-container"
         className="relative w-full h-full"

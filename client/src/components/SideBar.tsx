@@ -12,7 +12,7 @@ import MultiPlayerModal from "./MultiplayerModal";
 import { useIsDetectionActive } from "@/hooks/useIsDetectionActive";
 import { useGameStore, useUserSession } from "@/store";
 import { NavLink } from "react-router-dom";
-import { Tooltip as ReactTooltip, Tooltip } from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -20,10 +20,7 @@ const SideBar = () => {
   const upperUsername = user?.username.toUpperCase();
   const singlePlayer = useGameStore((state) => state.isSingle);
   const multiPlayer = useGameStore((state) => state.isMulti);
-  const gameState = useGameStore((state) => state.gameState);
-  const foundItems = useGameStore((state) => state.foundItems);
-  const time = "time";
-  const itemsToFind = 5;
+
 
   const sidebarIcon = () => {
     return isCollapsed ? <FaBars size={22} /> : <FaTimes size={22} />;
@@ -124,13 +121,13 @@ const SideBar = () => {
           </div>
           <Menu>
             <MenuItem icon={<RxTimer size={26} />}>
-              <span>{!isCollapsed && `Time: ${time}s`}</span>
+              {/* <span>{!isCollapsed && `Time: ${time}s`}</span> */}
             </MenuItem>
 
             <MenuItem icon={<MdEmojiObjects size={26} />}>
               <span>
-                {!isCollapsed &&
-                  `Found: ${foundItems}, To Find: ${itemsToFind - foundItems}`}
+                {/* {!isCollapsed && */}
+                  {/* // `Found: ${foundItems}, To Find: ${itemsToFind - foundItems}`} */}
               </span>
             </MenuItem>
           </Menu>
