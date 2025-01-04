@@ -12,6 +12,16 @@ jobs:
   deploy_staging:
     runs-on: ubuntu-latest
     steps:
+      - name: Ensure PR comes from main
+        run: |
+          echo "Head Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Base Branch: ${{ github.event.pull_request.base.ref }}"
+          if [[ "${{ github.event.pull_request.head.ref }}" != "main" ]]; then
+            echo "❌ This PR is not coming from the 'main' branch. Exiting..."
+            exit 1
+          fi
+          echo "✅ This PR is correctly coming from the 'main' branch. Continuing..."
+
       - uses: actions/checkout@v4
       - name: Install Project Dependencies
         run: |
