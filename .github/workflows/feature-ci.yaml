@@ -11,15 +11,6 @@ jobs:
   build-and-lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Ensure PR comes from feature/**
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if [[ "${{ github.event.pull_request.base.ref }}" != "feature/**" ]]; then
-            echo "This PR is not from a feature branch, exiting..."
-            exit 1
-          fi
-          echo "This PR is from a feature/ branch, continuing..."
-
       - uses: actions/checkout@v4
       - name: Install Project Dependencies
         run: |
