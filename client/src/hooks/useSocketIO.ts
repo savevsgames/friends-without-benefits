@@ -13,29 +13,37 @@ export const useSocketIO = () => {
           path: "/socket.io",
           transports: ["polling", "websocket"],
           reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
         })
       : io("https://friends-without-benefits.onrender.com/", {
           // No URL means "connect to the current origin"
           path: "/socket.io",
           transports: ["polling", "websocket"],
           reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
         });
 
     socketIo.on("connect", () => {
       console.log("✅ Socket.IO Connected:", socketIo.id);
       setSocket(socketIo);
     });
-
-    socketIo.on("disconnect", () => {
-      console.log("❌ Socket.IO Disconnected");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    socketIo.on("disconnect", (reason: any) => {
+      console.log("❌ Socket.IO Disconnected", reason);
     });
 
     socketIo.on("connect_error", (error: Error) => {
-      console.error("❗ Socket.IO Connection Error:", error);
+      console.error("❗ Socket.IO Connection Error:", error.message);
+    });
+
+    socketIo.on("reconnect_attempt", () => {
+      console.warn("🔄 Socket.IO Reconnecting...");
     });
 
     return () => {
       socketIo.disconnect();
     };
-  }, [setSocket]);
+  }, [setSocket, isDevelopment]);
 };
