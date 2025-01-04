@@ -28,9 +28,10 @@ export const ControlPanel: React.FC<
     >
       {/* // start game button */}
       <RunDetectionButton />
+
       {/* detection status */}
-      <div className="flex items-center justify-between  gap-2 px-1 py-2 rounded-full bg-gray-200 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
-        <span>🕵️‍♂️ Detection:</span>
+      <div className="flex items-center justify-between  gap-2 px-1 py-2 rounded-full bg-teal-950 bg-opacity-75 text-xs text-white shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+        <span>🕵️‍♂️ Detecting..</span>
         <span
           className="font-semibold truncate"
           style={{

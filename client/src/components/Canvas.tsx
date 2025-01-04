@@ -6,7 +6,7 @@ import ScavengerGame from "./ScavengerGameLogic";
 import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
-import "../App.css"
+import "../App.css";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -18,8 +18,6 @@ export const Canvas = () => {
   const singlePlayer = useGameStore((state) => state.isSingle);
 
   const multiPlayer = useGameStore((state) => state.isMulti);
-
-
 
   // manage tutorial steps
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
@@ -250,6 +248,8 @@ export const Canvas = () => {
         ></canvas>
         <ControlPanel />
         <GameStates />
+        <ScavengerGame />
+
         <video
           id="video-output"
           style={{
@@ -292,7 +292,6 @@ export const Canvas = () => {
             zIndex: 100,
           }}
         >
-          <ScavengerGame />
           {/* <GameStoreLiveFeed /> */}
         </div>
       </div>

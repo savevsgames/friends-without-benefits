@@ -22,7 +22,7 @@ const RunDetectionButton = () => {
         data-tooltip-id="start game"
         name="detect"
         id="detect"
-        className={`flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-teal-500 text-black text-lg font-bold shadow-md transition-transform transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal-300 disabled:bg-gray-400 disabled:cursor-not-allowed tracking-widest`}
+        className={`flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-teal-600 to-teal-900 text-white text-lg font-semibold shadow-lg transition-transform transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-teal-400 disabled:bg-gray-400 disabled:text-gray-300 disabled:cursor-not-allowed tracking-wide`}
       >
         Start Game
         <Tooltip

@@ -48,7 +48,7 @@ const variantStyles = {
         disabled={!canvasReady}
         onClick={handleWebcamToggle}
       >
-        {!videoPlaying ? "Webcam On" : "Quit Game 🚫"}
+        {!videoPlaying ? "Webcam On" : "Webcam Off"}
       </button>
       {/* Hidden video element for capturing webcam stream */}
       <video
