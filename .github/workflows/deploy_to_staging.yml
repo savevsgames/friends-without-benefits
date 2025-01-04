@@ -28,7 +28,7 @@ jobs:
           curl "$STAGING_WEBHOOK"
 
       - name: Run e2e Staging Tests
-        run: echo "e2e Testing Starts Here"
+        run: echo "e2e Testing on the Deployed Site Starts Here"
 
       - name: Run Component Tests
         run: echo "Component Testing on the Deployed Site Starts Here"
