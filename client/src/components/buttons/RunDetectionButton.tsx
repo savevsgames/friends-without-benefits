@@ -6,12 +6,13 @@ import { Tooltip } from "react-tooltip";
 const RunDetectionButton = () => {
   const canvasReady = useGameStore((state) => state.canvasReady);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
-  const setGameSate = useGameStore((state) => state.setGameState);
+  // const setGameSate = useGameStore((state) => state.setGameState);
 
   const handleDetection = () => {
     console.log(`Running Detection on ${currentMediaType}...`);
     if (currentMediaType) runDetectionOnCurrentMedia();
-    setGameSate("playing");
+    // Removed setting game state once detection turns on.
+    // Abstacting start game and start detection logic
   };
 
   return (

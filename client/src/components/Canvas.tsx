@@ -68,7 +68,7 @@ export const Canvas = () => {
       console.log("Game State is Setup");
     } else if (gameState === "playing") {
       console.log("Game State is Playing");
-    } else if (gameState === "gameover") {
+    } else if (gameState === "complete") {
       console.log("Game State is Game Over");
     } else {
       console.log("Game State is Unknown");

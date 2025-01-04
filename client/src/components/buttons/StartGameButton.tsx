@@ -1,51 +1,52 @@
-import { useGameStore } from "@/store";
-import { toggleWebcam } from "@/utils/model-utils";
-import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
-import ReactModal from "react-modal";
+import React from "react";
+import { useMultiplayerStore } from "@/store";
 
-// this is a combo between the LoadWebcamButton and RunDetectionButton
+const StartGameButton: React.FC = () => {
+  const playerId = useMultiplayerStore((state) => state.playerId) || "";
+  const players = useMultiplayerStore((state) => state.players);
+  const setPlayerReady = useMultiplayerStore((state) => state.setPlayerReady);
 
-const StartGameButton = () => {
-  const setCurrentMediaType = useGameStore(
-    (state) => state.setCurrentMediaType
-  );
-  const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
-  const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
-  const canvasReady = useGameStore((state) => state.canvasReady);
-  //   const currentMediaType = useGameStore((state) => state.currentMediaType);
+  const isReady = players[playerId]?.isReady || false;
 
-  const handleLoadCameraAndStartGame = async () => {
-    console.log("Loading webcam...");
-    const webcamOn = await toggleWebcam(true);
+  console.log("Button [StartGameButton] => isReady before click: ", isReady);
 
-    if (webcamOn) {
-      setCurrentMediaType("webcam");
-      setCurrentMediaRef("webcam-stream");
-      setVideoPlaying(true);
-      console.log("Webcam is enabled. Running detection...");
-      //   if (currentMediaType) {
-      //     runDetectionOnCurrentMedia();
-      //   }
-      runDetectionOnCurrentMedia(); // starts detection right after the webcom is confirmed on
-    } else {
-      console.error("Failed to load webcam stream.");
-      <ReactModal>Failed to Load your camera! 💔</ReactModal>;
-      setCurrentMediaType(null);
-      setCurrentMediaRef(null);
-      setVideoPlaying(false);
-    }
+  const handleReadyClick = () => {
+    // PlayerId is guaranteed to be defined here in our app flow
+    // This will go back to the store and update the players object:
+    /**
+     * players: {
+        ...state.players,
+        [id]: { ...state.players[id], isReady: ready },
+      },
+     */
+
+    setPlayerReady(playerId!, !isReady);
+    console.log("Button [StartGameButton] => isReady after click: ", isReady);
   };
 
   return (
-    <button
-      onClick={handleLoadCameraAndStartGame}
-      disabled={!canvasReady}
-      name="load-and-start"
-      id="load-and-start"
-      className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-800 shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto"
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      Start Game
-    </button>
+      <button
+        style={{
+          backgroundColor: "blue",
+          color: "white",
+          fontSize: "1.5rem",
+          fontWeight: "bold",
+          zIndex: 3,
+        }}
+        onClick={handleReadyClick}
+        className={`btn ${isReady ? "btn-disabled" : "btn-primary"}`}
+      >
+        {isReady ? "Waiting for other players..." : "I'm ready to go!"}
+      </button>
+    </div>
   );
 };
 
