@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
 import StartGameButton from "./buttons/StartGameButton";
 import Countdown from "./Countdown";
-import ReactModal from "react-modal";
 
 const ScavengerGame = () => {
   const startCountdown = useMultiplayerStore((state) => state.startCountdown);
