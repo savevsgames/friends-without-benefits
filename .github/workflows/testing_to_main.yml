@@ -9,14 +9,14 @@ on:
       - "main"
 
 jobs:
-  create-pr:
+  validate-branch:
     runs-on: ubuntu-latest
     steps:
       - name: Ensure PR comes from testing
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event.pull_request.head.ref != 'testing' }}
         run: |
-          if [[ "${{ github.event.pull_request.base.ref }}" != "testing" ]]; then
-              echo "This PR is not from testing, exiting..."
-              exit 1
-          fi
-          echo "This PR is from testing, continuing..."
+          echo "❌ This PR is not coming from the 'testing' branch. Exiting..."
+          exit 1
+      - name: Confirm Valid PR Source
+        run: |
+          echo "✅ This PR is correctly coming from the 'testing' branch. Continuing..."
