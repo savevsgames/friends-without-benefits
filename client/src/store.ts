@@ -46,7 +46,11 @@ export interface IGameState {
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
-  foundItems: number; //0-5 
+  numFoundItems: number; // 0-5 
+  itemsArr: string[], // items to find
+  foundItemsArr: string[] | null, // Arr to display to users as they find items 
+  timeRemaining: number, // Time in seconds
+  timerId: number | null // Store timer ID
 
   // State Setters
   setGameState: (newState: string) => void;
@@ -56,7 +60,11 @@ export interface IGameState {
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   setActiveDetectionLoop: (iteration: number | null) => void;
   addPlayer: (id: string, player: Player) => void;
-  setFoundItems: (numberFound: number) => void;
+  setNumFoundItems: (numberFound: number) => void;
+  setFoundItemsArr: (index: number) => void;
+  startTimer: () => void;
+  stopTimer: () => void;
+  resetGame: () => void;
 
   // Socket IO / Zustand Actions to set opponent player state
   outgoingUpdate: (updates: Partial<IGameState>) => void;
@@ -64,14 +72,18 @@ export interface IGameState {
 }
 
 // Using set() to update the store state for key-value pairs
-export const useGameStore = create<IGameState>((set) => ({
+export const useGameStore = create<IGameState>((set, get) => ({
   gameState: "setup",
   canvasReady: false,
   videoPlaying: false,
   currentMediaRef: null,
   currentMediaType: null,
   activeDetectionLoop: null,
-  foundItems: 0,
+  numFoundItems: 0,
+  itemsArr: ["Fork", "Headphones", "Mug", "Remote", "Toothbrush"],
+  foundItemsArr:[],
+  timeRemaining: 120,
+  timerId: null,
   players: {},
   setGameState: (newState) => {
     set({ gameState: newState });
@@ -91,8 +103,69 @@ export const useGameStore = create<IGameState>((set) => ({
   setActiveDetectionLoop: (iteration) => {
     set({ activeDetectionLoop: iteration });
   },
-  setFoundItems: (numberFound)  => {
-    set({ foundItems: numberFound });
+  setNumFoundItems: (numberFound)  => {
+    set({ numFoundItems: numberFound });
+  },
+  setFoundItemsArr: (index) => {
+    set((state) => {
+      const newArr = [...(state.foundItemsArr || []), state.itemsArr[index]];
+      if (newArr.length === 5) {
+        return { foundItemsArr: [] };
+      }
+      return { foundItemsArr: newArr };
+    });  
+  },
+  startTimer: () => {
+    const currentTimer = get().timerId;
+    if(currentTimer !== null) {
+        window.clearTimeout(currentTimer);
+    }
+
+    set({ timeRemaining: 120 });
+    
+    const intervalId = window.setInterval(() => {
+        set((state) => {
+            const newTime = state.timeRemaining - 1;
+            
+            if (newTime <= 0) {
+                
+                window.clearInterval(intervalId);
+                return {
+                    timeRemaining: 0,
+                    timerId: null,
+                    gameState: "gameover",
+                    numFoundItems: 0,
+                    foundItemsArr: [],
+                };
+            }
+            
+            return { timeRemaining: newTime };
+        });
+    }, 1000);
+    
+    set({ timerId: intervalId });
+},
+  stopTimer: () => {
+    set((state) => {
+      if (state.timerId !== null) {
+        window.clearTimeout(state.timerId);
+      }
+      return { timerId: null };
+    });
+  },
+  resetGame: () => {
+    set((state) => {
+      if (state.timerId !== null) {
+        window.clearTimeout(state.timerId);
+      }
+      return {
+        timeRemaining: 120,
+        timerId: null,
+        gameState: "setup",
+        numFoundItems: 0,
+        foundItemsArr: [],
+      }
+    })
   },
   addPlayer: (id, player) => {
     set((state) => ({
