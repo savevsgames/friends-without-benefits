@@ -22,6 +22,12 @@ const StartGameButton: React.FC = () => {
 
   return (
     <button
+      style={{
+        backgroundColor: "blue",
+        color: "white",
+        fontSize: "2rem",
+        fontWeight: "bold",
+      }}
       onClick={handleReadyClick}
       className={`btn ${isReady ? "btn-disabled" : "btn-primary"}`}
     >

@@ -4,11 +4,11 @@ import { useMultiplayerStore } from "@/store";
 import StartGameButton from "./buttons/StartGameButton";
 
 const ScavengerGame = () => {
-  //   const startCountdown = useMultiplayerStore((state) => state.startCountdown);
+  const startCountdown = useMultiplayerStore((state) => state.startCountdown);
   const socket = useMultiplayerStore((state) => state.socket);
-  //   const updatePlayerReadyStates = useMultiplayerStore(
-  //     (state) => state.updatePlayerReadyStates
-  //   );
+  const updatePlayerReadyStates = useMultiplayerStore(
+    (state) => state.updatePlayerReadyStates
+  );
 
   const gameState = useGameStore((state) => state.gameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
@@ -31,8 +31,15 @@ const ScavengerGame = () => {
 
   useEffect(() => {
     if (socket) {
-      console.log("socket testing for start game button: ", socket);
-      // This will update the updateReadyStates and startCountdown in the store if there is a socket
+      // console.log("socket testing for start game button: ", socket);
+      // Server sends the countdown to start the game
+      socket.on("startCountdown", (countdown: number) => {
+        console.log("startCountdown event received");
+        startCountdown(countdown);
+      });
+      // When the game is multiplayer, we need to update the ready
+      // states of the players in the store when the server sends an update
+      socket.on("updateReadyStates", updatePlayerReadyStates);
     }
   }, []);
 
