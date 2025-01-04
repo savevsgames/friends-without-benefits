@@ -55,7 +55,12 @@ const startApolloServer = async () => {
   // SocketId -> PeerJS ID mappings for Socket.IO to track connected users
   const connectedUsers = new Map<string, string>();
 
-  // Track ready states for players
+  /**
+   * Track ready states for players using playerReady and updateReadyStates
+   * @type Record<string, boolean>
+   * string represents id, boolean is their useMultiplayerGameStore
+   * players.Player.isReady state
+   */
   const playerReadyStates: Record<string, boolean> = {};
 
   // SOCKET.IO

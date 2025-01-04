@@ -19,7 +19,7 @@ const ScavengerGame = () => {
   const numFoundItems = useGameStore((state) => state.numFoundItems);
   const itemsArr = useGameStore((state) => state.itemsArr);
   const timeRemaining = useGameStore((state) => state.timeRemaining);
-  //   const countdown = useGameStore((state) => state.countdown);
+  const countdown = useGameStore((state) => state.countdown);
   const startTimer = useGameStore((state) => state.startTimer);
   const resetGame = useGameStore((state) => state.resetGame);
 
@@ -40,8 +40,13 @@ const ScavengerGame = () => {
       // When the game is multiplayer, we need to update the ready
       // states of the players in the store when the server sends an update
       socket.on("updateReadyStates", updatePlayerReadyStates);
+
+      return () => {
+        socket.off("startCountdown");
+        socket.off("updateReadyStates");
+      };
     }
-  }, []);
+  }, [socket, startCountdown, updatePlayerReadyStates]);
 
   useEffect(() => {
     if (numFoundItems >= 5 || timeRemaining === 0) {
@@ -51,13 +56,30 @@ const ScavengerGame = () => {
 
   useEffect(() => {
     if (
-      gameState === "playing" &&
+      gameState === "countdown" &&
       canvasReady &&
       currentMediaType !== null &&
-      activeDetectionLoop !== null
+      activeDetectionLoop !== null &&
+      countdown !== null
     ) {
-      console.log("All conditions met");
-      startTimer();
+      console.log("All conditions met. Starting the countdown timer...");
+      // startTimer();
+      const countdownTimer = setInterval(() => {
+        // Subtract 1 from store countdown every 1 s
+        useGameStore
+          .getState()
+          .setCountdown((prev: number | null) =>
+            prev !== null ? prev - 1 : null
+          );
+      }, 1000);
+
+      if (countdown === 0) {
+        console.log("Countdown ended...");
+        clearInterval(countdownTimer);
+        startTimer();
+      }
+
+      return () => clearInterval(countdownTimer);
     }
   }, [
     gameState,
@@ -65,6 +87,7 @@ const ScavengerGame = () => {
     currentMediaType,
     activeDetectionLoop,
     startTimer,
+    countdown,
   ]);
 
   if (
@@ -72,30 +95,50 @@ const ScavengerGame = () => {
     currentMediaType === null ||
     activeDetectionLoop === null
   ) {
-    return <div>Game components not loaded yet / detection not running...</div>;
-  } else if (
-    canvasReady &&
-    currentMediaType !== null &&
-    activeDetectionLoop !== null &&
-    gameState === "setup"
-  ) {
     return (
-      <div>
-        <StartGameButton />
+      <div
+        style={{
+          backgroundColor: "blue",
+          color: "white",
+          fontSize: "1.5rem",
+          fontWeight: "bold",
+          margin: "auto",
+          padding: "2rem",
+        }}
+      >
+        Game components not loaded yet / detection not running...
       </div>
     );
   }
 
   return (
     <div className="game-container">
-      {gameState === "playing" ? (
-        <div>
-          <h1>Time: {formatTime(timeRemaining)}</h1>
-          <h1>Find: {itemsArr[numFoundItems] || "Scavenge Complete!"}</h1>
-        </div>
-      ) : (
-        <div>Game not started</div>
-      )}
+      <div className="game-container">
+        {/* gameState of "setup" */}
+        {gameState === "setup" && <StartGameButton />}
+
+        {/* gameState of "countdown" */}
+        {gameState === "countdown" && countdown !== null && (
+          <div>
+            <h1 className="countdown-number">{countdown}</h1>
+          </div>
+        )}
+
+        {/* gameState of "playing" */}
+        {gameState === "playing" && (
+          <div>
+            <h1>Time: {timeRemaining}</h1>
+            <h1>Find: {itemsArr[numFoundItems] || "Scavenge Complete!"}</h1>
+          </div>
+        )}
+        {gameState === "complete" && (
+          <div>
+            <h1>Game Over</h1>
+            <p>YOU WON OR LOST & FOUND {itemsArr[numFoundItems]} ITEMS!</p>
+            <p>YOU HAD {timeRemaining} time left!</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
