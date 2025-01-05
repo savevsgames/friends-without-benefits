@@ -1,124 +1,241 @@
 import { useState } from "react";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
-import {
-  FaBars,
-  FaTimes,
-  FaPlay,
-  FaPause,
-  FaVideo,
-  FaRocket,
-  FaHatWizard,
-  FaClock,
-} from "react-icons/fa";
+import { FaBars, FaTimes, FaHome, FaHourglassEnd } from "react-icons/fa";
 import { IoLogoGameControllerA } from "react-icons/io";
-import { MdDashboard } from "react-icons/md";
+import { MdLeaderboard, MdEmojiObjects } from "react-icons/md";
 import { FaPeopleGroup } from "react-icons/fa6";
-import { FaImage } from "react-icons/fa";
-import { FaHourglassStart } from "react-icons/fa";
-import { RiWebcamFill } from "react-icons/ri";
-import LoadImageButton from "./buttons/LoadImageButton";
+
+import { SlMagnifier } from "react-icons/sl";
+
+// import RunDetectionButton from "./buttons/RunDetectionButton";
 import MultiPlayerModal from "./MultiplayerModal";
-import PauseVideoButton from "./buttons/PauseVideoButton";
-import RunDetectionButton from "./buttons/RunDetectionButton";
-import PlayStopVideoButton from "./buttons/PlayStopVideoButton";
-import LoadWebcamButton from "./buttons/LoadWebcamButton";
-import LoadVideoButton from "./buttons/LoadVideoButton";
-// import { useUserSession } from "@/store";
 import { useIsDetectionActive } from "@/hooks/useIsDetectionActive";
+import { useGameStore, useUserSession } from "@/store";
+import { NavLink } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
 
 const SideBar = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const user = useUserSession((state) => state.user?.data);
+  const upperUsername = user?.username.toUpperCase();
+  const singlePlayer = useGameStore((state) => state.isSingle);
+  const multiPlayer = useGameStore((state) => state.isMulti);
+  const numFoundItems = useGameStore((state) => state.numFoundItems);
+  const itemsArr = useGameStore((state) => state.itemsArr);
+  const timeRemaining = useGameStore((state) => state.timeRemaining);
+  const gameState = useGameStore((state) => state.gameState);
 
-  // const user = useUserSession((state) => state.user)
   const sidebarIcon = () => {
-    if (isCollapsed) {
-      return <FaBars size={22} />;
-    } else {
-      return <FaTimes size={22} />;
-    }
+    return isCollapsed ? <FaBars size={22} /> : <FaTimes size={22} />;
   };
 
-  // A hook to check if the detection loop is active and display with/near the button to detect
   const isDetectionActive = useIsDetectionActive();
-
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
   return (
-    <>
-      <Sidebar
-        collapsed={isCollapsed}
-        className="bg-zinc-100  dark:bg-teal-950 h-screen absolute top-0 left-0 z-30"
-      >
-        {/* Hamburger Button to open the sidebar or X button to close it */}
-        <div className="flex justify-center py-4">
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 bg-transparent rounded-md focus:outline-none"
-          >
-            {sidebarIcon()}
-          </button>
-        </div>
-        <Menu>
-          {/* user profile picture and username */}
-          <div
-            className={`transition-opacity duration-300 ${
-              isCollapsed ? "hidden" : "block"
-            }`}
-          >
-            <div className="flex flex-col items-center mb-3">
-              <img
-                alt="user profile"
-                src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
-                className="w-1/2 h-1/2 cursor-pointer rounded-full mb-2"
-              ></img>
-              <h1 className="my-2 text-center">User Username</h1>
-            </div>
+    <Sidebar
+      collapsed={isCollapsed}
+      className="bg-zinc-100 dark:bg-teal-950 h-screen absolute top-0 left-0 z-30"
+    >
+      {/* Hamburger Button */}
+      <div className="flex justify-center py-4">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-2 bg-transparent rounded-md focus:outline-none"
+          aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
+        >
+          {sidebarIcon()}
+        </button>
+      </div>
+      <Menu>
+        {/* User Info */}
+        {!isCollapsed && (
+          <div className="flex flex-col items-center mb-3">
+            <img
+              alt="user profile"
+              src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
+              className="w-1/2 h-1/2 cursor-pointer rounded-full mb-2"
+            />
+            <h1 className="my-2 text-center font-semibold">
+              HELLO {upperUsername}!
+            </h1>
           </div>
-
-          {/* Control Panel SubMenu */}
-          <SubMenu
-            label="Control Panel"
-            icon={<IoLogoGameControllerA size={26} />}
-            className="z-21"
+        )}
+        {/* back to home */}
+        <MenuItem
+          icon={
+            <FaHome
+              size={24}
+              data-tooltip-id="hometooltip"
+              onClick={() => (window.location.href = "/home")}
+              className="cursor-pointer"
+            />
+          }
+        >
+          <NavLink
+            to="/home"
+            className="flex items-center px-4 py-2 rounded-md"
           >
-            <MenuItem icon={<FaImage />}>
-              <LoadImageButton />
-            </MenuItem>
-            <MenuItem icon={<FaPause />}>
-              <PauseVideoButton />
-            </MenuItem>
-            <MenuItem icon={<RiWebcamFill />}>
-              <LoadWebcamButton />
-            </MenuItem>
-            <MenuItem icon={<FaPlay />}>
-              <PlayStopVideoButton />
-            </MenuItem>
-            <MenuItem icon={<FaHourglassStart />}>
-              <RunDetectionButton />
-            </MenuItem>
-            <MenuItem icon={<FaVideo />}>
-              <LoadVideoButton />
-            </MenuItem>
-            <MenuItem>
+            Home
+          </NavLink>
+          <Tooltip
+            id="hometooltip"
+            place="bottom"
+            className="font-thin text-xs"
+          >
+            to Home Page
+          </Tooltip>
+        </MenuItem>
+        {/* Game Control SubMenu */}
+        {singlePlayer && (
+          <SubMenu
+            label="Game Control"
+            icon={<IoLogoGameControllerA size={26} />}
+          >
+            <MenuItem className="z-60">
               <div>
-                Detection: {isDetectionActive ? "Active 🟢" : "Stopped 🔴"}
+                Detection: {isDetectionActive ? "Active 🟢" : "Inactive 🔴"}
               </div>
             </MenuItem>
+            {/* <MenuItem icon={<FaHourglassStart />}>
+              <RunDetectionButton />
+            </MenuItem> */}
           </SubMenu>
+        )}
 
-          {/* Dashboard SubMenu */}
-          <SubMenu label="Dashboard" icon={<MdDashboard size={24} />}>
-            <MenuItem icon={<FaRocket />}>ItemsFound: 2/5</MenuItem>
-            <MenuItem icon={<FaHatWizard />}>Items to find: Hat</MenuItem>
-            <MenuItem icon={<FaClock />}>Game Timer: </MenuItem>
-          </SubMenu>
+        {/* stats section */}
+        <div className="my-2">
+          <div
+            className={`flex items-center underline ${
+              isCollapsed ? "justify-center" : "justify-center"
+            } mb-2`}
+          >
+            <span
+              className={`text-sm text-center font-semibold text-gray-750 dark:text-gray-300 ${
+                isCollapsed ? "inline" : "block"
+              }`}
+            >
+              Stats
+            </span>
+          </div>
+          <Menu
+            className={`flex items-center pb-3 pt-1 ${
+              isCollapsed ? "flex-col gap-1" : "flex-row gap-2"
+            }`}
+          >
+            {/* Time Remaining */}
+            <MenuItem
+              className={`flex items-center pb-3 pt-1 ${
+                isCollapsed ? "flex-col gap-1" : "flex-row gap-2"
+              }`}
+            >
+              <FaHourglassEnd size={22} />
+              <span
+                className={`${
+                  isCollapsed
+                    ? "text-center text-sm"
+                    : "text-base font-medium text-gray-500 dark:text-gray-300"
+                }`}
+              >
+                {formatTime(timeRemaining)}
+              </span>
+            </MenuItem>
 
-          {/* Single Menu Item */}
+            {/* Items Found */}
+            <MenuItem
+              className={`flex items-center w-full pb-3 pt-1  ${
+                isCollapsed
+                  ? "flex-col gap-1 justify-center"
+                  : "flex-row gap-2 justify-start"
+              }`}
+            >
+              <MdEmojiObjects size={24} />
+              <span
+                className={`${
+                  isCollapsed
+                    ? "text-center text-sm font-normal"
+                    : "text-left text-base font-medium text-gray-500 dark:text-gray-300"
+                }`}
+              >
+                {isCollapsed
+                  ? `${numFoundItems} / ${itemsArr.length}`
+                  : `Items Found: ${numFoundItems} / ${itemsArr.length}`}
+              </span>
+            </MenuItem>
+            <MenuItem>
+              <SlMagnifier size={22} />
+              <span
+                className={`${
+                  isCollapsed
+                    ? "text-center text-sm"
+                    : "text-base text-center font-medium text-gray-500 dark:text-gray-300"
+                }`}
+              >
+                {gameState === "playing" ? `${itemsArr[numFoundItems]}` : "?"}
+              </span>
+            </MenuItem>
+          </Menu>
+        </div>
 
+        {/* pages section */}
+        <div className="my-2">
+          <div
+            className={`flex items-center underline ${
+              isCollapsed ? "justify-center" : "justify-center"
+            } mb-2`}
+          >
+            <span
+              className={`text-sm text-center font-semibold text-gray-750 dark:text-gray-300 ${
+                isCollapsed ? "inline" : "block"
+              }`}
+            >
+              Pages
+            </span>
+          </div>
+          <Menu>
+            <MenuItem icon={<IoLogoGameControllerA size={26} color="teal" />}>
+              <NavLink
+                to="/game"
+                className={({ isActive }) =>
+                  `flex items-center px-4 py-2 rounded-md ${
+                    isActive
+                      ? "bg-teal-100 text-neutral-950 font-semibold"
+                      : "text-gray-700 hover:bg-gray-200"
+                  }`
+                }
+              >
+                Gameboard
+              </NavLink>
+            </MenuItem>
+
+            <MenuItem icon={<MdLeaderboard size={24} />}>
+              <NavLink
+                to="/leaderboard"
+                className={({ isActive }) =>
+                  `flex items-center px-4 py-2 rounded-md ${
+                    isActive
+                      ? "bg-teal-700 text-white"
+                      : "text-gray-700 hover:bg-gray-200"
+                  }`
+                }
+              >
+                Leaderboard
+              </NavLink>
+            </MenuItem>
+          </Menu>
+        </div>
+
+        {/* Multiplayer Manager */}
+        {multiPlayer && (
           <MenuItem icon={<FaPeopleGroup size={24} />}>
             <MultiPlayerModal />
           </MenuItem>
-        </Menu>
-      </Sidebar>
-    </>
+        )}
+      </Menu>
+    </Sidebar>
   );
 };
 

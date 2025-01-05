@@ -225,8 +225,15 @@ export const disableWebcam = (): void => {
  */
 export const toggleWebcam = async (isEnabled: boolean): Promise<boolean> => {
   if (isEnabled) {
-    const stream = await enableWebcam();
-    return stream !== null;
+    const isSinglePlayer = useGameStore.getState().isSingle;
+    if (isSinglePlayer) {
+      const stream = await enableWebcam();
+      return stream !== null;
+    } else {
+      // Multiplayer Game
+      const stream = await enableWebcam(true);
+      return stream !== null;
+    }
   } else {
     disableWebcam();
     return false;
@@ -251,7 +258,6 @@ export const colorForLabels = (className: string) => {
   //
   return colors[className] || colors.default;
 };
-
 
 export const drawBoundingBoxes = (predictions: Prediction[]): void => {
   const canvasElement = document.getElementById(
@@ -501,7 +507,6 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
   }
   await detectFrame();
 };
-
 
 /**
  * Stop detection and clear canvas

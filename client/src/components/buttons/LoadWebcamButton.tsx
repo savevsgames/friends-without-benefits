@@ -1,23 +1,12 @@
 import { toggleWebcam } from "@/utils/model-utils";
 import { useGameStore } from "@/store";
 
-const LoadWebcamButton = () => {
-  // Button Styling - TEMPORARY STYLING BEGINS
-  // const testButtons = {
-  //   padding: "0.25em 0.5em",
-  //   margin: "0.25em",
-  //   border: "3px solid #333",
-  //   boxShadow: "0 0 0.5em #333",
-  //   borderRadius: "0.25em",
-  //   backgroundColor: "#10343D",
-  //   color: "#f8f8f8",
-  //   textDecoration: "none",
-  //   fontWeight: "bold",
-  //   cursor: "pointer",
-  //   width: "100%",
-  //   height: "100%",
-  // };
-  // END OF TEMPORARY STYLING
+const LoadWebcamButton = ({
+
+}: {
+  // variant: "tuto" | "sidebar";
+  // onComplete?: () => void;
+}) => {
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
   );
@@ -46,16 +35,24 @@ const LoadWebcamButton = () => {
     }
   };
 
+  // const variantStyles = {
+  //   tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
+  //   sidebar: "",
+  // };
+
   return (
     <div>
       <button
-        className="bg-teal-50 dark:bg-teal-800 text-teal-900 dark:text-gray-200 font-bold tracking-wide rounded-lg shadow-lg border border-teal-800 dark:border-teal-400 border-l-4 border-l-teal-800 dark:border-l-teal-400 px-2 py-1 sm:px-3 sm:py-2 md:px-3 md:py-2 text-xs sm:text-sm md:text-xs hover:bg-teal-100 dark:hover:bg-teal-700 transition focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 w-full"
+        className="card bg-teal-600 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
         id="enable-webcam"
         name="enable-webcam"
         disabled={!canvasReady}
         onClick={handleWebcamToggle}
       >
-        {!videoPlaying ? "WEBCAM ON 🎦" : "WEBCAM OFF 🚫"}
+        <h2 className="text-2xl font-bold mb-2">
+          {!videoPlaying ? "📸 Turn on Webcam" : "Turn off Webcam"}
+        </h2>
+        <p className="text-sm">Check your camera setup.</p>
       </button>
       {/* Hidden video element for capturing webcam stream */}
       <video
