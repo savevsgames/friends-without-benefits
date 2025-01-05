@@ -7,7 +7,7 @@ import io from "socket.io-client";
 type SocketIOClient = ReturnType<typeof io>;
 
 // Player extends User type with additional game-related properties
-interface Player {
+export interface Player {
   username: string; // Player username displayed in the game
   score: number; // Player's current game score
   avatar?: string; // Player avatar image URL
@@ -39,31 +39,39 @@ export const useModelStore = create<IModelState>((set) => ({
 
 // GAME STORE - SINGLE & MULTIPLAYER
 export interface IGameState {
-  gameState: string; // "setup", "playing", "gameover"
+  gameState: "setup" | "countdown" | "playing" | "complete";
   canvasReady: boolean; // Flag to indicate if the canvas is ready for drawing
   videoPlaying: boolean; // Flag to indicate if the video is playing
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
   players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
-  numFoundItems: number; // 0-5 
-  itemsArr: string[], // items to find
-  foundItemsArr: string[] | null, // Arr to display to users as they find items 
-  timeRemaining: number, // Time in seconds
-  timerId: number | null // Store timer ID
+  isSingle: boolean;
+  isMulti: boolean;
+  numFoundItems: number; // 0-5
+  itemsArr: string[]; // items to find
+  foundItemsArr: string[] | null; // Arr to display to users as they find items
+  timeRemaining: number; // Time in seconds
+  countdown: number | null; // Countdown in seconds
+  timerId: number | null; // Store timer ID
 
   // State Setters
-  setGameState: (newState: string) => void;
+  setGameState: (
+    newState: "setup" | "countdown" | "playing" | "complete"
+  ) => void;
   setCanvasReady: (ready: boolean) => void;
   setVideoPlaying: (playing: boolean) => void;
   setCurrentMediaRef: (ref: string | null) => void;
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   setActiveDetectionLoop: (iteration: number | null) => void;
   addPlayer: (id: string, player: Player) => void;
+  setIsSingle: (value: boolean) => void;
+  setIsMulti: (value: boolean) => void;
   setNumFoundItems: (numberFound: number) => void;
   setFoundItemsArr: (index: number) => void;
   startTimer: () => void;
   stopTimer: () => void;
+  setCountdown: (countdown: number | null) => void;
   resetGame: () => void;
 
   // Socket IO / Zustand Actions to set opponent player state
@@ -81,13 +89,14 @@ export const useGameStore = create<IGameState>((set, get) => ({
   activeDetectionLoop: null,
   numFoundItems: 0,
   itemsArr: ["Fork", "Headphones", "Mug", "Remote", "Toothbrush"],
-  foundItemsArr:[],
+  foundItemsArr: [],
   timeRemaining: 120,
   timerId: null,
+  countdown: null,
   players: {},
-  setGameState: (newState) => {
-    set({ gameState: newState });
-  },
+  isSingle: true,
+  isMulti: false,
+  setGameState: (newState) => set({ gameState: newState }),
   setCanvasReady: (ready) => {
     set({ canvasReady: ready });
   },
@@ -103,7 +112,7 @@ export const useGameStore = create<IGameState>((set, get) => ({
   setActiveDetectionLoop: (iteration) => {
     set({ activeDetectionLoop: iteration });
   },
-  setNumFoundItems: (numberFound)  => {
+  setNumFoundItems: (numberFound) => {
     set({ numFoundItems: numberFound });
   },
   setFoundItemsArr: (index) => {
@@ -113,38 +122,37 @@ export const useGameStore = create<IGameState>((set, get) => ({
         return { foundItemsArr: [] };
       }
       return { foundItemsArr: newArr };
-    });  
+    });
   },
+  setCountdown: (countdown: number | null) => set({ countdown }),
   startTimer: () => {
     const currentTimer = get().timerId;
-    if(currentTimer !== null) {
-        window.clearTimeout(currentTimer);
+    if (currentTimer !== null) {
+      window.clearTimeout(currentTimer);
     }
 
-    set({ timeRemaining: 120 });
-    
+    set({ timeRemaining: 120, gameState: "playing" });
+
     const intervalId = window.setInterval(() => {
-        set((state) => {
-            const newTime = state.timeRemaining - 1;
-            
-            if (newTime <= 0) {
-                
-                window.clearInterval(intervalId);
-                return {
-                    timeRemaining: 0,
-                    timerId: null,
-                    gameState: "gameover",
-                    numFoundItems: 0,
-                    foundItemsArr: [],
-                };
-            }
-            
-            return { timeRemaining: newTime };
-        });
+      set((state) => {
+        const newTime = state.timeRemaining - 1;
+
+        if (newTime <= 1) {
+          window.clearInterval(intervalId);
+          return {
+            timeRemaining: 0,
+            timerId: null,
+            gameState: "complete",
+            numFoundItems: 0,
+            foundItemsArr: [],
+          };
+        }
+        // Since the interval is 1000ms (1 second), we can just subtract 1
+        return { timeRemaining: state.timeRemaining - 1 };
+      });
     }, 1000);
-    
     set({ timerId: intervalId });
-},
+  },
   stopTimer: () => {
     set((state) => {
       if (state.timerId !== null) {
@@ -164,13 +172,20 @@ export const useGameStore = create<IGameState>((set, get) => ({
         gameState: "setup",
         numFoundItems: 0,
         foundItemsArr: [],
-      }
-    })
+        countdown: null,
+      };
+    });
   },
   addPlayer: (id, player) => {
     set((state) => ({
       players: { ...state.players, [id]: player },
     }));
+  },
+  setIsSingle: (value) => {
+    set({ isSingle: value, isMulti: !value });
+  },
+  setIsMulti: (value) => {
+    set({ isMulti: value, isSingle: !value });
   },
   removePlayer: (id: string) => {
     set((state) => {
@@ -222,8 +237,8 @@ export const useAuthStore = create(
     }
   )
 );
-
-type User = {
+// had to do it this way because of the way the decoded is being decoded. 
+interface UserData {
   id: string;
   username: string;
   email: string;
@@ -231,6 +246,11 @@ type User = {
   avatar: string;
   shortestRound: string;
 };
+interface User {
+  data: UserData;
+  iat?: number;
+  exp?: number
+}
 
 type SessionState = {
   user: User | null;
@@ -303,6 +323,9 @@ export interface IMultiplayerState {
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
   setWebcamEnabled: (enabled: boolean) => void;
+  setPlayerReady: (id: string, ready: boolean) => void;
+  updatePlayerReadyStates: (readyStates: Record<string, boolean>) => void;
+  startCountdown: (countdown: number) => void;
   addChatMessage: (message: { sender: string; message: string }) => void;
   setInviteLink: (link: string) => void;
   setGameStartTime: (time: number) => void;
@@ -319,6 +342,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   roomId: null,
   isConnected: false,
   isHost: false,
+  playerReadyStates: {},
   webcamEnabled: false,
   chatMessages: [],
   gameStartTime: null,
@@ -383,5 +407,41 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   incomingUpdate: (updates) => {
     set((state) => ({ ...state, ...updates }));
     console.log("📥 Incoming Multiplayer Store update:", updates);
+  },
+  // TODO:
+  // This setter can also be used to set more Player properties for the
+  // multiplayer game like avatar, itemsFound, etc.
+  setPlayerReady: (id: string, ready: boolean) => {
+    set((state) => ({
+      players: {
+        ...state.players,
+        [id]: { ...state.players[id], isReady: ready },
+      },
+    }));
+    // use the player's socket to emit the playerReady event
+    const socket = useMultiplayerStore.getState().socket;
+    socket?.emit("playerReady", { playerId: id });
+  },
+  updatePlayerReadyStates: (readyStates: Record<string, boolean>) => {
+    set((state) => {
+      // Update the ready state for player with [id:string] sent from the server
+      // when allPlayersReady is true => start the countdown
+      const updatedPlayers = { ...state.players };
+      for (const id in readyStates) {
+        if (updatedPlayers[id]) {
+          updatedPlayers[id].isReady = readyStates[id];
+        }
+      }
+      return { players: updatedPlayers };
+    });
+  },
+  // Countdown sync for multiplayer games
+  startCountdown: (countdown: number) => {
+    // Access the gameStore to set the countdown
+    const setGameState = useGameStore.getState().setGameState;
+    const setCountdown = useGameStore.getState().setCountdown;
+    // This triggers the socket io listener in the server to
+    setGameState("countdown");
+    setCountdown(countdown);
   },
 }));

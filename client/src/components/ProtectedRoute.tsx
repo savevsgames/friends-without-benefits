@@ -13,7 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   if (!loggedIn) {
     return <Navigate to="/login" />;
   }
-  // ekse render the protected page
+  // else render the protected page
   return children;
 };
 

@@ -37,8 +37,13 @@ jobs:
           # WebHook to trigger deployment to Render Staging Environment
           curl "$STAGING_WEBHOOK"
 
-      - name: Run e2e Staging Tests
-        run: echo "e2e Testing on the Deployed Site Starts Here"
+      - name: Wait for Deployment
+        run: sleep 180s
+
+      - name: Run Cypress E2E Tests
+        run: npx cypress run --e2e
+        env:
+          CYPRESS_STAGING_BASE_URL: https://friends-without-benefits-1.onrender.com
 
       - name: Run Component Tests
         run: echo "Component Testing on the Deployed Site Starts Here"

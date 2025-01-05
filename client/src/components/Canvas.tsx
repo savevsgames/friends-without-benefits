@@ -3,7 +3,10 @@ import { useGameStore } from "../store"; // Import Zustand store
 import MultiplayerChat from "./MultiplayerChat";
 import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
 import ScavengerGame from "./ScavengerGameLogic";
-// import GameStoreLiveFeed from "./GameStoreLiveFeed";
+import GameStates from "./GameStates.tsx";
+import ControlPanel from "./ControlPanel.tsx";
+import TutoModal from "./TutoModal.tsx";
+import ChoiceScreen from "./ChoiceScreen.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -12,6 +15,51 @@ export const Canvas = () => {
 
   const [welcomeImageLoaded, setWelcomeImageLoaded] = useState(false);
 
+  const singlePlayer = useGameStore((state) => state.isSingle);
+
+  const multiPlayer = useGameStore((state) => state.isMulti);
+  // show choices modal
+  const [showChoices, setShowChoices] = useState(true);
+  const [showTuto, setShowTuto] = useState(false); // Controls Tutorial modal visibility
+  // manage tutorial steps
+
+  const handleStartTuto = () => {
+    setTutorialStep(1);
+    setShowChoices(false);
+    setShowTuto(true);
+  };
+
+  const handleTurnOnCamera = () => {
+    console.log("Camera turned on!");
+  };
+  const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
+  // Tutorial modal content
+  const tutorialContent = [
+    "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
+    "🧩 Solve the riddle: A riddle will appear on the screen. Solve it to identify the item you need to find. Let your detective skills shine!",
+    "⏳ Watch the clock:Tick-tock! Keep an eye on the riddle timer. Time is precious and every second counts!",
+    "🚀 Start the game: Ready, set, go! Click 'Start Game' on the main menu to kick off the countdown",
+    "🕵️‍♂️ Begin the Hunt: Let the Scavenger Hunt begin! Search for items, solve riddles, and HAVE FUN!",
+  ];
+  // function to handle the tutorial once the single player selection is established
+  // Trigger tutorial when single-player is selected
+
+
+  const handleNextStep = () => {
+    if (tutorialStep < tutorialContent.length) {
+      setTutorialStep((prev) => prev + 1);
+    } else {
+      setTutorialStep(0);
+      setShowChoices(true);
+      setShowTuto(false) // End the tutorial
+    }
+  };
+  // handle the skip tuto
+  const handleSkipTuto = () => {
+    setTutorialStep(0);
+    setShowChoices(true);
+    setShowTuto(false)
+  };
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
     if (videoPlaying) {
@@ -33,7 +81,7 @@ export const Canvas = () => {
       console.log("Game State is Setup");
     } else if (gameState === "playing") {
       console.log("Game State is Playing");
-    } else if (gameState === "gameover") {
+    } else if (gameState === "complete") {
       console.log("Game State is Game Over");
     } else {
       console.log("Game State is Unknown");
@@ -89,7 +137,7 @@ export const Canvas = () => {
 
           context.fillStyle = "black";
           context.font = "20px Arial";
-          context.fillText("SCAVENGER HUNT 2025", 10, 30);
+          // context.fillText("SCAVENGER HUNT 2025", 10, 30);
           context.globalAlpha = 1; // Reset transparency
         }
       }
@@ -174,27 +222,53 @@ export const Canvas = () => {
         flexDirection: "row",
         alignItems: "stretch",
         minWidth: "300px",
-        minHeight: "300px",
+        height: "calc(100vh-64px)",
       }}
     >
+      <ChoiceScreen
+        isOpen={showChoices}
+        onClose={() => setShowChoices(false)}
+        onStartTuto={handleStartTuto}
+        onTurnOnCamera={handleTurnOnCamera}
+      />
+      {/* tutorial modal */}
+      <TutoModal
+        isOpen={showTuto}
+        content={tutorialContent}
+        currentStep={tutorialStep - 1}
+        onNext={handleNextStep}
+        onSkip={handleSkipTuto}
+        isLastStep={tutorialStep === tutorialContent.length}
+      />
       <div
         id="canvas-container"
-        className="relative w-full"
-        style={{ overflow: "hidden", maxWidth: "60vw", maxHeight: "90vh" }}
+        className="relative w-full h-full"
+        style={{
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          maxWidth: singlePlayer ? "100vw" : "60vw",
+          maxHeight: singlePlayer ? "100vh" : "90vh",
+          flex: singlePlayer ? "1 1 auto" : "initial",
+        }}
       >
         <canvas
           id="canvas-main"
           ref={canvasRef}
           style={{
             display: "block",
-            position: "absolute",
+            // position: "absolute",
             top: "0",
             left: "0",
             width: "100%",
-            height: "auto",
+            height: "100%",
             zIndex: 10,
           }}
         ></canvas>
+        <ControlPanel />
+        <GameStates />
+        <ScavengerGame />
+
         <video
           id="video-output"
           style={{
@@ -205,6 +279,7 @@ export const Canvas = () => {
             width: "100%",
             height: "auto",
             zIndex: 2,
+            objectFit: "contain",
           }}
           playsInline
           muted
@@ -220,6 +295,7 @@ export const Canvas = () => {
             width: "100%",
             height: "auto",
             zIndex: 1,
+            objectFit: "contain",
           }}
           crossOrigin="anonymous"
         />
@@ -235,30 +311,32 @@ export const Canvas = () => {
             zIndex: 100,
           }}
         >
-          <ScavengerGame />
           {/* <GameStoreLiveFeed /> */}
         </div>
       </div>
       {/* New Div Right of Canvas */}
-      <div
-        className="relative z-20 p-4"
-        style={{
-          marginTop: "10px",
-        }}
-      >
+      {multiPlayer && (
         <div
+          className="relative z-20 p-4"
           style={{
-            display: "grid",
-            gridTemplateRows: "2fr 5fr",
-            gap: "2rem",
+            marginTop: "10px",
+            flex: "1 1 auto",
           }}
         >
-          <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
-            <MultiplayerVideoFeed />
+          <div
+            style={{
+              display: "grid",
+              gridTemplateRows: "2fr 5fr",
+              gap: "2rem",
+            }}
+          >
+            <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
+              <MultiplayerVideoFeed />
+            </div>
+            <MultiplayerChat />
           </div>
-          <MultiplayerChat />
         </div>
-      </div>
+      )}
     </div>
   );
 };
