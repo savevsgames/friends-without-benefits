@@ -1,12 +1,12 @@
 import ReactModal from "react-modal";
 import StartGameButton from "./buttons/StartGameButton";
+import LoadWebcamButton from "./buttons/LoadWebcamButton";
 
 const ChoiceScreen = ({
   isOpen,
   onClose,
   onStartTuto,
 
-  onTurnOnCamera,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -41,8 +41,8 @@ const ChoiceScreen = ({
     >
       <div className="flex flex-col items-center justify-center gap-6">
         {/* start game */}
- 
-        <StartGameButton />
+
+        <StartGameButton onClose={onClose} />
 
         {/* start tutorial */}
         <button
@@ -54,13 +54,7 @@ const ChoiceScreen = ({
         </button>
 
         {/* turn on Webcam */}
-        <button
-          onClick={onTurnOnCamera}
-          className="card bg-teal-600 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
-        >
-          <h2 className="text-2xl font-bold mb-2">📸 Turn on Webcam</h2>
-          <p className="text-sm">Check your camera setup.</p>
-        </button>
+        <LoadWebcamButton />
       </div>
     </ReactModal>
   );

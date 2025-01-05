@@ -5,7 +5,7 @@ import { toggleWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
-const StartGameButton: React.FC = () => {
+const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
   const players = useMultiplayerStore((state) => state.players);
   const setPlayerReady = useMultiplayerStore((state) => state.setPlayerReady);
@@ -93,6 +93,9 @@ const StartGameButton: React.FC = () => {
         setGameSate("countdown");
       } else {
         console.log("Player is not ready to start the game.");
+      }
+      if (onClose) {
+        onClose();
       }
     } catch (error) {
       console.error(

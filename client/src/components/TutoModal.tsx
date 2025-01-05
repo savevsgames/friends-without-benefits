@@ -1,7 +1,5 @@
 import React from "react";
 import ReactModal from "react-modal";
-import LoadWebcamButton from "./buttons/LoadWebcamButton";
-import StartGameButton from "./buttons/StartGameButton";
 
 interface TutorialModalProps {
   isOpen: boolean;
@@ -48,29 +46,25 @@ const TutoModal: React.FC<TutorialModalProps> = ({
       <h2 className="text-xl font-bold mb-4">Kick-Off Time!</h2>
       <p className="mb-6">{content[currentStep]}</p>
 
-      {/* tuto buttons: loadCam/ skip / next */}
+      {/* tuto buttons: skip / next */}
       <div className="flex justify-between">
         {/* Shell div for StartGameButton */}
-        <div onClick={onSkip}>
-          <StartGameButton />
-        </div>
-
-        <LoadWebcamButton variant="tuto" />
-
-        {currentStep === 1 ? ( // use webcam button
-          <LoadWebcamButton onComplete={onNext} variant="tuto" />
-        ) : (
-          <button
-            onClick={onNext}
-            className={`px-4 py-2 ${
-              isLastStep
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-teal-600 hover:bg-teal-700"
-            } text-white rounded`}
-          >
-            {isLastStep ? "Finish" : "Next"}
-          </button>
-        )}
+        <button
+          onClick={onSkip}
+          className="bg-teal-600 hover:bg-teal-700 text-white rounded-md px-4 py-2"
+        >
+          Back to Menu
+        </button>
+        <button
+          onClick={onNext}
+          className={`px-4 py-2 ${
+            isLastStep
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-teal-600 hover:bg-teal-700"
+          } text-white rounded`}
+        >
+          {isLastStep ? "Finish" : "Next"}
+        </button>
       </div>
     </ReactModal>
   );

@@ -25,6 +25,7 @@ export const Canvas = () => {
   // manage tutorial steps
 
   const handleStartTuto = () => {
+    setTutorialStep(1);
     setShowChoices(false);
     setShowTuto(true);
   };
@@ -36,28 +37,29 @@ export const Canvas = () => {
   // Tutorial modal content
   const tutorialContent = [
     "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
-    "Use your webcam to scan your surroundings for items to be shown on the screen.",
-    "Keep an eye on the timer and find the items quickly!",
-    "Click 'Start Game' to begin the hunt! Good luck and have fun!",
+    "🧩 Solve the riddle: A riddle will appear on the screen. Solve it to identify the item you need to find. Let your detective skills shine!",
+    "⏳ Watch the clock:Tick-tock! Keep an eye on the riddle timer. Time is precious and every second counts!",
+    "🚀 Start the game: Ready, set, go! Click 'Start Game' on the main menu to kick off the countdown",
+    "🕵️‍♂️ Begin the Hunt: Let the Scavenger Hunt begin! Search for items, solve riddles, and HAVE FUN!",
   ];
   // function to handle the tutorial once the single player selection is established
   // Trigger tutorial when single-player is selected
-  useEffect(() => {
-    if (singlePlayer) {
-      setTutorialStep(1); // Start the tutorial when single-player is activated
-    }
-  }, [singlePlayer]);
+
 
   const handleNextStep = () => {
     if (tutorialStep < tutorialContent.length) {
       setTutorialStep((prev) => prev + 1);
     } else {
-      setTutorialStep(0); // End the tutorial
+      setTutorialStep(0);
+      setShowChoices(true);
+      setShowTuto(false) // End the tutorial
     }
   };
   // handle the skip tuto
   const handleSkipTuto = () => {
     setTutorialStep(0);
+    setShowChoices(true);
+    setShowTuto(false)
   };
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
