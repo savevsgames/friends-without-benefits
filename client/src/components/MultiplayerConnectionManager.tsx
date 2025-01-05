@@ -39,12 +39,14 @@ const MultiplayerConnectionManager: React.FC = () => {
       return;
     }
     console.log("Initializing PeerJS connection...");
+
     // TODO: Check store first to see if peer exists? or disable button if peer exists?
+    const hostName = window.location.hostname;
     const peerJs =
       useMultiplayerStore.getState().peer ||
       new Peer({
-        host: "localhost",
-        port: 3001,
+        host: hostName,
+        port: 5173,
         path: "/peerjs",
       });
     // Make sure local scope syncs with store
@@ -86,7 +88,7 @@ const MultiplayerConnectionManager: React.FC = () => {
 
   const handleCreateMultiplayerRoom = () => {
     // Make sure the webcam is enabled before creating a room with shareMyStream property of TRUE!
-    enableWebcam(true);
+    enableWebcam();
     setCurrentMediaType("webcam");
     // Create a multiplayer game
     const peer = useMultiplayerStore.getState().peer;
@@ -144,7 +146,7 @@ const MultiplayerConnectionManager: React.FC = () => {
     });
 
     conn.on("error", (err) => {
-      console.error("❗ Connection Error:", err);
+      console.error("❗ Connection Error:", err.message);
     });
   };
 
