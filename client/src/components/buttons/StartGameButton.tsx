@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useMultiplayerStore } from "@/store";
 import { useGameStore } from "@/store";
-import { enableWebcam, toggleWebcam } from "@/utils/model-utils";
+import { enableWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
