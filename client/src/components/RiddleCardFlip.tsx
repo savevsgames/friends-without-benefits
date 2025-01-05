@@ -52,7 +52,7 @@ const CardFlipRiddle = ({
 
   return (
     <div
-      className="card-flip-container bottom-5"
+      className="card-flip-container"
       style={{ width: "300px", margin: "0 auto" }}
     >
       <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
