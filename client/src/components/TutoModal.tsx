@@ -1,6 +1,7 @@
 import React from "react";
 import ReactModal from "react-modal";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
+import StartGameButton from "./buttons/StartGameButton";
 
 interface TutorialModalProps {
   isOpen: boolean;
@@ -49,12 +50,12 @@ const TutoModal: React.FC<TutorialModalProps> = ({
 
       {/* tuto buttons: loadCam/ skip / next */}
       <div className="flex justify-between">
-        <button
-          onClick={onSkip}
-          className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
-        >
-          Skip Tutorial
-        </button>
+        {/* Shell div for StartGameButton */}
+        <div onClick={onSkip}>
+          <StartGameButton />
+        </div>
+
+        <LoadWebcamButton variant="tuto" />
 
         {currentStep === 1 ? ( // use webcam button
           <LoadWebcamButton onComplete={onNext} variant="tuto" />
