@@ -4,7 +4,7 @@ import { ChatMessage, ServerContext } from "./socketTypes";
 export const chatMessageManager = (context: ServerContext) => {
   return (socket: Socket, data: ChatMessage) => {
     const { sender, message } = data;
-    // TODO: Add logic to change to username
+    // TODO: Add logic to change to username?
     console.log(`Socket ${socket.id} sent message: ${message}`);
     context.io.emit("chat-message", { sender, message });
   };

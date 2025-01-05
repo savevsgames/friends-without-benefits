@@ -88,7 +88,7 @@ const MultiplayerConnectionManager: React.FC = () => {
 
   const handleCreateMultiplayerRoom = () => {
     // Make sure the webcam is enabled before creating a room with shareMyStream property of TRUE!
-    enableWebcam(true);
+    enableWebcam();
     setCurrentMediaType("webcam");
     // Create a multiplayer game
     const peer = useMultiplayerStore.getState().peer;
@@ -146,7 +146,7 @@ const MultiplayerConnectionManager: React.FC = () => {
     });
 
     conn.on("error", (err) => {
-      console.error("❗ Connection Error:", err);
+      console.error("❗ Connection Error:", err.message);
     });
   };
 
