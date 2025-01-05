@@ -48,6 +48,7 @@ const startApolloServer = async () => {
       context: authenticateToken as any,
     })
   );
+  console.log("✅ Connected GraphQL middleware");
 
   // Create HTTP Server
   const httpServer = createServer(app);
@@ -227,6 +228,7 @@ const startApolloServer = async () => {
     // Start the server on Render
     httpServer.listen(PORT, () => {
       console.log(`✅ Server is running on port ${PORT}`);
+      console.log(`🔎 Local Server: https://localhost:${PORT}`);
       console.log(
         `🛠️ GraphQL: https://friends-without-benefits.onrender.com/graphql`
       );
