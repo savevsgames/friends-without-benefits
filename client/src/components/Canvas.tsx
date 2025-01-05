@@ -6,6 +6,7 @@ import ScavengerGame from "./ScavengerGameLogic";
 import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
+import ChoiceScreen from "./ChoiceScreen.tsx";
 import "../App.css";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
@@ -18,8 +19,19 @@ export const Canvas = () => {
   const singlePlayer = useGameStore((state) => state.isSingle);
 
   const multiPlayer = useGameStore((state) => state.isMulti);
-
+  // show choices modal
+  const [showChoices, setShowChoices] = useState(true);
+  const [showTuto, setShowTuto] = useState(false); // Controls Tutorial modal visibility
   // manage tutorial steps
+
+  const handleStartTuto = () => {
+    setShowChoices(false);
+    setShowTuto(true);
+  };
+
+  const handleTurnOnCamera = () => {
+    console.log("Camera turned on!");
+  };
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
   // Tutorial modal content
   const tutorialContent = [
@@ -212,9 +224,15 @@ export const Canvas = () => {
         height: "calc(100vh-64px)",
       }}
     >
+      <ChoiceScreen
+        isOpen={showChoices}
+        onClose={() => setShowChoices(false)}
+        onStartTuto={handleStartTuto}
+        onTurnOnCamera={handleTurnOnCamera}
+      />
       {/* tutorial modal */}
       <TutoModal
-        isOpen={tutorialStep > 0}
+        isOpen={showTuto}
         content={tutorialContent}
         currentStep={tutorialStep - 1}
         onNext={handleNextStep}

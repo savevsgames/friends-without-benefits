@@ -131,16 +131,12 @@ const StartGameButton: React.FC = () => {
         name="start-game-button"
         disabled={!canvasReady}
         onClick={handleReadyClick}
-        style={{
-          display: "flex",
-          width: "30vw",
-          height: "auto",
-          padding: "1rem 1.5rem",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className="card bg-teal-700 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
       >
-        {isReady ? "Waiting for other players..." : "I'm ready to go!"}
+        <h2 className="text-2xl font-bold mb-2">
+          {isReady ? "Waiting for other players..." : "Start Game!"}
+        </h2>
+        <p className="text-sm">Jump right into the action!</p>
       </button>
     </div>
   );
