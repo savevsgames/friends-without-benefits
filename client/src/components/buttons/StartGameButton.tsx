@@ -1,5 +1,6 @@
 import React from "react";
 import { useMultiplayerStore } from "@/store";
+import { useGameStore } from "@/store";
 
 const StartGameButton: React.FC = () => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
@@ -9,6 +10,14 @@ const StartGameButton: React.FC = () => {
   const isReady = players[playerId]?.isReady || false;
 
   console.log("Button [StartGameButton] => isReady before click: ", isReady);
+
+  const setCurrentMediaType = useGameStore(
+      (state) => state.setCurrentMediaType
+    );
+    const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
+    const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
+    const canvasReady = useGameStore((state) => state.canvasReady);
+    const videoPlaying = useGameStore((state) => state.videoPlaying);
 
   const handleReadyClick = () => {
     // PlayerId is guaranteed to be defined here in our app flow

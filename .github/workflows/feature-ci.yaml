@@ -14,7 +14,7 @@ jobs:
       - name: Ensure PR comes from a feature/** branch
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          if [[ "${{ github.event.pull_request.head.ref }}" != "feature/**" ]]; then
+          if [[ "${{ github.event.pull_request.head.ref }}" != "^feature/" ]]; then
             echo "This PR is not from feature/**, exiting..."
             exit 1
           fi
