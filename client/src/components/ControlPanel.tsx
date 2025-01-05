@@ -28,7 +28,7 @@ export const ControlPanel: React.FC<
     >
 
       {/* detection status */}
-      <div className="flex items-center justify-between  gap-2 px-1 py-2 rounded-full bg-teal-950 bg-opacity-75 text-xs text-white shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
+      <div className="flex items-center justify-between  gap-2 px-1 py-2 rounded-full bg-teal-950 bg-opacity-75 text-xs text-white shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto p-4 bg-gradient-to-br from-teal-800 via-teal-500 to-purple-500">
         <span>🕵️‍♂️ Detecting..</span>
         <span
           className="font-semibold truncate"
