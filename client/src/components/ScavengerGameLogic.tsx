@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
-import StartGameButton from "./buttons/StartGameButton";
+// import StartGameButton from "./buttons/StartGameButton";
 import Countdown from "./Countdown";
+import "../App.css"
 
 const ScavengerGame = () => {
   const startCountdown = useMultiplayerStore((state) => state.startCountdown);
@@ -38,16 +39,16 @@ const ScavengerGame = () => {
   };
   useEffect(() => {
     // Trigger animation when the riddle changes
-    setRiddleClass("animate-fade-in");
+    setRiddleClass("animate-fade-in bg-highlight");
     const timeout = setTimeout(() => setRiddleClass(""), 1000); // Reset class after animation
     return () => clearTimeout(timeout);
   }, [numFoundItems]);
 
-  // const formatTime = (seconds: number) => {
-  //   const mins = Math.floor(seconds / 60);
-  //   const secs = seconds % 60;
-  //   return `${mins}:${secs.toString().padStart(2, "0")}`;
-  // };
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     if (socket) {
@@ -129,10 +130,10 @@ const ScavengerGame = () => {
   ]);
 
   return (
-    <div className="game-container flex flex-col items-start text-white rounded-lg shadow-lg z-50 absolute top-36 gap-4 w-72 bg-opacity-90 p-4">
+    <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">
       <div className="game-container">
         {/* gameState of "setup" */}
-        {gameState === "setup" && <StartGameButton />}
+        {/* {gameState === "setup" && <StartGameButton />} */}
 
         {/* gameState of "countdown" */}
         {gameState === "countdown" && countdown !== null && <Countdown />}
@@ -141,7 +142,7 @@ const ScavengerGame = () => {
         {gameState === "playing" && (
           <div>
             <div
-              className={`riddle-box p-4 rounded-lg bg-teal-950 bg-opacity-80 text-center shadow-md ${riddleClass}`}
+              className={`riddle-box fixed p-4  bg-teal-950 bg-opacity-80 text-center mb-6 bottom-12 left-1/2 transform -translate-x-1/2 rounded-lg shadow-lg ${riddleClass}`}
             >
               <h1 className="text-xl font-bold mb-2 text-left">
                 🧩 Solve the Riddle:
@@ -150,9 +151,17 @@ const ScavengerGame = () => {
             </div>
 
             {/* Time Remaining */}
-            <div className="time-box p-4 rounded-lg bg-teal-950 bg-opacity-80 text-center shadow-md">
+            <div className="time-box p-4  bg-teal-950 bg-opacity-80 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-lg">
               <h1 className="text-xl font-bold mb-2">⏳ Time Remaining:</h1>
-              <p className="text-lg font-semibold">{timeRemaining}</p>
+              <p className="text-lg font-semibold">
+                {formatTime(timeRemaining)}
+              </p>
+              <div className="relative w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div
+                  className="absolute top-0 left-0 h-full bg-teal-500 transition-width duration-500"
+                  style={{ width: `${(timeRemaining / 120) * 100}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         )}
