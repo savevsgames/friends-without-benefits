@@ -83,7 +83,7 @@ const MultiplayerVideoFeed: React.FC = () => {
       peer.on("call", async (call) => {
         console.log("Incoming call from opponent: ", call.peer);
         // Enable the webcam stream for the opponent
-        const stream = await enableWebcam(true);
+        const stream = await enableWebcam();
         if (!stream) {
           console.error("Error enabling webcam stream...");
           return;
