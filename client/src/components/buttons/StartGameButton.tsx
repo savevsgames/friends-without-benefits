@@ -5,7 +5,7 @@ import { toggleWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
-const StartGameButton: React.FC = () => {
+const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
   const players = useMultiplayerStore((state) => state.players);
   const setPlayerReady = useMultiplayerStore((state) => state.setPlayerReady);
@@ -94,6 +94,9 @@ const StartGameButton: React.FC = () => {
       } else {
         console.log("Player is not ready to start the game.");
       }
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       console.error(
         "Failed to set player ready state in start button: ",
@@ -131,16 +134,12 @@ const StartGameButton: React.FC = () => {
         name="start-game-button"
         disabled={!canvasReady}
         onClick={handleReadyClick}
-        style={{
-          display: "flex",
-          width: "30vw",
-          height: "auto",
-          padding: "1rem 1.5rem",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className="card bg-teal-700 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
       >
-        {isReady ? "Waiting for other players..." : "I'm ready to go!"}
+        <h2 className="text-2xl font-bold mb-2">
+          {isReady ? "Waiting for other players..." : "Start Game!"}
+        </h2>
+        <p className="text-sm">Jump right into the action!</p>
       </button>
     </div>
   );

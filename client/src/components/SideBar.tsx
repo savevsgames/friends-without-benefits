@@ -4,9 +4,9 @@ import { FaBars, FaTimes, FaHome, FaHourglassEnd } from "react-icons/fa";
 import { IoLogoGameControllerA } from "react-icons/io";
 import { MdLeaderboard, MdEmojiObjects } from "react-icons/md";
 import { FaPeopleGroup } from "react-icons/fa6";
-import { RiWebcamFill } from "react-icons/ri";
+
 import { SlMagnifier } from "react-icons/sl";
-import LoadWebcamButton from "./buttons/LoadWebcamButton";
+
 // import RunDetectionButton from "./buttons/RunDetectionButton";
 import MultiPlayerModal from "./MultiplayerModal";
 import { useIsDetectionActive } from "@/hooks/useIsDetectionActive";
@@ -95,9 +95,6 @@ const SideBar = () => {
             label="Game Control"
             icon={<IoLogoGameControllerA size={26} />}
           >
-            <MenuItem icon={<RiWebcamFill />} className="z-60">
-              <LoadWebcamButton variant="sidebar" />
-            </MenuItem>
             <MenuItem className="z-60">
               <div>
                 Detection: {isDetectionActive ? "Active 🟢" : "Inactive 🔴"}
