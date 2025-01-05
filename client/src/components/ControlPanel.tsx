@@ -21,13 +21,11 @@ export const ControlPanel: React.FC<
 
   return (
     <div
-      className="flex flex-col ml-3 absolute top-3 left-24 content-center z-50 gap-4 -translate-x-1/2 justify-center z-1000"
+      className="flex flex-col ml-3 absolute bottom-12 left-24 content-center z-50 gap-4 -translate-x-1/2 justify-center z-1000"
       style={{
         pointerEvents: "auto",
       }}
     >
-      {/* // start game button */}
-      <RunDetectionButton />
 
       {/* detection status */}
       <div className="flex items-center justify-between  gap-2 px-1 py-2 rounded-full bg-teal-950 bg-opacity-75 text-xs text-white shadow dark:bg-gray-700 dark:text-gray-200 w-48 pointer-events-auto">
