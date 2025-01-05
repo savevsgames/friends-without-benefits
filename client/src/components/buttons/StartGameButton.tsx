@@ -1,7 +1,9 @@
-import React from "react";
+import { useEffect } from "react";
 import { useMultiplayerStore } from "@/store";
 import { useGameStore } from "@/store";
 import { enableWebcam } from "@/utils/model-utils";
+import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
+import { stopDetection } from "../../utils/custom-model-utils-2";
 
 const StartGameButton = ({
   variant,
@@ -25,6 +27,7 @@ const StartGameButton = ({
   const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
   const canvasReady = useGameStore((state) => state.canvasReady);
   const videoPlaying = useGameStore((state) => state.videoPlaying);
+  const currentMediaType = useGameStore((state) => state.currentMediaType);
 
   /***
    * On button click -> enables webcam if stream is available
@@ -79,6 +82,16 @@ const StartGameButton = ({
       );
     }
   };
+
+  const conditionsMet = isReady && canvasReady && currentMediaType;
+
+  useEffect(() => {
+    if (conditionsMet) {
+      runDetectionOnCurrentMedia();
+    } else {
+      stopDetection();
+    }
+  }, [conditionsMet]);
 
   const variantStyles = {
     tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
