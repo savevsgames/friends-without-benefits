@@ -33,10 +33,10 @@ const LoadWebcamButton = ({ variant, onComplete}: {variant: "tuto" | "sidebar", 
     if (onComplete) onComplete();
   };
 
-const variantStyles = {
-  tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
-  sidebar: ""
-}
+  const variantStyles = {
+    tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
+    sidebar: ""
+  }
 
   return (
     <div>
