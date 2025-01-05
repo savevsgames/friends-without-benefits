@@ -1,17 +1,11 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useMultiplayerStore } from "@/store";
 import { useGameStore } from "@/store";
-import { enableWebcam } from "@/utils/model-utils";
+import { toggleWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
-import { stopDetection } from "../../utils/custom-model-utils-2";
+// import { stopDetection } from "../../utils/custom-model-utils-2";
 
-const StartGameButton = ({
-  variant,
-  onComplete,
-}: {
-  variant: "tuto" | "sidebar";
-  onComplete?: () => void;
-}) => {
+const StartGameButton: React.FC = () => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
   const players = useMultiplayerStore((state) => state.players);
   const setPlayerReady = useMultiplayerStore((state) => state.setPlayerReady);
@@ -28,38 +22,47 @@ const StartGameButton = ({
   const canvasReady = useGameStore((state) => state.canvasReady);
   const videoPlaying = useGameStore((state) => state.videoPlaying);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
+  const setGameSate = useGameStore((state) => state.setGameState);
 
   /***
    * On button click -> enables webcam if stream is available
    */
   const handleWebcamStart = async () => {
-    console.log("Video Playing: ", videoPlaying); // false expected
-    // webcamOn will be true if the webcam becomes available
-    const webcamOn = await enableWebcam(Object.keys(players).length > 1);
-    // players object contains all the Players in the game so we take the number of
-    // keys/indexes to determine if the webcam needs to be shared (audio enabled)
-    if (webcamOn && Object.keys(players).length === 1) {
-      setCurrentMediaType("webcam");
-      setCurrentMediaRef("webcam-stream");
-      setVideoPlaying(true);
-      console.log("Webcam is enabled and the context has been updated.");
-    } else if (webcamOn && Object.keys(players).length > 1) {
-      setCurrentMediaType("webcam");
-      setCurrentMediaRef("webcam-stream");
-      setVideoPlaying(true);
+    try {
+      console.log("Starting webcam...");
       console.log(
-        "Webcam is enabled for sharing and the context has been updated."
+        "Number of players in the game: ",
+        Object.keys(players).length
       );
-    } else {
-      console.error("Failed to load webcam stream.");
-      setCurrentMediaType(null);
-      setCurrentMediaRef(null);
-      setVideoPlaying(false);
-      // TODO: Give the player a modal to try again (tutorial) or leave the game options
-    } // end of if
-
-    if (onComplete) onComplete();
-    return webcamOn;
+      // webcamOn is the webcam stream object when it is first enabled
+      const webcamOn = await toggleWebcam(!videoPlaying);
+      // players object contains all the Players in the game so we take the number of
+      // keys/indexes to determine if the webcam needs to be shared (audio enabled)
+      if (webcamOn) {
+        setCurrentMediaType("webcam");
+        setCurrentMediaRef("webcam-stream");
+        setVideoPlaying(true);
+        console.log(
+          "Webcam is enabled and the SINGLE PLAYER GAME context has been updated."
+        );
+      } else {
+        console.error("Failed to load webcam stream.");
+        setCurrentMediaType(null);
+        setCurrentMediaRef(null);
+        setVideoPlaying(false);
+        // TODO: Give the player a modal to try again (tutorial) or leave the game options
+      } // end of if
+      console.log("Webcam stream object: ", webcamOn);
+      console.log("Players in the game: ", players);
+      console.log(
+        "Number of players in the game: ",
+        Object.keys(players).length
+      );
+      // Return the webcam stream object
+      return webcamOn;
+    } catch (error) {
+      console.error("Failed to start webcam: ", error);
+    }
   };
 
   const handleReadyClick = async () => {
@@ -73,8 +76,24 @@ const StartGameButton = ({
      */
     try {
       await handleWebcamStart();
+      console.log(
+        "Button [StartGameButton] => The webcam is :",
+        useMultiplayerStore.getState().webcamEnabled
+      );
+      console.log("[StartGameButton] => Video playing state: ", videoPlaying);
+
       setPlayerReady(playerId!, !isReady);
       console.log("Button [StartGameButton] => isReady after click: ", isReady);
+
+      if (isReady && videoPlaying && canvasReady) {
+        console.log(
+          "Player is ready to start the game.",
+          "Starting countdown..."
+        );
+        setGameSate("countdown");
+      } else {
+        console.log("Player is not ready to start the game.");
+      }
     } catch (error) {
       console.error(
         "Failed to set player ready state in start button: ",
@@ -83,20 +102,20 @@ const StartGameButton = ({
     }
   };
 
-  const conditionsMet = isReady && canvasReady && currentMediaType;
-
   useEffect(() => {
+    const conditionsMet = isReady && canvasReady && currentMediaType;
+
+    const logConditions = () => {
+      console.log("isReady: ", isReady);
+      console.log("canvasReady: ", canvasReady);
+      console.log("currentMediaType: ", currentMediaType);
+    };
     if (conditionsMet) {
       runDetectionOnCurrentMedia();
     } else {
-      stopDetection();
+      logConditions();
     }
-  }, [conditionsMet]);
-
-  const variantStyles = {
-    tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
-    sidebar: "",
-  };
+  }, [isReady, canvasReady, currentMediaType]);
 
   return (
     <div
@@ -112,7 +131,14 @@ const StartGameButton = ({
         name="start-game-button"
         disabled={!canvasReady}
         onClick={handleReadyClick}
-        className={`${variantStyles[variant]}`}
+        style={{
+          display: "flex",
+          width: "30vw",
+          height: "auto",
+          padding: "1rem 1.5rem",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         {isReady ? "Waiting for other players..." : "I'm ready to go!"}
       </button>
