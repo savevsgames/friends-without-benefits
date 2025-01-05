@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useMultiplayerStore } from "@/store";
 import { useGameStore } from "@/store";
-import { toggleWebcam } from "@/utils/model-utils";
+import { enableWebcam, toggleWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
@@ -35,7 +35,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         Object.keys(players).length
       );
       // webcamOn is the webcam stream object when it is first enabled
-      const webcamOn = await toggleWebcam(!videoPlaying);
+      const webcamOn = await enableWebcam();
       // players object contains all the Players in the game so we take the number of
       // keys/indexes to determine if the webcam needs to be shared (audio enabled)
       if (webcamOn) {
@@ -47,9 +47,9 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         );
       } else {
         console.error("Failed to load webcam stream.");
-        setCurrentMediaType(null);
-        setCurrentMediaRef(null);
-        setVideoPlaying(false);
+        // setCurrentMediaType(null);
+        // setCurrentMediaRef(null);
+        // setVideoPlaying(false);
         // TODO: Give the player a modal to try again (tutorial) or leave the game options
       } // end of if
       console.log("Webcam stream object: ", webcamOn);
