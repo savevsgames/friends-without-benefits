@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { ChatMessage, ServerContext } from "./socketTypes";
 
-const chatManager = (context: ServerContext) => {
+export const chatMessageManager = (context: ServerContext) => {
   return (socket: Socket, data: ChatMessage) => {
     const { sender, message } = data;
     // TODO: Add logic to change to username
@@ -10,7 +10,7 @@ const chatManager = (context: ServerContext) => {
   };
 };
 
-export default chatManager;
+export default chatMessageManager;
 
 /** SOCKET EMIT OPTIONS
  *  This would only send to the socket that sent the message

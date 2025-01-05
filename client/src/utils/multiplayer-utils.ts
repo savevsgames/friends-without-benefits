@@ -7,12 +7,17 @@ import { IMultiplayerState, useMultiplayerStore } from "@/store";
  * Initialize Socket.IO connection
  */
 export const initializeSocket = () => {
-  const socketIo = io("http://localhost:3001", {
+  const protocol: string = window.location.protocol;
+  console.log("🔌 SOCKET-IO INITIALIZER Protocol:", protocol);
+  // TODO: Add logic to handle secure connections
+  const hostName: string = window.location.hostname;
+  const socketIo = io(`http://${hostName}`, {
     path: "/socket.io",
     transports: ["polling", "websocket"],
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
+    secure: false,
   });
 
   socketIo.on("connect", () => {

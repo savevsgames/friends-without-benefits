@@ -35,3 +35,5 @@ export const peerJsManager = (socket: Socket, context: ServerContext) => {
     console.log("❌ Peer ID unregistered: ", socket.id);
   });
 };
+
+export default peerJsManager;

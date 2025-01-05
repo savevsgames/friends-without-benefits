@@ -23,6 +23,6 @@ export interface ChatMessage {
 export interface ServerContext {
   io: SocketIOServer;
   connectedUsers: Map<string, string>;
-  playerReadyStates: Record<string, string>;
+  playerReadyStates: Record<string, boolean>;
   numCurrentActiveUsers: number;
 }

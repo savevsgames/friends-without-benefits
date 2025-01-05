@@ -39,12 +39,14 @@ const MultiplayerConnectionManager: React.FC = () => {
       return;
     }
     console.log("Initializing PeerJS connection...");
+
     // TODO: Check store first to see if peer exists? or disable button if peer exists?
+    const hostName = window.location.hostname;
     const peerJs =
       useMultiplayerStore.getState().peer ||
       new Peer({
-        host: "localhost",
-        port: 3001,
+        host: hostName,
+        port: 5173,
         path: "/peerjs",
       });
     // Make sure local scope syncs with store
