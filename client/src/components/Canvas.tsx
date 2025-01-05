@@ -6,7 +6,7 @@ import ScavengerGame from "./ScavengerGameLogic";
 import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
-import "../App.css";
+import ChoiceScreen from "./ChoiceScreen.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -18,34 +18,47 @@ export const Canvas = () => {
   const singlePlayer = useGameStore((state) => state.isSingle);
 
   const multiPlayer = useGameStore((state) => state.isMulti);
-
+  // show choices modal
+  const [showChoices, setShowChoices] = useState(true);
+  const [showTuto, setShowTuto] = useState(false); // Controls Tutorial modal visibility
   // manage tutorial steps
+
+  const handleStartTuto = () => {
+    setTutorialStep(1);
+    setShowChoices(false);
+    setShowTuto(true);
+  };
+
+  const handleTurnOnCamera = () => {
+    console.log("Camera turned on!");
+  };
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
   // Tutorial modal content
   const tutorialContent = [
     "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
-    "Use your webcam to scan your surroundings for items to be shown on the screen.",
-    "Keep an eye on the timer and find the items quickly!",
-    "Click 'Start Game' to begin the hunt! Good luck and have fun!",
+    "🧩 Solve the riddle: A riddle will appear on the screen. Solve it to identify the item you need to find. Let your detective skills shine!",
+    "⏳ Watch the clock:Tick-tock! Keep an eye on the riddle timer. Time is precious and every second counts!",
+    "🚀 Start the game: Ready, set, go! Click 'Start Game' on the main menu to kick off the countdown",
+    "🕵️‍♂️ Begin the Hunt: Let the Scavenger Hunt begin! Search for items, solve riddles, and HAVE FUN!",
   ];
   // function to handle the tutorial once the single player selection is established
   // Trigger tutorial when single-player is selected
-  useEffect(() => {
-    if (singlePlayer) {
-      setTutorialStep(1); // Start the tutorial when single-player is activated
-    }
-  }, [singlePlayer]);
+
 
   const handleNextStep = () => {
     if (tutorialStep < tutorialContent.length) {
       setTutorialStep((prev) => prev + 1);
     } else {
-      setTutorialStep(0); // End the tutorial
+      setTutorialStep(0);
+      setShowChoices(true);
+      setShowTuto(false) // End the tutorial
     }
   };
   // handle the skip tuto
   const handleSkipTuto = () => {
     setTutorialStep(0);
+    setShowChoices(true);
+    setShowTuto(false)
   };
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
@@ -212,9 +225,15 @@ export const Canvas = () => {
         height: "calc(100vh-64px)",
       }}
     >
+      <ChoiceScreen
+        isOpen={showChoices}
+        onClose={() => setShowChoices(false)}
+        onStartTuto={handleStartTuto}
+        onTurnOnCamera={handleTurnOnCamera}
+      />
       {/* tutorial modal */}
       <TutoModal
-        isOpen={tutorialStep > 0}
+        isOpen={showTuto}
         content={tutorialContent}
         currentStep={tutorialStep - 1}
         onNext={handleNextStep}

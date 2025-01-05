@@ -1,8 +1,12 @@
 import { toggleWebcam } from "@/utils/model-utils";
 import { useGameStore } from "@/store";
 
-const LoadWebcamButton = ({ variant, onComplete}: {variant: "tuto" | "sidebar", onComplete? : () => void}) => {
+const LoadWebcamButton = ({
 
+}: {
+  // variant: "tuto" | "sidebar";
+  // onComplete?: () => void;
+}) => {
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
   );
@@ -29,26 +33,26 @@ const LoadWebcamButton = ({ variant, onComplete}: {variant: "tuto" | "sidebar", 
       setCurrentMediaRef(null);
       setVideoPlaying(false);
     }
-
-    if (onComplete) onComplete();
   };
 
-  const variantStyles = {
-    tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
-    sidebar: ""
-  }
+  // const variantStyles = {
+  //   tuto: "px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700",
+  //   sidebar: "",
+  // };
 
   return (
     <div>
       <button
-
-        className= {`${variantStyles[variant]}`}
+        className="card bg-teal-600 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
         id="enable-webcam"
         name="enable-webcam"
         disabled={!canvasReady}
         onClick={handleWebcamToggle}
       >
-        {!videoPlaying ? "Webcam On" : "Webcam Off"}
+        <h2 className="text-2xl font-bold mb-2">
+          {!videoPlaying ? "📸 Turn on Webcam" : "Turn off Webcam"}
+        </h2>
+        <p className="text-sm">Check your camera setup.</p>
       </button>
       {/* Hidden video element for capturing webcam stream */}
       <video
