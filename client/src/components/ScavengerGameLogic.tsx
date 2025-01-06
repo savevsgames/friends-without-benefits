@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
+import RiddleCardFlip from "./RiddleCardFlip";
 // import StartGameButton from "./buttons/StartGameButton";
 import Countdown from "./Countdown";
 import "../App.css";
@@ -24,26 +25,7 @@ const ScavengerGame = () => {
   const countdown = useGameStore((state) => state.countdown);
   const startTimer = useGameStore((state) => state.startTimer);
   const resetGame = useGameStore((state) => state.resetGame);
-  const [riddleClass, setRiddleClass] = useState("");
-  const getRiddle = () => {
-    const riddles: Record<string, string> = {
-      Mug: "I hold your drink, be it coffee or tea, find me! ☕",
-      Headphones:
-        "Put me on to hear a tune, I sit on your ears and block out the room, find me! 🎧",
-      Toothbrush:
-        "I help you keep your teeth pearly white, use me in the morning and at night, find me! 🪥",
-      Fork: "I have prongs but I'm not a plug. I sit at the table and help you eat! 🍴",
-      Remote: "I let you switch channels while you relax, find me! 📺",
-    };
-    return riddles[itemsArr[numFoundItems]] || "Scavenge Complete!";
-  };
-  useEffect(() => {
-    // Trigger animation when the riddle changes
-    setRiddleClass("animate-fade-in bg-highlight");
-    const timeout = setTimeout(() => setRiddleClass(""), 1000); // Reset class after animation
-    return () => clearTimeout(timeout);
-  }, [numFoundItems]);
-
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -137,6 +119,16 @@ const ScavengerGame = () => {
     countdown,
     startTimer,
   ]);
+  // bingoo msg
+  useEffect(() => {
+    if (timeRemaining < 120 || numFoundItems === itemsArr.length) {
+      setShowSuccessMessage(true);
+      const timeout = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 1000); //  displayed for 1 second
+      return () => clearTimeout(timeout);
+    }
+  }, [numFoundItems, gameState]);
 
   return (
     <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">
@@ -150,28 +142,28 @@ const ScavengerGame = () => {
         {/* gameState of "playing" */}
         {gameState === "playing" && (
           <div>
-            <div
-              className={`riddle-box fixed p-4  bg-teal-950 bg-opacity-80 text-center mb-6 bottom-12 left-1/2 transform -translate-x-1/2 rounded-lg shadow-lg ${riddleClass}`}
-            >
-              <h1 className="text-xl font-bold mb-2 text-left">
-                🧩 Solve the Riddle:
+            {/* Success Message */}
+            {showSuccessMessage && (
+              <div className="fixed top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-teal-900 via-indigo-800 to-green-600 text-white text-4xl font-bold py-4 px-8 rounded-lg shadow-lg animate-bounce">
+                🎉 BINGO! 🎉
+              </div>
+            )}
+            {/* time remaining */}
+            <div className="time-box p-4 bg-gradient-to-br from-teal-600 to-indigo-800 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl">
+              <h1 className="text-xl font-bold mb-2 text-white">
+                ⏳ Time Remaining:
               </h1>
-              <p className="text-lg font-semibold text-left">{getRiddle()}</p>
-            </div>
-
-            {/* Time Remaining */}
-            <div className="time-box p-4  bg-teal-950 bg-opacity-80 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-lg">
-              <h1 className="text-xl font-bold mb-2">⏳ Time Remaining:</h1>
-              <p className="text-lg font-semibold">
+              <p className="text-lg font-semibold text-white">
                 {formatTime(timeRemaining)}
               </p>
-              <div className="relative w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div className="relative w-full bg-gray-300 rounded-full h-2 mt-2">
                 <div
-                  className="absolute top-0 left-0 h-full bg-teal-500 transition-width duration-500"
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-teal-400 to-orange-500 transition-width duration-500"
                   style={{ width: `${(timeRemaining / 120) * 100}%` }}
                 ></div>
               </div>
             </div>
+            <RiddleCardFlip numFoundItems={numFoundItems} itemsArr={itemsArr} />
           </div>
         )}
         {gameState === "complete" && (

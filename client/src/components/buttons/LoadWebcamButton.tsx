@@ -54,7 +54,7 @@ const LoadWebcamButton = () =>
           <h2 className="text-2xl font-bold mb-2">
             {!videoPlaying ? "📸 Turn on Webcam" : "Turn off Webcam"}
           </h2>
-          <p className="text-sm">Check your camera setup.</p>
+          <p className="text-sm text-gray-300">Check your camera setup.</p>
         </button>
         {/* Hidden video element for capturing webcam stream */}
         <video

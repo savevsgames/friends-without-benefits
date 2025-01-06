@@ -7,6 +7,7 @@ import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
 import ChoiceScreen from "./ChoiceScreen.tsx";
+import DetectionOverlay from "./DetectionBoxes.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -44,21 +45,20 @@ export const Canvas = () => {
   // function to handle the tutorial once the single player selection is established
   // Trigger tutorial when single-player is selected
 
-
   const handleNextStep = () => {
     if (tutorialStep < tutorialContent.length) {
       setTutorialStep((prev) => prev + 1);
     } else {
       setTutorialStep(0);
       setShowChoices(true);
-      setShowTuto(false) // End the tutorial
+      setShowTuto(false); // End the tutorial
     }
   };
   // handle the skip tuto
   const handleSkipTuto = () => {
     setTutorialStep(0);
     setShowChoices(true);
-    setShowTuto(false)
+    setShowTuto(false);
   };
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
@@ -232,14 +232,16 @@ export const Canvas = () => {
         onTurnOnCamera={handleTurnOnCamera}
       />
       {/* tutorial modal */}
-      <TutoModal
-        isOpen={showTuto}
-        content={tutorialContent}
-        currentStep={tutorialStep - 1}
-        onNext={handleNextStep}
-        onSkip={handleSkipTuto}
-        isLastStep={tutorialStep === tutorialContent.length}
-      />
+      {!multiPlayer && (
+        <TutoModal
+          isOpen={showTuto}
+          content={tutorialContent}
+          currentStep={tutorialStep - 1}
+          onNext={handleNextStep}
+          onSkip={handleSkipTuto}
+          isLastStep={tutorialStep === tutorialContent.length}
+        />
+      )}
       <div
         id="canvas-container"
         className="relative w-full h-full"
@@ -299,6 +301,9 @@ export const Canvas = () => {
           }}
           crossOrigin="anonymous"
         />
+
+        <DetectionOverlay />
+
         <div
           id="debug-overlay"
           style={{

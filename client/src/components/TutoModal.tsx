@@ -1,3 +1,4 @@
+
 import React from "react";
 import ReactModal from "react-modal";
 
@@ -18,6 +19,7 @@ const TutoModal: React.FC<TutorialModalProps> = ({
   onSkip,
   isLastStep,
 }) => {
+
   return (
     <ReactModal
       isOpen={isOpen}
@@ -51,7 +53,7 @@ const TutoModal: React.FC<TutorialModalProps> = ({
         {/* Shell div for StartGameButton */}
         <button
           onClick={onSkip}
-          className="bg-teal-600 hover:bg-teal-700 text-white rounded-md px-4 py-2"
+          className="bg-teal-100 text-teal-700 hover:bg-teal-700  rounded-md px-4 py-2"
         >
           Back to Menu
         </button>
