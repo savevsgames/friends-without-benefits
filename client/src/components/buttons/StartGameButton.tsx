@@ -104,6 +104,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         error
       );
     }
+    //setGameSate("playing");
   };
 
   useEffect(() => {
