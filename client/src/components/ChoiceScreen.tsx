@@ -18,8 +18,8 @@ const ChoiceScreen = ({
 
   onTurnOnCamera: () => void;
 }) => {
-  // const singlePlayer = useGameStore((state) => state.isSingle);
-  const multiPlayer = useGameStore((state) => state.isMulti); // flag
+  const setIsSingle = useGameStore((state) => state.setIsSingle);
+  const setIsMulti = useGameStore((state) => state.setIsMulti);
   // Access the create game mutation
   const [createGameMutation, { data, loading, error }] =
     useMutation(CREATE_GAME);
@@ -58,10 +58,37 @@ const ChoiceScreen = ({
         `Host with user data: ${user} has created a game with id: `,
         gameId
       );
+
+      // Emit to the server that a new user is registering (first register)
+      if (!socket) {
+        console.error("❌ No socket exists to broadcast new game.");
+      } else {
+        console.log("Emitting registerUser: ", user?.data.id, gameId);
+        socket.emit("registerUser", {
+          userId: user?.data.id,
+          gameId,
+        });
+      }
+
+      // Update the zustand store
+      setIsHost(true);
+      setRoomId(gameId);
     } catch (error) {
       console.log("Error creating game in Choice Screen: ", error);
     }
   };
+
+  const handleMultiplayerGameCreation = () =>{
+    // TODO: Add DB call to createGame
+    // if (mode === "single") {
+    //   setIsSingle(true);
+    //   setIsMulti(false);
+    // } else if (mode === "multi") {
+    //   setIsMulti(true);
+    //   setIsSingle(false);
+    // }
+  }
+  }
 
   return (
     <ReactModal
@@ -89,21 +116,20 @@ const ChoiceScreen = ({
       }}
     >
       <div className="flex flex-col items-center justify-center gap-6">
-        {multiPlayer && (
-          <>
-            <button
-              // onClick={}
-              className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
-            >
-              <h2 className="text-2xl font-bold mb-2">
-                <MultiPlayerModal />
-              </h2>
-              <p className="text-sm text-gray-600">
-                Playing with friends is always fun!
-              </p>
-            </button>
-          </>
-        )}
+        <>
+          <button
+            onClick={handleMultiplayerGameCreation}
+            className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+          >
+            <h2 className="text-2xl font-bold mb-2">
+              <MultiPlayerModal />
+            </h2>
+            <p className="text-sm text-gray-600">
+              Playing with friends is always fun!
+            </p>
+          </button>
+        </>
+
         {/* start game */}
 
         <StartGameButton onClose={onClose} />
