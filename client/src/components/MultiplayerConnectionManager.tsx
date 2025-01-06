@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useGameStore, useMultiplayerStore, useUserSession } from "@/store";
-import { Peer } from "peerjs";
+// import { Peer } from "peerjs";
 // import io from "socket.io-client";
 // Repeatable functions to connect to Socket.IO and PeerJS
-import { initializeSocket } from "@/utils/multiplayer-utils";
+// import { initializeSocket } from "@/utils/multiplayer-utils";
 import { enableWebcam } from "@/utils/model-utils";
 // import { initializePeer } from "@/utils/multiplayer-utils";
-import { IMultiplayerState } from "@/store";
-import { IGameState } from "@/store";
+
 import {
   FaSquareXTwitter,
   FaInstagram,
@@ -22,9 +21,9 @@ const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
 
   const {
-    setSocket,
-    setPeer,
-    setPlayerId,
+    // setSocket,
+    // setPeer,
+    // setPlayerId,
     // isHost,
     setIsHost,
     roomId,
@@ -114,7 +113,7 @@ const MultiplayerConnectionManager: React.FC = () => {
     }
 
     // Set the room ID and mark as Host
-    setRoomId(peer.id);
+    setRoomId(peer.id); // host will be used as gameId in the server context
     setIsHost(true);
     console.log("🏠 Room Created. Room ID:", peer.id);
   };
@@ -257,7 +256,11 @@ const MultiplayerConnectionManager: React.FC = () => {
       {adminUser && (
         <div className="grid grid-cols-2 gap-4">
           {/* PeerJS Initialization */}
-          <button className="border btn" onClick={handlePeerJSInitialization}>
+          <button
+            className="border btn"
+            disabled={useMultiplayerStore.getState().peer !== null}
+            // onClick={handlePeerJSInitialization}
+          >
             Initialize PeerJS
           </button>
           {/* Cleanup Connections */}
@@ -271,7 +274,8 @@ const MultiplayerConnectionManager: React.FC = () => {
           {/* Reconnect to Socket.IO */}
           <button
             className="border btn"
-            onClick={() => handleSocketIOConnection()}
+            disabled={useMultiplayerStore.getState().socket !== null}
+            // onClick={() => handleSocketIOConnection()}
             style={{ backgroundColor: "lightgray" }}
           >
             Re-connect to Socket.IO

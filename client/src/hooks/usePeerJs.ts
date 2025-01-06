@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Peer } from "peerjs";
 import { useMultiplayerStore } from "@/store";
 
+// TODO: Maybe a useRef for the peer instance? to persist is across re-renders?
+
 export const usePeerJS = () => {
   const { setPeer, setPlayerId, setRoomId, setIsConnected } =
     useMultiplayerStore();
@@ -38,5 +40,6 @@ export const usePeerJS = () => {
     return () => {
       peerJs.destroy();
     };
-  }, [setPeer, setPlayerId, setRoomId, setIsConnected]);
+    // Setters dont re-render - they are functions
+  }, [setPeer, setPlayerId, setRoomId, setIsConnected, isDevelopment]);
 };
