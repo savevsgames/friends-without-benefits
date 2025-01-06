@@ -11,16 +11,20 @@ export interface GameStateUpdates {
   // Ex. ("game", {canvasReady: true})
   store: "game" | "multiplayer";
   updates: Record<string, any>;
+  // Game id will be used for reconnection and match the mongoDB game _id
+  gameId: string;
 }
 
 // interface for chat messages
 export interface ChatMessage {
   sender: string;
   message: string;
+  gameId: string;
 }
 
 // server context for each user's connection
 export interface UserConnection {
+  userId: string;
   socketId: string;
   peerId: string;
   gameId?: string;
