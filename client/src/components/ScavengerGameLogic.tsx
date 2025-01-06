@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/store";
-import { useMultiplayerStore } from "@/store";
+// import { useMultiplayerStore } from "@/store";
 import RiddleCardFlip from "./RiddleCardFlip";
 // import StartGameButton from "./buttons/StartGameButton";
 import Countdown from "./Countdown";
 import "../App.css";
 
 const ScavengerGame = () => {
-  const startCountdown = useMultiplayerStore((state) => state.startCountdown);
-  const socket = useMultiplayerStore((state) => state.socket);
-  const updatePlayerReadyStates = useMultiplayerStore(
-    (state) => state.updatePlayerReadyStates
-  );
+  // const startCountdown = useMultiplayerStore((state) => state.startCountdown);
+  // // const socket = useMultiplayerStore((state) => state.socket);
+  // const updatePlayerReadyStates = useMultiplayerStore(
+  //   (state) => state.updatePlayerReadyStates
+  // );
 
   const gameState = useGameStore((state) => state.gameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
@@ -32,33 +32,33 @@ const ScavengerGame = () => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  useEffect(() => {
-    if (socket) {
-      try {
-        // console.log("socket testing for start game button: ", socket);
-        // Server sends the countdown to start the game
-        socket.on("startCountdown", (countdown: number) => {
-          console.log("startCountdown event received: ", countdown);
-          startCountdown(countdown);
-        });
-        // When the game is multiplayer, we need to update the ready
-        // states of the players in the store when the server sends an update
-        socket.on("updateReadyStates", updatePlayerReadyStates);
+  // useEffect(() => {
+  //   if (socket) {
+  //     try {
+  //       // console.log("socket testing for start game button: ", socket);
+  //       // Server sends the countdown to start the game
+  //       socket.on("startCountdown", (countdown: number) => {
+  //         console.log("startCountdown event received: ", countdown);
+  //         startCountdown(countdown);
+  //       });
+  //       // When the game is multiplayer, we need to update the ready
+  //       // states of the players in the store when the server sends an update
+  //       socket.on("updateReadyStates", updatePlayerReadyStates);
 
-        socket.on("disconnect", () => {
-          console.warn("Socket IO DISCONNECTED UNEXPECTEDLY");
-        });
+  //       socket.on("disconnect", () => {
+  //         console.warn("Socket IO DISCONNECTED UNEXPECTEDLY");
+  //       });
 
-        return () => {
-          socket.off("startCountdown");
-          socket.off("updateReadyStates");
-          socket.off("disconnect");
-        };
-      } catch (error) {
-        console.log("Error starting countdown", error);
-      }
-    }
-  }, [socket, startCountdown, updatePlayerReadyStates]);
+  //       return () => {
+  //         socket.off("startCountdown");
+  //         socket.off("updateReadyStates");
+  //         socket.off("disconnect");
+  //       };
+  //     } catch (error) {
+  //       console.log("Error starting countdown", error);
+  //     }
+  //   }
+  // }, [socket, startCountdown, updatePlayerReadyStates]);
 
   useEffect(() => {
     if (numFoundItems >= 5 || timeRemaining === 0) {
@@ -75,21 +75,48 @@ const ScavengerGame = () => {
     }
   }, [numFoundItems, timeRemaining, resetGame]);
 
+  // useEffect(() => {
+  //   let countdownTimer: NodeJS.Timeout;
+
+  //   if (gameState === "countdown" && countdown !== null) {
+  //     console.log("🔄 Countdown Started:", countdown);
+
+  //     countdownTimer = setInterval(() => {
+  //       const currentCountdown = useGameStore.getState().countdown;
+  //       if (currentCountdown !== null && currentCountdown > 0) {
+  //         // useGameStore.getState().setCountdown(currentCountdown - 1);
+  //         return currentCountdown - 1;
+  //       } else {
+  //         clearInterval(countdownTimer);
+  //         return 0; // countdown is over
+  //       }
+  //     }, 1000);
+  //   }
+
+  //   return () => {
+  //     if (countdownTimer) {
+  //       clearInterval(countdownTimer);
+  //       console.log("🛑 Countdown Timer Cleared");
+  //     }
+  //   };
+  // }, [gameState, countdown, startTimer]);
+
   useEffect(() => {
-    let countdownTimer: NodeJS.Timeout;
+    let countdownTimer: NodeJS.Timeout | null = null;
 
     if (gameState === "countdown" && countdown !== null) {
       console.log("🔄 Countdown Started:", countdown);
 
       countdownTimer = setInterval(() => {
-        const currentCountdown = useGameStore.getState().countdown;
-        if (currentCountdown !== null && currentCountdown > 0) {
-          // useGameStore.getState().setCountdown(currentCountdown - 1);
-          return currentCountdown - 1;
-        } else {
-          clearInterval(countdownTimer);
-          return 0; // countdown is over
-        }
+        useGameStore.setState((state) => {
+          // Actually set the state of the countdown in the store
+          if (state.countdown && state.countdown > 0) {
+            return { countdown: state.countdown - 1 };
+          } else {
+            clearInterval(countdownTimer!);
+            return { countdown: 0 };
+          }
+        });
       }, 1000);
     }
 
@@ -99,7 +126,7 @@ const ScavengerGame = () => {
         console.log("🛑 Countdown Timer Cleared");
       }
     };
-  }, [gameState, countdown, startTimer]);
+  }, [gameState, countdown]);
 
   useEffect(() => {
     if (
@@ -120,7 +147,7 @@ const ScavengerGame = () => {
     countdown,
     startTimer,
   ]);
-  // bingoo msg
+  // bingoo msg - added itemsArr.length, timeRemaining as missing dependencies
   useEffect(() => {
     if (timeRemaining < 120 || numFoundItems === itemsArr.length) {
       setShowSuccessMessage(true);
@@ -129,7 +156,7 @@ const ScavengerGame = () => {
       }, 1000); //  displayed for 1 second
       return () => clearTimeout(timeout);
     }
-  }, [numFoundItems, gameState]);
+  }, [numFoundItems, gameState, itemsArr.length, timeRemaining]);
 
   return (
     <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">

@@ -37,7 +37,8 @@ const MultiplayerConnectionManager: React.FC = () => {
 
   // For setting webcam as media type
   const { setCurrentMediaType } = useGameStore();
-  const adminUser = useUserSession((state) => state.user?.data.isAdmin);
+  // const adminUser = useUserSession((state) => state.user?.data.isAdmin);
+  const adminUser = false; //debugging other things - temp value TODO: fix
   const [copied, setCopied] = useState(false);
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");

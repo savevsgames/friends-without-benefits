@@ -13,10 +13,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
   const players = useMultiplayerStore((state) => state.players);
   const setPlayerReady = useMultiplayerStore((state) => state.setPlayerReady);
-
-  const isReady = players[playerId]?.isReady || false;
-
-  console.log("Button [StartGameButton] => isReady before click: ", isReady);
+  const roomId = useMultiplayerStore((state) => state.roomId);
 
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
@@ -37,6 +34,8 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const socket = useMultiplayerStore((state) => state.socket);
   const setRoomId = useMultiplayerStore((state) => state.setRoomId);
   const setIsHost = useMultiplayerStore((state) => state.setIsHost);
+
+  const isReady = players[playerId]?.isReady || false;
 
   // SINGLE PLAYER VERSION
   const handleSinglePlayerGameCreation = async () => {
@@ -63,7 +62,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         return;
       }
       // Set the gameId for the server/user link
-      const gameId = newGameData._id;
+      const gameId = newGameData._id || "69";
       console.log(
         `Host with user data: ${user} has created a game with id: `,
         gameId
@@ -85,6 +84,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       setIsMulti(false);
       setIsHost(true);
       setRoomId(gameId);
+      setPlayerReady(playerId!, true, gameId!);
       console.log(
         "Number of players in the game: ",
         Object.keys(players).length
@@ -147,14 +147,18 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
      */
     try {
       await handleWebcamStart();
-      console.log(
-        "Button [StartGameButton] => The webcam is :",
-        useMultiplayerStore.getState().webcamEnabled
-      );
-      // console.log("[StartGameButton] => Video playing state: ", videoPlaying);
-
-      setPlayerReady(playerId!, !isReady);
-      // console.log("Button [StartGameButton] => isReady after click: ", isReady);
+      try {
+        await handleSinglePlayerGameCreation();
+        setGameSate("countdown");
+      } catch (error) {
+        console.error("Error Creating Game", error);
+      }
+      if (roomId) {
+        setPlayerReady(playerId!, !isReady, roomId);
+        // console.log("Button [StartGameButton] => isReady after click: ", isReady);
+      } else {
+        console.error("ROOM ID NOT SET! - START BUTTON");
+      }
 
       if (isReady && videoPlaying && canvasReady) {
         console.log(
@@ -163,12 +167,6 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         );
         // TODO: DB Call for update game - start time etc.
         // THIS LEADS TO EMITTING THE COUNTDOWN > STORE > SERVER
-        try {
-          await handleSinglePlayerGameCreation();
-          setGameSate("countdown");
-        } catch (error) {
-          console.error("Error Creating Game", error);
-        }
       } else {
         console.log("Player is not ready to start the game.");
       }

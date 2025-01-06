@@ -9,7 +9,7 @@
     "setup:server": "npm --prefix server install",
     "setup:client": "npm --prefix client install",
     "dev": "concurrently --kill-others-on-fail \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "npm --prefix server run dev",
+    "dev:server": "NODE_ENV=staging npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
     "build": "npm run build:server && npm run build:client",
     "build:server": "npm --prefix server run build",

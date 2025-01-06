@@ -60,7 +60,7 @@ export const createSocketManager = (
 
       // Clean up the socket connection
       socket.on("disconnect", () => {
-        console.log("🔌 SOCKET-IO Disconnected: ", socket.id);
+        console.log("❌ SOCKET-IO Disconnected: ", socket.id);
 
         // context.userConnections.delete(socket.id); - preventing reconnect?
         // Delete the context of the player in the playerReadyStates

@@ -71,6 +71,16 @@ export const useSocketIO = () => {
       useMultiplayerStore.getState().addChatMessage(data);
     });
 
+    socketIo.on("startCountdown", (countdown: number) => {
+      console.log("startCountdown event received:", countdown);
+      useMultiplayerStore.getState().startCountdown(countdown);
+    });
+
+    socketIo.on("updateReadyStates", (readyStates: Record<string, boolean>) => {
+      console.log("updateReadyStates event received:", readyStates);
+      useMultiplayerStore.getState().updatePlayerReadyStates(readyStates);
+    });
+
     socketIo.on("connect_error", (error: Error) => {
       console.error("❗ Socket.IO Connection Error:", error.message);
     });
@@ -84,6 +94,8 @@ export const useSocketIO = () => {
       socketIo.off("disconnect");
       socketIo.off("stateUpdate");
       socketIo.off("chat-message");
+      socketIo.off("startCountdown");
+      socketIo.off("updateReadyStates");
       socketIo.disconnect();
     };
   }, [setSocket, isDevelopment]);
