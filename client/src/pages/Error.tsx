@@ -1,6 +1,8 @@
 function Error() {
   return (
-    <div>Error</div>
+    <div className="w-full h-screen">
+      <img alt="error page" src="/assets/error."/>
+    </div>
   )
 }
 export default Error

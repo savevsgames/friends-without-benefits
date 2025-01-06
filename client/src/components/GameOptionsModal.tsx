@@ -22,7 +22,7 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
       alert("You must provide consent to proceed!");
       return;
     }
-
+    // TODO: Add DB call to createGame
     if (mode === "single") {
       setIsSingle(true);
       setIsMulti(false);
@@ -66,14 +66,16 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
         },
       }}
     >
-      <h2 className="text-2xl font-bold text-center mb-6">Game Setup</h2>
+      <h2 className="text-2xl font-bold text-center mb-6 text-teal-800">
+        Game Setup
+      </h2>
 
       <div className="flex flex-col gap-4">
         <button
           className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
             !hasConsented
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-teal-500 text-white hover:bg-teal-600"
+              : "bg-gradient-to-r from-teal-500 to-green-500 text-white hover:bg-teal-600"
           }`}
           onClick={() => handleSelection("single")}
           disabled={!hasConsented}
@@ -85,7 +87,7 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
           className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
             !hasConsented
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-teal-500 text-white hover:bg-teal-600"
+              : "bg-gradient-to-r from-teal-500 to-green-500 text-white hover:bg-teal-600"
           }`}
           onClick={() => handleSelection("multi")}
           disabled={!hasConsented}
