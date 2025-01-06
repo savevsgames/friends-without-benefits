@@ -73,7 +73,7 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
           className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
             !hasConsented
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-teal-500 text-white hover:bg-teal-600"
+              : "bg-gradient-to-r from-teal-500 to-green-500 text-white hover:bg-teal-600"
           }`}
           onClick={() => handleSelection("single")}
           disabled={!hasConsented}
@@ -85,7 +85,7 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
           className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
             !hasConsented
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-teal-500 text-white hover:bg-teal-600"
+              : "bg-gradient-to-r from-teal-500 to-green-500 text-white hover:bg-teal-600"
           }`}
           onClick={() => handleSelection("multi")}
           disabled={!hasConsented}

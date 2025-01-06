@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useGameStore, useMultiplayerStore } from "@/store";
+import { useGameStore, useMultiplayerStore, useUserSession } from "@/store";
 import { Peer } from "peerjs";
 // import io from "socket.io-client";
 // Repeatable functions to connect to Socket.IO and PeerJS
@@ -8,6 +8,14 @@ import { enableWebcam } from "@/utils/model-utils";
 // import { initializePeer } from "@/utils/multiplayer-utils";
 import { IMultiplayerState } from "@/store";
 import { IGameState } from "@/store";
+import {
+  FaSquareXTwitter,
+  FaInstagram,
+  FaSquareFacebook,
+  FaSnapchat,
+  FaLinkedin,
+} from "react-icons/fa6";
+import { Tooltip } from "react-tooltip";
 
 const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
@@ -25,7 +33,7 @@ const MultiplayerConnectionManager: React.FC = () => {
 
   // For setting webcam as media type
   const { setCurrentMediaType } = useGameStore();
-
+  const adminUser = useUserSession((state) => state.user?.data.isAdmin);
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
@@ -237,58 +245,110 @@ const MultiplayerConnectionManager: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    <div>
       {/* <h3 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
         Multiplayer Connection Manager
       </h3> */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Reconnect to Socket.IO */}
-        <button
-          className="border btn"
-          onClick={() => handleSocketIOConnection()}
-          style={{ backgroundColor: "lightgray" }}
-        >
-          Re-connect to Socket.IO
-        </button>
-
-        {/* Cleanup Connections */}
-        <button
-          className="border btn"
-          onClick={cleanupConnections}
-          style={{ backgroundColor: "lightgray" }}
-        >
-          Cleanup Connections
-        </button>
-
-        {/* PeerJS Initialization */}
-        <button className="border btn" onClick={handlePeerJSInitialization}>
-          Initialize PeerJS
-        </button>
-
-        {/* Create Multiplayer Room */}
-        <button className="border btn" onClick={handleCreateMultiplayerRoom}>
-          Create Multiplayer Game
-        </button>
-      </div>
-      <p>✅ Socket ID: {useMultiplayerStore.getState().socket?.id || "N/A"}</p>
-      <p> 🆔 Peer ID: {useMultiplayerStore.getState().peer?.id || "N/A"}</p>
-      {isConnected ? (
-        <p>✅Connected to Room: {roomId}</p>
-      ) : (
-        <p>❌ Not Connected</p>
+      {adminUser && (
+        <div className="grid grid-cols-2 gap-4">
+          {/* PeerJS Initialization */}
+          <button className="border btn" onClick={handlePeerJSInitialization}>
+            Initialize PeerJS
+          </button>
+          {/* Cleanup Connections */}
+          <button
+            className="border btn"
+            onClick={cleanupConnections}
+            style={{ backgroundColor: "lightgray" }}
+          >
+            Cleanup Connections
+          </button>
+          {/* Reconnect to Socket.IO */}
+          <button
+            className="border btn"
+            onClick={() => handleSocketIOConnection()}
+            style={{ backgroundColor: "lightgray" }}
+          >
+            Re-connect to Socket.IO
+          </button>
+          <p>
+            ✅ Socket ID: {useMultiplayerStore.getState().socket?.id || "N/A"}
+          </p>
+          <p> 🆔 Peer ID: {useMultiplayerStore.getState().peer?.id || "N/A"}</p>
+          {isConnected ? (
+            <p>✅Connected to Room: {roomId}</p>
+          ) : (
+            <p>❌ Not Connected</p>
+          )}
+        </div>
       )}
-      {/* Join Multiplayer Room */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Enter Room ID"
-          value={inputRoomId}
-          onChange={(e) => setInputRoomId(e.target.value)}
-          className="border p-1"
-        />
-        <button className="border btn" onClick={handleJoinMultiplayerRoom}>
-          Join Game
-        </button>
+      <div className="flex flex-col items-center gap-6">
+        <h2 className="text-2xl font-bold text-teal-700">Multiplayer Setup</h2>
+        <p className="text-center text-gray-600">
+          Choose to <span className="font-semibold">Create a Room</span> or{" "}
+          <span className="font-semibold">Join an Existing Room</span>.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+          {/******************** create room: create room + social ughhh *************************/}
+          <div className="bg-teal-100 p-6 rounded-lg shadow-lg text-center">
+            <h3 className="text-xl font-semibold text-teal-700 mb-4">
+              Create Room
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Start a multiplayer game and share the Room ID with others.
+            </p>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row gap-3 justify-center">
+                <FaSquareXTwitter size={26} />
+                <FaInstagram size={26} />
+                <FaSquareFacebook size={26} />
+                <FaSnapchat size={26} />
+                <FaLinkedin size={26} />
+              </div>
+
+              <button
+                className="w-full py-2 px-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-lg hover:scale-105 transition-transform duration-300"
+                onClick={handleCreateMultiplayerRoom}
+                data-tooltip-id="create room"
+              >
+                <Tooltip
+                  id="create room"
+                  place="bottom-end"
+                  className="font-thin text-xs "
+                >
+                  Click to copy Room Id and share it with friends!
+                </Tooltip>
+                Create Room
+              </button>
+            </div>
+          </div>
+
+          {/* **************** join room: input + join room ************* */}
+          <div className="bg-teal-100 p-6 rounded-lg shadow-lg text-center">
+            <h3 className="text-xl font-semibold text-teal-700 mb-4">
+              Join Room
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Enter the Room ID to join an existing multiplayer game.
+            </p>
+            <div className="flex flex-col gap-4">
+              <input
+                type="text"
+                placeholder="Enter Room ID"
+                value={inputRoomId}
+                onChange={(e) => setInputRoomId(e.target.value)}
+                className="border rounded-md p-2 w-full"
+              />
+              <button
+                className="w-full py-2 px-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-lg hover:scale-105 transition-transform duration-300"
+                onClick={handleJoinMultiplayerRoom}
+              >
+                Join Room
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

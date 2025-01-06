@@ -1,12 +1,13 @@
 import ReactModal from "react-modal";
 import StartGameButton from "./buttons/StartGameButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
+import { useGameStore } from "@/store";
+import MultiPlayerModal from "./MultiplayerModal";
 
 const ChoiceScreen = ({
   isOpen,
   onClose,
   onStartTuto,
-
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -14,6 +15,9 @@ const ChoiceScreen = ({
 
   onTurnOnCamera: () => void;
 }) => {
+  const singlePlayer = useGameStore((state) => state.isSingle);
+  const multiPlayer = useGameStore((state) => state.isMulti);
+
   return (
     <ReactModal
       isOpen={isOpen}
@@ -40,6 +44,19 @@ const ChoiceScreen = ({
       }}
     >
       <div className="flex flex-col items-center justify-center gap-6">
+        {multiPlayer && (
+          <>
+            <button
+              // onClick={}
+              className="card bg-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+            >
+              <h2 className="text-2xl font-bold mb-2">
+                <MultiPlayerModal />
+              </h2>
+              <p className="text-sm">Playing with friends is always fun!</p>
+            </button>
+          </>
+        )}
         {/* start game */}
 
         <StartGameButton onClose={onClose} />

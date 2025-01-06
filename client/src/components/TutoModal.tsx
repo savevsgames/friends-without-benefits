@@ -1,3 +1,4 @@
+
 import React from "react";
 import ReactModal from "react-modal";
 
@@ -18,6 +19,7 @@ const TutoModal: React.FC<TutorialModalProps> = ({
   onSkip,
   isLastStep,
 }) => {
+
   return (
     <ReactModal
       isOpen={isOpen}
@@ -42,6 +44,7 @@ const TutoModal: React.FC<TutorialModalProps> = ({
         },
       }}
     >
+  
       {/* tuto content */}
       <h2 className="text-xl font-bold mb-4">Kick-Off Time!</h2>
       <p className="mb-6">{content[currentStep]}</p>

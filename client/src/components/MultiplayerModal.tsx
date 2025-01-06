@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ReactModal from "react-modal";
 import MultiplayerConnectionManager from "./MultiplayerConnectionManager.tsx";
 
+
 // Set the app element for accessibility
 ReactModal.setAppElement("#root");
 
@@ -10,6 +11,7 @@ const MultiPlayerModal: React.FC = () => {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
 
   return (
     <div>

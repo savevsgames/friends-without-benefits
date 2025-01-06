@@ -237,7 +237,7 @@ export const useAuthStore = create(
     }
   )
 );
-// had to do it this way because of the way the decoded is being decoded. 
+// had to do it this way because of the way the decoded is being decoded.
 interface UserData {
   id: string;
   username: string;
@@ -245,11 +245,12 @@ interface UserData {
   password?: string;
   avatar: string;
   shortestRound: string;
-};
+  isAdmin: boolean;
+}
 interface User {
   data: UserData;
   iat?: number;
-  exp?: number
+  exp?: number;
 }
 
 type SessionState = {
