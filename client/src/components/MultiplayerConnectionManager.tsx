@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGameStore, useMultiplayerStore, useUserSession } from "@/store";
 // import { Peer } from "peerjs";
 // import io from "socket.io-client";
@@ -6,6 +6,9 @@ import { useGameStore, useMultiplayerStore, useUserSession } from "@/store";
 // import { initializeSocket } from "@/utils/multiplayer-utils";
 import { enableWebcam } from "@/utils/model-utils";
 // import { initializePeer } from "@/utils/multiplayer-utils";
+
+import { useMutation } from "@apollo/client";
+import { CREATE_GAME } from "../utils/mutations";
 
 import {
   FaSquareXTwitter,
@@ -38,6 +41,19 @@ const MultiplayerConnectionManager: React.FC = () => {
   const [copied, setCopied] = useState(false);
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");
+  const isHost = useMultiplayerStore((state) => state.isHost);
+  const isMulti = useGameStore((state) => state.isMulti);
+  const setIsSingle = useGameStore((state) => state.setIsSingle);
+  const setIsMulti = useGameStore((state) => state.setIsMulti);
+  // Access the create game mutation
+  const [createGameMutation] = useMutation(CREATE_GAME); // [createGameMutation, { loading, error }]
+  // state.user or state?
+  const user = useUserSession((state) => state.user);
+  const socket = useMultiplayerStore((state) => state.socket);
+
+  useEffect(() => {
+    console.log("Room ID has been copied? ", copied);
+  }, [copied]);
 
   // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
   // USING BUTTON CLICK TO TRIGGER CONNECTION
@@ -96,10 +112,12 @@ const MultiplayerConnectionManager: React.FC = () => {
   //   });
   // };
 
-  const handleCreateMultiplayerRoom = () => {
-    // Make sure the webcam is enabled before creating a room with shareMyStream property of TRUE!
-    enableWebcam();
-    setCurrentMediaType("webcam");
+  const handleMultiplayerGameCreation = async () => {
+    if (!user) {
+      console.log("No user logged in");
+      return;
+    }
+
     // Create a multiplayer game
     const peer = useMultiplayerStore.getState().peer;
     if (!peer) {
@@ -113,9 +131,54 @@ const MultiplayerConnectionManager: React.FC = () => {
     }
 
     // Set the room ID and mark as Host
-    setRoomId(peer.id); // host will be used as gameId in the server context
+
     setIsHost(true);
-    console.log("🏠 Room Created. Room ID:", peer.id);
+    enableWebcam();
+    setCurrentMediaType("webcam");
+
+    try {
+      const { data } = await createGameMutation({
+        variables: {
+          input: {
+            authorId: user.data.id,
+            challengerIds: [],
+            items: [],
+          },
+        },
+      });
+      const newGame = data?.createGame;
+      if (!newGame) {
+        console.error("No game returned from createGame mutation");
+        return;
+      }
+
+      // Register with the socket
+      const gameId = newGame._id;
+      if (socket) {
+        socket.emit("registerUser", {
+          userId: user.data.id,
+          gameId,
+        });
+      }
+
+      setIsHost(true);
+      setRoomId(gameId);
+      setIsMulti(true);
+      setIsSingle(false);
+      console.log(
+        "🏠 Game Room Created: ",
+        "Room ID:",
+        gameId,
+        "Multiplayer: ",
+        isMulti,
+        "You are the host: ",
+        isHost
+      );
+
+      // onClose(); ?
+    } catch (err) {
+      console.error("Error creating multiplayer game:", err);
+    }
   };
 
   const handleJoinMultiplayerRoom = () => {
@@ -331,20 +394,20 @@ const MultiplayerConnectionManager: React.FC = () => {
                 onCopy={() => setCopied(true)}
               >
                 <button
-                  className="w-full py-2 px-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-lg hover:scale-105 transition-transform duration-300"
-                  onClick={handleCreateMultiplayerRoom}
-                  data-tooltip-id="create room"
+                  data-tooltip-id="create-room"
+                  onClick={handleMultiplayerGameCreation}
                 >
-                  <Tooltip
-                    id="create room"
-                    place="bottom-end"
-                    className="font-thin text-xs "
-                  >
-                    {`Click to copy Room Id and share it with friends! ${copied}`}
-                  </Tooltip>
-                  Create Room
+                  Create Multiplayer Game
                 </button>
               </CopyToClipboard>
+
+              <Tooltip
+                id="create-room"
+                place="bottom-end"
+                className="font-thin text-xs"
+              >
+                Click to copy Room Id and share it with friends!
+              </Tooltip>
             </div>
           </div>
 

@@ -5,6 +5,10 @@ import { enableWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
+import { useMutation } from "@apollo/client";
+import { CREATE_GAME } from "../../utils/mutations";
+import { useUserSession } from "@/store";
+
 const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
   const players = useMultiplayerStore((state) => state.players);
@@ -24,16 +28,83 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const currentMediaType = useGameStore((state) => state.currentMediaType);
   const setGameSate = useGameStore((state) => state.setGameState);
 
+  const setIsSingle = useGameStore((state) => state.setIsSingle);
+  const setIsMulti = useGameStore((state) => state.setIsMulti);
+  // Access the create game mutation
+  const [createGameMutation] = useMutation(CREATE_GAME);
+  // state.user or state?
+  const user = useUserSession((state) => state.user);
+  const socket = useMultiplayerStore((state) => state.socket);
+  const setRoomId = useMultiplayerStore((state) => state.setRoomId);
+  const setIsHost = useMultiplayerStore((state) => state.setIsHost);
+
+  // SINGLE PLAYER VERSION
+  const handleSinglePlayerGameCreation = async () => {
+    try {
+      if (!user) {
+        console.log("There is no authorized user");
+        return;
+      }
+      // call the db with the mutation
+      const response = await createGameMutation({
+        variables: {
+          input: {
+            authorId: user.data.id,
+            items: [], // TODO: might need to sync items here - can be done in updateGame instead
+            challengerIds: [],
+          },
+        },
+      });
+
+      // get the new game data from the response
+      const newGameData = response.data?.createGame;
+      if (!newGameData) {
+        console.error("No game was created/returned.");
+        return;
+      }
+      // Set the gameId for the server/user link
+      const gameId = newGameData._id;
+      console.log(
+        `Host with user data: ${user} has created a game with id: `,
+        gameId
+      );
+
+      // Emit to the server that a new user is registering (first register)
+      if (!socket) {
+        console.error("❌ No socket exists to broadcast new game.");
+      } else {
+        console.log("Emitting registerUser: ", user?.data.id, gameId);
+        socket.emit("registerUser", {
+          userId: user?.data.id,
+          gameId,
+        });
+      }
+
+      // Update the zustand store
+      setIsSingle(true);
+      setIsMulti(false);
+      setIsHost(true);
+      setRoomId(gameId);
+      console.log(
+        "Number of players in the game: ",
+        Object.keys(players).length
+      );
+      // close the modal
+      if (onClose) {
+        onClose();
+      }
+    } catch (error) {
+      console.log("Error creating game in Choice Screen: ", error);
+    }
+  };
+
   /***
    * On button click -> enables webcam if stream is available
    */
   const handleWebcamStart = async () => {
     try {
       console.log("Starting webcam...");
-      console.log(
-        "Number of players in the game: ",
-        Object.keys(players).length
-      );
+
       // webcamOn is the webcam stream object when it is first enabled
       const webcamOn = await enableWebcam();
       // players object contains all the Players in the game so we take the number of
@@ -92,9 +163,12 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         );
         // TODO: DB Call for update game - start time etc.
         // THIS LEADS TO EMITTING THE COUNTDOWN > STORE > SERVER
-        setGameSate("countdown");
-        
-        
+        try {
+          await handleSinglePlayerGameCreation();
+          setGameSate("countdown");
+        } catch (error) {
+          console.error("Error Creating Game", error);
+        }
       } else {
         console.log("Player is not ready to start the game.");
       }
@@ -144,7 +218,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         <h2 className="text-2xl font-bold mb-2">
           {isReady ? "Waiting for other players..." : "Start Game!"}
         </h2>
-        <p className="text-sm text-gray-300">Jump right into the action!</p>
+        <p className="text-sm text-gray-300">Start Single Player Game</p>
       </button>
     </div>
   );
