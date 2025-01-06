@@ -80,10 +80,10 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         "Button [StartGameButton] => The webcam is :",
         useMultiplayerStore.getState().webcamEnabled
       );
-      console.log("[StartGameButton] => Video playing state: ", videoPlaying);
+      // console.log("[StartGameButton] => Video playing state: ", videoPlaying);
 
       setPlayerReady(playerId!, !isReady);
-      console.log("Button [StartGameButton] => isReady after click: ", isReady);
+      // console.log("Button [StartGameButton] => isReady after click: ", isReady);
 
       if (isReady && videoPlaying && canvasReady) {
         console.log(
@@ -91,7 +91,10 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
           "Starting countdown..."
         );
         // TODO: DB Call for update game - start time etc.
+        // THIS LEADS TO EMITTING THE COUNTDOWN > STORE > SERVER
         setGameSate("countdown");
+        
+        
       } else {
         console.log("Player is not ready to start the game.");
       }

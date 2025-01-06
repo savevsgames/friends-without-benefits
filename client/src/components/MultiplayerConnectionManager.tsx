@@ -43,59 +43,59 @@ const MultiplayerConnectionManager: React.FC = () => {
   // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
   // USING BUTTON CLICK TO TRIGGER CONNECTION
 
-  const handlePeerJSInitialization = () => {
-    const { socket, playerId } = useMultiplayerStore.getState();
-    if (!socket) {
-      console.error("❌ Socket.IO connection not established.");
-      return;
-    }
-    console.log("Initializing PeerJS connection...");
+  // const handlePeerJSInitialization = () => {
+  //   const { socket, playerId } = useMultiplayerStore.getState();
+  //   if (!socket) {
+  //     console.error("❌ Socket.IO connection not established.");
+  //     return;
+  //   }
+  //   console.log("Initializing PeerJS connection...");
 
-    // TODO: Check store first to see if peer exists? or disable button if peer exists?
-    const hostName = window.location.hostname;
-    const peerJs =
-      useMultiplayerStore.getState().peer ||
-      new Peer({
-        host: hostName,
-        port: 5173,
-        path: "/peerjs",
-      });
-    // Make sure local scope syncs with store
+  //   // TODO: Check store first to see if peer exists? or disable button if peer exists?
+  //   const hostName = window.location.hostname;
+  //   const peerJs =
+  //     useMultiplayerStore.getState().peer ||
+  //     new Peer({
+  //       host: hostName,
+  //       port: 5173,
+  //       path: "/peerjs",
+  //     });
+  //   // Make sure local scope syncs with store
 
-    setPeer(peerJs);
-    console.log("✅ PeerJS Connection established.");
+  //   setPeer(peerJs);
+  //   console.log("✅ PeerJS Connection established.");
 
-    // When peer is initialized, update the store with the peerId and player ID and set connection status
-    peerJs.on("open", (id) => {
-      console.log("PeerJS connection established with ID:", id);
+  //   // When peer is initialized, update the store with the peerId and player ID and set connection status
+  //   peerJs.on("open", (id) => {
+  //     console.log("PeerJS connection established with ID:", id);
 
-      setPlayerId(id); // Save player ID to store
-      console.log("🆔 Player ID:", playerId);
+  //     setPlayerId(id); // Save player ID to store
+  //     console.log("🆔 Player ID:", playerId);
 
-      setRoomId(id); // Set the room ID to the local peer ID
-      console.log("🏠 Room ID:", roomId);
+  //     setRoomId(id); // Set the room ID to the local peer ID
+  //     console.log("🏠 Room ID:", roomId);
 
-      setPeer(peerJs); // Save peer instance to store
-    });
+  //     setPeer(peerJs); // Save peer instance to store
+  //   });
 
-    // Log data when a peer connection is established
-    peerJs.on("connection", (conn) => {
-      console.log("Peer connection is incoming: ", conn.peer);
+  //   // Log data when a peer connection is established
+  //   peerJs.on("connection", (conn) => {
+  //     console.log("Peer connection is incoming: ", conn.peer);
 
-      conn.on("data", (data) => {
-        console.log("Received data from peer: ", data);
-      });
-    });
+  //     conn.on("data", (data) => {
+  //       console.log("Received data from peer: ", data);
+  //     });
+  //   });
 
-    peerJs.on("close", () => {
-      console.log("Peer connection is closed.");
-    });
+  //   peerJs.on("close", () => {
+  //     console.log("Peer connection is closed.");
+  //   });
 
-    peerJs.on("error", (err) => {
-      console.error("PeerJS Error:", err);
-      // peerJs.destroy(); // because this is in a modal, we don't want to destroy the peer connection
-    });
-  };
+  //   peerJs.on("error", (err) => {
+  //     console.error("PeerJS Error:", err);
+  //     // peerJs.destroy(); // because this is in a modal, we don't want to destroy the peer connection
+  //   });
+  // };
 
   const handleCreateMultiplayerRoom = () => {
     // Make sure the webcam is enabled before creating a room with shareMyStream property of TRUE!
@@ -176,76 +176,78 @@ const MultiplayerConnectionManager: React.FC = () => {
     }
   };
 
-  const handleSocketIOConnection = () => {
-    const connectedStatus = useMultiplayerStore.getState().isConnected;
-    if (connectedStatus) {
-      console.error("Socket.IO connection already established.");
-      return;
-    }
-    console.log("Initializing Socket.IO connection...");
-    const socketIo = initializeSocket();
-    setSocket(socketIo);
-    console.log(
-      "Socket.IO connection established: ",
-      `✅ Socket ID: ${useMultiplayerStore.getState().socket?.id}`
-    );
-  };
+  // const handleSocketIOConnection = () => {
+  //   const connectedStatus = useMultiplayerStore.getState().isConnected;
+  //   if (connectedStatus) {
+  //     console.error("Socket.IO connection already established.");
+  //     return;
+  //   }
+  //   console.log("Initializing Socket.IO connection...");
+  //   const socketIo = initializeSocket();
+  //   setSocket(socketIo);
+  //   console.log(
+  //     "Socket.IO connection established: ",
+  //     `✅ Socket ID: ${useMultiplayerStore.getState().socket?.id}`
+  //   );
+  // };
+
+  // TODO: THIS MAY STILL BE NEEDED
   // Turns on the webcam when the connection is established for the challenger
-  useEffect(() => {
-    if (isConnected) {
-      console.log("🎥 Enabling Webcam...");
-      // Enable webcam and and allow game to start with "start game" type button for both players - isReady?
-      enableWebcam();
-      setCurrentMediaType("webcam");
-    }
-  }, [isConnected, setCurrentMediaType, roomId, setRoomId]);
+  // useEffect(() => {
+  //   if (isConnected) {
+  //     console.log("🎥 Enabling Webcam...");
+  //     // Enable webcam and and allow game to start with "start game" type button for both players - isReady?
+  //     enableWebcam();
+  //     setCurrentMediaType("webcam");
+  //   }
+  // }, [isConnected, setCurrentMediaType, roomId, setRoomId]);
 
-  useEffect(() => {
-    const socket = useMultiplayerStore.getState().socket;
+  // useEffect(() => {
+  //   const socket = useMultiplayerStore.getState().socket;
 
-    if (!socket) {
-      console.error("❌ Socket.IO connection not established.");
-      return;
-    }
+  //   if (!socket) {
+  //     console.error("❌ Socket.IO connection not established.");
+  //     return;
+  //   }
 
-    // Listen for state updates to either game or multiplayer store
-    socket.on(
-      "stateUpdate",
-      ({
-        store,
-        updates,
-      }: {
-        store: "game" | "multiplayer";
-        updates: Partial<IGameState | IMultiplayerState>;
-      }) => {
-        if (store === "game") {
-          console.log(`🔄 Incoming GameStore Update (${store}):`, updates);
-          useGameStore
-            .getState()
-            .incomingUpdate(updates as Partial<IGameState>);
-        } else if (store === "multiplayer") {
-          console.log(
-            `🔄 Incoming MultiplayerStore Update (${store}):`,
-            updates
-          );
-          useMultiplayerStore
-            .getState()
-            .incomingUpdate(updates as Partial<IMultiplayerState>);
-        }
-      }
-    );
+  //   // Listen for state updates to either game or multiplayer store
+  //   socket.on(
+  //     "stateUpdate",
+  //     ({
+  //       store,
+  //       updates,
+  //     }: {
+  //       store: "game" | "multiplayer";
+  //       updates: Partial<IGameState | IMultiplayerState>;
+  //     }) => {
+  //       if (store === "game") {
+  //         console.log(`🔄 Incoming GameStore Update (${store}):`, updates);
+  //         useGameStore
+  //           .getState()
+  //           .incomingUpdate(updates as Partial<IGameState>);
+  //       } else if (store === "multiplayer") {
+  //         console.log(
+  //           `🔄 Incoming MultiplayerStore Update (${store}):`,
+  //           updates
+  //         );
+  //         useMultiplayerStore
+  //           .getState()
+  //           .incomingUpdate(updates as Partial<IMultiplayerState>);
+  //       }
+  //     }
+  //   );
 
-    // Listen for chat messages
-    socket.on("chat-message", (data: { sender: string; message: string }) => {
-      console.log("💬 Chat Message Received:", data);
-      useMultiplayerStore.getState().addChatMessage(data);
-    });
+  //   // Listen for chat messages
+  //   socket.on("chat-message", (data: { sender: string; message: string }) => {
+  //     console.log("💬 Chat Message Received:", data);
+  //     useMultiplayerStore.getState().addChatMessage(data);
+  //   });
 
-    return () => {
-      socket.off("stateUpdate");
-      socket.off("chat-message");
-    };
-  }, []);
+  //   return () => {
+  //     socket.off("stateUpdate");
+  //     socket.off("chat-message");
+  //   };
+  // }, []);
 
   return (
     <div>

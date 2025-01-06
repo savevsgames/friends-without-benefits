@@ -84,6 +84,7 @@ const ScavengerGame = () => {
       countdownTimer = setInterval(() => {
         const currentCountdown = useGameStore.getState().countdown;
         if (currentCountdown !== null && currentCountdown > 0) {
+          // useGameStore.getState().setCountdown(currentCountdown - 1);
           return currentCountdown - 1;
         } else {
           clearInterval(countdownTimer);

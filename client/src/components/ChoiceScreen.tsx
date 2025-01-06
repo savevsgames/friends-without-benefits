@@ -15,7 +15,7 @@ const ChoiceScreen = ({
 
   onTurnOnCamera: () => void;
 }) => {
-  const singlePlayer = useGameStore((state) => state.isSingle);
+  // const singlePlayer = useGameStore((state) => state.isSingle);
   const multiPlayer = useGameStore((state) => state.isMulti);
 
   return (
