@@ -48,14 +48,14 @@ const GameStoreLiveFeed = () => {
   };
 
   return (
-    <>
+    <div style={{ zIndex: 2000 }}>
       <h2>Debug Store Viewer</h2>
       <div
         style={{
           padding: "1rem",
           display: "flex",
-          flexDirection: "column",
-          gap: "0.75rem",
+          flexDirection: "row",
+          gap: "0.25em",
           justifyContent: "start",
           maxHeight: "calc(100vh - 400px)",
         }}
@@ -63,11 +63,11 @@ const GameStoreLiveFeed = () => {
         <div>
           <h3>Game Store</h3>
           {Object.entries(gameStore).map(([key, value]) => (
-            <div key={key} className="flex items-start p-2 m-2">
+            <div key={key} className="flex items-start m-2">
               <span className="font-mono text-sm text-blue-600 min-w-[120px]">
                 {trimString(key, 20)}:
               </span>
-              <span className="font-mono text-sm text-gray-700 break-all">
+              <span className="font-mono text-md text-red-700 break-all">
                 {formatValue(value)}
               </span>
             </div>
@@ -80,14 +80,14 @@ const GameStoreLiveFeed = () => {
               <span className="font-mono text-sm text-blue-600 min-w-[120px]">
                 {key}:
               </span>
-              <span className="font-mono text-sm text-gray-700 break-all">
+              <span className="font-mono text-md text-red-700 break-all">
                 {formatValue(value)}
               </span>
             </div>
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

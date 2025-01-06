@@ -35,6 +35,19 @@ const SideBar = () => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  // Local Setter for showing the Multiplayer Modal
+  const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
+
+  // Modal Handler for multiplayer modal
+  // const handleOpenMPModal = () => {
+  //   setShowMultiplayerModal(true);
+  // };
+
+  const handleCloseMPModal = () => {
+    setShowMultiplayerModal(false);
+  };
+
   return (
     <Sidebar
       collapsed={isCollapsed}
@@ -231,7 +244,10 @@ const SideBar = () => {
         {/* Multiplayer Manager */}
         {multiPlayer && (
           <MenuItem icon={<FaPeopleGroup size={24} />}>
-            <MultiPlayerModal />
+            <MultiPlayerModal
+              isOpen={showMultiplayerModal}
+              onClose={handleCloseMPModal}
+            />
           </MenuItem>
         )}
       </Menu>
