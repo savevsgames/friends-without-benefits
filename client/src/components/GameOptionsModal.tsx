@@ -1,5 +1,4 @@
 import ReactModal from "react-modal";
-import { useGameStore } from "@/store";
 import { useState } from "react";
 
 ReactModal.setAppElement("#root");
@@ -13,27 +12,18 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const setIsSingle = useGameStore((state) => state.setIsSingle);
-  const setIsMulti = useGameStore((state) => state.setIsMulti);
   const [hasConsented, setHasConsented] = useState(false); // State for consent
 
-  const handleSelection = (mode: "single" | "multi") => {
+  const handleConsentChange = () => setHasConsented((prev) => !prev);
+
+  const handleAccept = () => {
     if (!hasConsented) {
       alert("You must provide consent to proceed!");
       return;
     }
-    // TODO: Add DB call to createGame
-    if (mode === "single") {
-      setIsSingle(true);
-      setIsMulti(false);
-    } else if (mode === "multi") {
-      setIsMulti(true);
-      setIsSingle(false);
-    }
+    // If they have accepted, allow them to close with button click
     onClose();
   };
-
-  const handleConsentChange = () => setHasConsented((prev) => !prev);
 
   return (
     <ReactModal
@@ -72,27 +62,14 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
 
       <div className="flex flex-col gap-4">
         <button
-          className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
+          onClick={handleAccept}
+          className={`px-4 py-2 border rounded-md text-sm font-semibold ${
             !hasConsented
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-gradient-to-r from-teal-500 to-green-500 text-white hover:bg-teal-600"
           }`}
-          onClick={() => handleSelection("single")}
-          disabled={!hasConsented}
         >
-          Single-Player
-        </button>
-
-        <button
-          className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
-            !hasConsented
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-teal-500 to-green-500 text-white hover:bg-teal-600"
-          }`}
-          onClick={() => handleSelection("multi")}
-          disabled={!hasConsented}
-        >
-          Multi-Player
+          Let’s Go!
         </button>
       </div>
 
