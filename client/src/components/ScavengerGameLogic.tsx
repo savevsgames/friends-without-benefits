@@ -63,6 +63,15 @@ const ScavengerGame = () => {
   useEffect(() => {
     if (numFoundItems >= 5 || timeRemaining === 0) {
       resetGame(); //this currently sets the game to "setup"
+      // TODO: Add DB Call to save/ updateGame data
+      //TODO: DONT JUST RESET GAME - GIVE OPTIONS:
+      // 1. Play Again
+      // 2. Return to Tutorial
+      // 3. Return to Home
+      // 4. View Leaderboard
+      // 5. Play a Multiplayer Game
+      // TODO: currently sets the game to "setup" -> Need to change to "complete" and wait for user input
+      // stop detecting, etc. and show a modal with the results
     }
   }, [numFoundItems, timeRemaining, resetGame]);
 

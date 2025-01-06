@@ -90,6 +90,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
           "Player is ready to start the game.",
           "Starting countdown..."
         );
+        // TODO: DB Call for update game - start time etc.
         setGameSate("countdown");
       } else {
         console.log("Player is not ready to start the game.");
