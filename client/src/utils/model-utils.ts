@@ -178,7 +178,7 @@ export const enableWebcam = async (): Promise<MediaStream | null> => {
       // Set the video element source to the stream
       videoElement.srcObject = stream;
       videoElement.autoplay = true;
-      videoElement.muted = true;
+      videoElement.muted = true; // TODO: may need to change this for multiplayer
       videoElement.playsInline = true;
 
       console.log("Webcam enabled:", videoElement.srcObject);

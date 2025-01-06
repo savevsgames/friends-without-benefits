@@ -22,7 +22,7 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
       alert("You must provide consent to proceed!");
       return;
     }
-
+    // TODO: Add DB call to createGame
     if (mode === "single") {
       setIsSingle(true);
       setIsMulti(false);
