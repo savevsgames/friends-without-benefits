@@ -14,6 +14,7 @@ import { ExpressPeerServer } from "peer";
 import cors from "cors";
 import { authenticateToken } from "./utils/auth.js";
 import { createSocketManager } from "./socket/index.js";
+import type { ServerContext } from "./socket/socketTypes.js";
 
 // Define __dirname manually
 const __filename = fileURLToPath(import.meta.url);
@@ -53,9 +54,6 @@ const startApolloServer = async () => {
   // Create HTTP Server
   const httpServer = createServer(app);
 
-  // SocketId -> PeerJS ID mappings for Socket.IO to track connected users
-  const connectedUsers = new Map<string, string>();
-
   /**
    * Track ready states for players using playerReady and updateReadyStates
    * @type Record<string, boolean>
@@ -80,115 +78,129 @@ const startApolloServer = async () => {
     allowEIO3: true, // Legacy support for older browsers
   });
 
-  io.on("connection", (socket) => {
-    console.log("🔗 Socket.IO Connected:", socket.id);
+  // Set up the server context
+  const serverContext: ServerContext = {
+    io,
+    // SocketId -> PeerJS ID mappings for Socket.IO to track connected users
+    connectedUsers: new Map<string, string>(),
+    playerReadyStates: {},
+    numCurrentActiveUsers: 0,
+  };
 
-    /**
-     * 🔄 State Update Middleware
-     * - Listens for state updates from clients.
-     * - Broadcasts state updates to all other clients (not the sender)
-     */
-    socket.on("stateUpdate", ({ store, updates }) => {
-      // SYNCHRONIZATION MIDDLEWARE - Updates zustand "store" with incoming updates - game or multiplayer
-      console.log(`Updating the ${store} store with:`, updates);
-      try {
-        if (store === "game") {
-          console.log("🔄 Game State Update:", updates);
-          socket.broadcast.emit("stateUpdate", { store: "game", updates });
-        } else if (store === "multiplayer") {
-          console.log("🔄 Multiplayer State Update:", updates);
-          socket.broadcast.emit("stateUpdate", {
-            store: "multiplayer",
-            updates,
-          });
-        }
-      } catch (error) {
-        console.error("❗ Error updating state:", error);
-      }
-    });
+  // Pass the server into the Create Socket Manager
+  const socketManager = createSocketManager(serverContext);
+  // Let the manager handle all listeners now
+  io.on("connection", socketManager.socketConnection);
 
-    /**
-     * 🛠️ Chat Messaging Middleware
-     * - Listens for chat messages from clients.
-     * - Broadcasts chat messages to all clients to update chat history as single source of truth.
-     */
-    socket.on("chat-message", (data) => {
-      console.log(`💬 Chat message from ${data.sender}: ${data.message}`);
+  // io.on("connection", (socket) => {
+  //   console.log("🔗 Socket.IO Connected:", socket.id);
 
-      // Send to everyone including the sender - chat component will filter out the sender
-      io.emit("chat-message", data);
-    });
+  //   /**
+  //    * 🔄 State Update Middleware
+  //    * - Listens for state updates from clients.
+  //    * - Broadcasts state updates to all other clients (not the sender)
+  //    */
+  //   socket.on("stateUpdate", ({ store, updates }) => {
+  //     // SYNCHRONIZATION MIDDLEWARE - Updates zustand "store" with incoming updates - game or multiplayer
+  //     console.log(`Updating the ${store} store with:`, updates);
+  //     try {
+  //       if (store === "game") {
+  //         console.log("🔄 Game State Update:", updates);
+  //         socket.broadcast.emit("stateUpdate", { store: "game", updates });
+  //       } else if (store === "multiplayer") {
+  //         console.log("🔄 Multiplayer State Update:", updates);
+  //         socket.broadcast.emit("stateUpdate", {
+  //           store: "multiplayer",
+  //           updates,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("❗ Error updating state:", error);
+  //     }
+  //   });
 
-    /**
-     * 📡 PeerJS Signalling Middleware
-     * - Listens for PeerJS events.
-     * - Broadcasts PeerJS events to all clients.
-     */
-    socket.on("registerPeerId", ({ peerId }) => {
-      // Store the mapping of SocketId -> PeerId to connectedUsers
-      connectedUsers.set(socket.id, peerId);
-      console.log(`📹 Peer Registered: ${peerId} by Socket: ${socket.id}`);
-      socket.broadcast.emit("peer-registered", { peerId, socketId: socket.id });
-    });
+  //   /**
+  //    * 🛠️ Chat Messaging Middleware
+  //    * - Listens for chat messages from clients.
+  //    * - Broadcasts chat messages to all clients to update chat history as single source of truth.
+  //    */
+  //   socket.on("chat-message", (data) => {
+  //     console.log(`💬 Chat message from ${data.sender}: ${data.message}`);
 
-    /**
-     * 🔍 Opponent ID Request Middleware
-     * - Listens for requests for an opponent ID.
-     * - Responds with the first available opponent ID.
-     */
-    socket.on("requestOpponentId", ({ from }) => {
-      console.log(`🔍 Opponent ID requested by: ${from}`);
-      // Find the first available opponent - later we can implement an
-      // array where all connected users and loop through them
-      console.log("Connected Users", connectedUsers);
-      const opponent = Array.from(connectedUsers.entries()).find(
-        // Find a key-value pair that is not the user's own socket.id
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ([key, _value]) => key !== socket.id
-      );
+  //     // Send to everyone including the sender - chat component will filter out the sender
+  //     io.emit("chat-message", data);
+  //   });
 
-      if (opponent) {
-        const [socketId, peerId] = opponent;
-        socket.emit("opponentId", { opponentId: peerId });
-        console.log(`📤 Sent opponentId: ${peerId} to ${from}`);
-        console.log("socket ID", socketId);
-      } else {
-        console.warn("❗ No opponent available");
-        socket.emit("opponentId", { opponentId: null });
-      }
-    });
+  //   /**
+  //    * 📡 PeerJS Signalling Middleware
+  //    * - Listens for PeerJS events.
+  //    * - Broadcasts PeerJS events to all clients.
+  //    */
+  //   socket.on("registerPeerId", ({ peerId }) => {
+  //     // Store the mapping of SocketId -> PeerId to connectedUsers
+  //     connectedUsers.set(socket.id, peerId);
+  //     console.log(`📹 Peer Registered: ${peerId} by Socket: ${socket.id}`);
+  //     socket.broadcast.emit("peer-registered", { peerId, socketId: socket.id });
+  //   });
 
-    // Listen for 'playerReady' event
-    // Record<string, boolean> = {};
-    socket.on("playerReady", ({ playerId }) => {
-      playerReadyStates[playerId] = true;
-      console.log(`🎯 Player ${playerId} is ready.`);
+  //   /**
+  //    * 🔍 Opponent ID Request Middleware
+  //    * - Listens for requests for an opponent ID.
+  //    * - Responds with the first available opponent ID.
+  //    */
+  //   socket.on("requestOpponentId", ({ from }) => {
+  //     console.log(`🔍 Opponent ID requested by: ${from}`);
+  //     // Find the first available opponent - later we can implement an
+  //     // array where all connected users and loop through them
+  //     console.log("Connected Users", connectedUsers);
+  //     const opponent = Array.from(connectedUsers.entries()).find(
+  //       // Find a key-value pair that is not the user's own socket.id
+  //       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //       ([key, _value]) => key !== socket.id
+  //     );
 
-      // Check if all players are ready / all values of the records are true
-      const allPlayersReady = Object.values(playerReadyStates).every(
-        (ready) => ready === true
-      );
+  //     if (opponent) {
+  //       const [socketId, peerId] = opponent;
+  //       socket.emit("opponentId", { opponentId: peerId });
+  //       console.log(`📤 Sent opponentId: ${peerId} to ${from}`);
+  //       console.log("socket ID", socketId);
+  //     } else {
+  //       console.warn("❗ No opponent available");
+  //       socket.emit("opponentId", { opponentId: null });
+  //     }
+  //   });
 
-      if (allPlayersReady) {
-        console.log("✅ All players are ready. Starting 5-second countdown.");
-        // Emit only the number of seconds to start the countdown
-        // This is where the countdown time can be adjusted - 5s for now
-        io.emit("startCountdown", 5);
-      }
+  //   // Listen for 'playerReady' event
+  //   // Record<string, boolean> = {};
+  //   socket.on("playerReady", ({ playerId }) => {
+  //     playerReadyStates[playerId] = true;
+  //     console.log(`🎯 Player ${playerId} is ready.`);
 
-      // Broadcast updated ready states to all clients
-      io.emit("updateReadyStates", playerReadyStates);
-    });
+  //     // Check if all players are ready / all values of the records are true
+  //     const allPlayersReady = Object.values(playerReadyStates).every(
+  //       (ready) => ready === true
+  //     );
 
-    socket.on("disconnect", () => {
-      console.log("❌ Socket.IO Disconnected:", socket.id);
-      // Clean up connectedUsers map
-      connectedUsers.delete(socket.id);
-      delete playerReadyStates[socket.id];
-      // Notify all clients that a peer has disconnected
-      socket.broadcast.emit("peer-disconnected", { socketId: socket.id });
-    });
-  });
+  //     if (allPlayersReady) {
+  //       console.log("✅ All players are ready. Starting 5-second countdown.");
+  //       // Emit only the number of seconds to start the countdown
+  //       // This is where the countdown time can be adjusted - 5s for now
+  //       io.emit("startCountdown", 5);
+  //     }
+
+  //     // Broadcast updated ready states to all clients
+  //     io.emit("updateReadyStates", playerReadyStates);
+  //   });
+
+  //   socket.on("disconnect", () => {
+  //     console.log("❌ Socket.IO Disconnected:", socket.id);
+  //     // Clean up connectedUsers map
+  //     connectedUsers.delete(socket.id);
+  //     delete playerReadyStates[socket.id];
+  //     // Notify all clients that a peer has disconnected
+  //     socket.broadcast.emit("peer-disconnected", { socketId: socket.id });
+  //   });
+  // });
 
   // PEERJS
   const peerServer = ExpressPeerServer(httpServer, {

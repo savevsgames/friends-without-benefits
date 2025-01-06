@@ -19,10 +19,26 @@ export interface ChatMessage {
   message: string;
 }
 
+// server context for each user's connection
+export interface UserConnection {
+  socketId: string;
+  peerId: string;
+  gameId?: string;
+  isHost: boolean;
+  isReady: boolean;
+}
+// server context for each Game "Room"
+export interface GameRoom {
+  gameId: string;
+  hostId: string;
+  players: Map<string, UserConnection>;
+  gameState: string;
+}
+
 // interface for back-end context (Map)
 export interface ServerContext {
   io: SocketIOServer;
-  connectedUsers: Map<string, string>;
-  playerReadyStates: Record<string, boolean>;
   numCurrentActiveUsers: number;
+  userConnections: Map<string, UserConnection>;
+  gameRooms: Map<string, GameRoom>;
 }
