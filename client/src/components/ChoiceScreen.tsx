@@ -3,6 +3,9 @@ import StartGameButton from "./buttons/StartGameButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import { useGameStore } from "@/store";
 import MultiPlayerModal from "./MultiplayerModal";
+import { useMutation } from "@apollo/client";
+import { CREATE_GAME } from "../utils/mutations";
+import { useUserSession, useMultiplayerStore } from "@/store";
 
 const ChoiceScreen = ({
   isOpen,
@@ -16,7 +19,49 @@ const ChoiceScreen = ({
   onTurnOnCamera: () => void;
 }) => {
   // const singlePlayer = useGameStore((state) => state.isSingle);
-  const multiPlayer = useGameStore((state) => state.isMulti);
+  const multiPlayer = useGameStore((state) => state.isMulti); // flag
+  // Access the create game mutation
+  const [createGameMutation, { data, loading, error }] =
+    useMutation(CREATE_GAME);
+  // state.user or state?
+  const user = useUserSession((state) => state.user);
+  const socket = useMultiplayerStore((state) => state.socket);
+  const setRoomId = useMultiplayerStore((state) => state.setRoomId);
+  const setIsHost = useMultiplayerStore((state) => state.setIsHost);
+
+  const handleGameCreation = async () => {
+    try {
+      if (!user) {
+        console.log("There is no authorized user");
+        return;
+      }
+      // call the db with the mutation
+      const response = await createGameMutation({
+        variables: {
+          input: {
+            authorId: user.data.id,
+            items: [], // TODO: might need to sync items here - can be done in updateGame instead
+            challengerIds: [],
+          },
+        },
+      });
+
+      // get the new game data from the response
+      const newGameData = response.data?.createGame;
+      if (!newGameData) {
+        console.error("No game was created/returned.");
+        return;
+      }
+      // Set the gameId for the server/user link
+      const gameId = newGameData._id;
+      console.log(
+        `Host with user data: ${user} has created a game with id: `,
+        gameId
+      );
+    } catch (error) {
+      console.log("Error creating game in Choice Screen: ", error);
+    }
+  };
 
   return (
     <ReactModal
