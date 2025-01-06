@@ -8,9 +8,10 @@ const MONGODB_URI_MPTESTING = process.env.MONGODB_URI_MPTESTING || "";
 
 const db = async (): Promise<typeof mongoose.connection> => {
   console.log("Starting database connection...");
-  console.log("NODE_ENV:", process.env.NODE_ENV);
-  console.log("MONGODB_URI:", process.env.MONGODB_URI);
-  console.log("MONGODB_URI_MPTESTING:", process.env.MONGODB_URI_MPTESTING);
+  // console.log("NODE_ENV:", process.env.NODE_ENV);
+  // console.log("MONGODB_URI:", process.env.MONGODB_URI);
+  // console.log("MONGODB_URI_MPTESTING:", process.env.MONGODB_URI_MPTESTING);
+
   if (!MONGODB_URI || !MONGODB_URI_MPTESTING) {
     throw new Error("Missing MongoDB URI environment variable!");
   }
