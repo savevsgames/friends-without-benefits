@@ -140,7 +140,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         <h2 className="text-2xl font-bold mb-2">
           {isReady ? "Waiting for other players..." : "Start Game!"}
         </h2>
-        <p className="text-sm">Jump right into the action!</p>
+        <p className="text-sm text-gray-300">Jump right into the action!</p>
       </button>
     </div>
   );
