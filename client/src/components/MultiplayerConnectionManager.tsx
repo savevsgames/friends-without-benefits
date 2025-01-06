@@ -16,9 +16,11 @@ import {
   FaLinkedin,
 } from "react-icons/fa6";
 import { Tooltip } from "react-tooltip";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
+
   const {
     setSocket,
     setPeer,
@@ -34,6 +36,7 @@ const MultiplayerConnectionManager: React.FC = () => {
   // For setting webcam as media type
   const { setCurrentMediaType } = useGameStore();
   const adminUser = useUserSession((state) => state.user?.data.isAdmin);
+  const [copied, setCopied] = useState(false);
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
@@ -295,32 +298,47 @@ const MultiplayerConnectionManager: React.FC = () => {
             <h3 className="text-xl font-semibold text-teal-700 mb-4">
               Create Room
             </h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 mb-8">
               Start a multiplayer game and share the Room ID with others.
             </p>
             <div className="flex flex-col gap-4">
-              <div className="flex flex-row gap-3 justify-center">
-                <FaSquareXTwitter size={26} />
-                <FaInstagram size={26} />
-                <FaSquareFacebook size={26} />
-                <FaSnapchat size={26} />
-                <FaLinkedin size={26} />
+              <div className="flex flex-row gap-3 justify-center mb-2">
+                <a href="https://x.com/?lang=en&mx=2" target="_blank">
+                  <FaSquareXTwitter size={26} />
+                </a>
+                <a href="https://www.instagram.com/" target="_blank">
+                  <FaInstagram size={26} />
+                </a>
+                <a href="https://www.facebook.com/" target="_blank">
+                  <FaSquareFacebook size={26} />
+                </a>
+                <a href="https://www.snapchat.com/" target="_blank">
+                  <FaSnapchat size={26} />
+                </a>
+                <a href="https://www.linkedin.com/" target="_blank">
+                  {" "}
+                  <FaLinkedin size={26} />
+                </a>
               </div>
-
-              <button
-                className="w-full py-2 px-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-lg hover:scale-105 transition-transform duration-300"
-                onClick={handleCreateMultiplayerRoom}
-                data-tooltip-id="create room"
+              <CopyToClipboard
+                text={roomId || ""}
+                onCopy={() => setCopied(true)}
               >
-                <Tooltip
-                  id="create room"
-                  place="bottom-end"
-                  className="font-thin text-xs "
+                <button
+                  className="w-full py-2 px-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-lg hover:scale-105 transition-transform duration-300"
+                  onClick={handleCreateMultiplayerRoom}
+                  data-tooltip-id="create room"
                 >
-                  Click to copy Room Id and share it with friends!
-                </Tooltip>
-                Create Room
-              </button>
+                  <Tooltip
+                    id="create room"
+                    place="bottom-end"
+                    className="font-thin text-xs "
+                  >
+                    {`Click to copy Room Id and share it with friends! ${copied}`}
+                  </Tooltip>
+                  Create Room
+                </button>
+              </CopyToClipboard>
             </div>
           </div>
 
