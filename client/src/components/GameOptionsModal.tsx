@@ -66,7 +66,9 @@ const GameOptionsModal: React.FC<GameOptionsModalProps> = ({
         },
       }}
     >
-      <h2 className="text-2xl font-bold text-center mb-6">Game Setup</h2>
+      <h2 className="text-2xl font-bold text-center mb-6 text-teal-800">
+        Game Setup
+      </h2>
 
       <div className="flex flex-col gap-4">
         <button

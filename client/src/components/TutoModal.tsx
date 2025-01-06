@@ -44,7 +44,6 @@ const TutoModal: React.FC<TutorialModalProps> = ({
         },
       }}
     >
-  
       {/* tuto content */}
       <h2 className="text-xl font-bold mb-4">Kick-Off Time!</h2>
       <p className="mb-6">{content[currentStep]}</p>
@@ -54,7 +53,7 @@ const TutoModal: React.FC<TutorialModalProps> = ({
         {/* Shell div for StartGameButton */}
         <button
           onClick={onSkip}
-          className="bg-teal-600 hover:bg-teal-700 text-white rounded-md px-4 py-2"
+          className="bg-teal-100 text-teal-700 hover:bg-teal-700  rounded-md px-4 py-2"
         >
           Back to Menu
         </button>
