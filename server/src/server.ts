@@ -64,7 +64,7 @@ const startApolloServer = async () => {
    * string represents id, boolean is their useMultiplayerGameStore
    * players.Player.isReady state
    */
-  const playerReadyStates: Record<string, boolean> = {};
+  // const playerReadyStates: Record<string, boolean> = {};
 
   // SOCKET.IO
   const io = new SocketIOServer(httpServer, {

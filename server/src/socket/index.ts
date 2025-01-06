@@ -1,20 +1,22 @@
 import { Socket } from "socket.io";
 
-import { ServerContext } from "./socketTypes";
-import { ChatMessage } from "./socketTypes";
-import { GameStateUpdates } from "./socketTypes";
-import { SocketConnection } from "./socketTypes";
+import {
+  ServerContext,
+  ChatMessage,
+  GameStateUpdates,
+  SocketConnection,
+} from "./socketTypes.js";
 
-import { playerStateReadyManager } from "./playerReadyStateManager";
-import { peerJsManager } from "./peerJsManager";
-import { chatMessageManager } from "./chatMessageManager";
-import { gameStateManager } from "./gameStateManager";
+import { playerReadyStateManager } from "./playerReadyStateManager.js";
+import { peerJsManager } from "./peerJsManager.js";
+import { chatMessageManager } from "./chatMessageManager.js";
+import { gameStateManager } from "./gameStateManager.js";
 
 // Handles all the socket connections and listeners
 export const createSocketManager = (
   context: ServerContext
 ): SocketConnection => {
-  const playerReadyManager = playerStateReadyManager(context);
+  const playerReadyManager = playerReadyStateManager(context);
   const peerManager = peerJsManager;
   const chatManager = chatMessageManager(context);
   const gameManager = gameStateManager(context);

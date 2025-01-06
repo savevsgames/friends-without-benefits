@@ -1,8 +1,8 @@
 import { Socket } from "socket.io";
 import { ServerContext } from "./socketTypes";
 
-export const playerStateReadyManager = (context: ServerContext) => {
-  // return socket and data for players
+export const playerReadyStateManager = (context: ServerContext) => {
+  // return socket and connection data for players
   const { io, gameRooms, userConnections } = context;
 
   return (
@@ -56,4 +56,4 @@ export const playerStateReadyManager = (context: ServerContext) => {
   };
 };
 
-export default playerStateReadyManager;
+export default playerReadyStateManager;
