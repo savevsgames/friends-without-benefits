@@ -115,7 +115,7 @@ Check the [live production link](https://friends-without-benefits.onrender.com) 
 ## Team
 
 | Developer                  | Email                 | GitHub                                             |
-| -------------------------- | --------------------- | -------------------------------------------------- |
+| -------------------------- |-----------------------| -------------------------------------------------- |
 | **Greg Barker**            | gregcbarker@gmail.com | [@savevsgames](https://github.com/savevsgames)     |
 | **Thomas Stemler**         | thomas@stemler.dev    | [@OccultParrot](https://github.com/OccultParrot) |
 | **Souad Hassen-Bouzouita** | souad@example.com     | [@SouadHB](https://github.com/SouadHB)             |
