@@ -7,6 +7,7 @@ import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
 import ChoiceScreen from "./ChoiceScreen.tsx";
+import DetectionOverlay from "./DetectionBoxes.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -300,6 +301,9 @@ export const Canvas = () => {
           }}
           crossOrigin="anonymous"
         />
+
+        <DetectionOverlay />
+
         <div
           id="debug-overlay"
           style={{
