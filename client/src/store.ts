@@ -136,8 +136,9 @@ export const useGameStore = create<IGameState>((set, get) => ({
     });
   },
   setCountdown: (countdown: number | null) => set({ countdown }),
-  setDetectMeter: (detectMeter: number) => set ({ detectMeter }),
-  setCurrentDetections: (predictions) => set ({ currentDetections: predictions}),
+  setDetectMeter: (detectMeter: number) => set({ detectMeter }),
+  setCurrentDetections: (predictions) =>
+    set({ currentDetections: predictions }),
   startTimer: () => {
     const currentTimer = get().timerId;
     if (currentTimer !== null) {
@@ -426,16 +427,21 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   // TODO:
   // This setter can also be used to set more Player properties for the
   // multiplayer game like avatar, itemsFound, etc.
-  setPlayerReady: (id: string, ready: boolean) => {
+  setPlayerReady: (id: string, ready: boolean, gameId?: string) => {
     set((state) => ({
       players: {
         ...state.players,
         [id]: { ...state.players[id], isReady: ready },
       },
     }));
-    // use the player's socket to emit the playerReady event
+
     const socket = useMultiplayerStore.getState().socket;
-    socket?.emit("playerReady", { playerId: id });
+    if (gameId) {
+      socket?.emit("playerReady", { userId: id, gameId });
+    } else {
+      socket?.emit("playerReady", { playerId: id });
+      // fallback if you somehow don't have a gameId
+    }
   },
   updatePlayerReadyStates: (readyStates: Record<string, boolean>) => {
     set((state) => {
