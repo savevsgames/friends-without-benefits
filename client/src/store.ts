@@ -6,11 +6,9 @@ import Peer from "peerjs";
 import io from "socket.io-client";
 type SocketIOClient = ReturnType<typeof io>;
 
-// Player extends User type with additional game-related properties
-export interface Player {
-  username: string; // Player username displayed in the game
+// Player extends UserData type with additional game-related properties
+export interface Player extends UserData {
   score: number; // Player's current game score
-  avatar?: string; // Player avatar image URL
   isReady: boolean; // Player is ready to start the game (multiplayer checking function)
   // Need to add more relevant props like items to find, etc.
 }
@@ -28,6 +26,11 @@ interface IModelState {
   setModel: (model: any | null) => void;
 }
 
+interface Prediction {
+  bbox: [number, number, number, number];
+  class: string;
+  score: number;
+}
 export const useModelStore = create<IModelState>((set) => ({
   isLoading: false,
   error: null,
@@ -54,6 +57,8 @@ export interface IGameState {
   timeRemaining: number; // Time in seconds
   countdown: number | null; // Countdown in seconds
   timerId: number | null; // Store timer ID
+  detectMeter: number; // Used for progressbar
+  currentDetections: Prediction[]; // Used to draw bbox and progressbar
 
   // State Setters
   setGameState: (
@@ -71,6 +76,8 @@ export interface IGameState {
   setFoundItemsArr: (index: number) => void;
   startTimer: () => void;
   stopTimer: () => void;
+  setDetectMeter: (value: number) => void;
+  setCurrentDetections: (predictions: Prediction[]) => void;
   setCountdown: (countdown: number | null) => void;
   resetGame: () => void;
 
@@ -92,6 +99,8 @@ export const useGameStore = create<IGameState>((set, get) => ({
   foundItemsArr: [],
   timeRemaining: 120,
   timerId: null,
+  detectMeter: 0,
+  currentDetections: [],
   countdown: null,
   players: {},
   isSingle: true,
@@ -125,6 +134,9 @@ export const useGameStore = create<IGameState>((set, get) => ({
     });
   },
   setCountdown: (countdown: number | null) => set({ countdown }),
+  setDetectMeter: (detectMeter: number) => set({ detectMeter }),
+  setCurrentDetections: (predictions) =>
+    set({ currentDetections: predictions }),
   startTimer: () => {
     const currentTimer = get().timerId;
     if (currentTimer !== null) {
@@ -143,8 +155,8 @@ export const useGameStore = create<IGameState>((set, get) => ({
             timeRemaining: 0,
             timerId: null,
             gameState: "complete",
-            numFoundItems: 0,
-            foundItemsArr: [],
+            // numFoundItems: 0,
+            // foundItemsArr: [],
           };
         }
         // Since the interval is 1000ms (1 second), we can just subtract 1
@@ -176,6 +188,7 @@ export const useGameStore = create<IGameState>((set, get) => ({
       };
     });
   },
+
   addPlayer: (id, player) => {
     set((state) => ({
       players: { ...state.players, [id]: player },
@@ -239,7 +252,7 @@ export const useAuthStore = create(
 );
 // had to do it this way because of the way the decoded is being decoded.
 interface UserData {
-  id: string;
+  _id: string;
   username: string;
   email: string;
   password?: string;
@@ -311,6 +324,7 @@ export interface IMultiplayerState {
   roomId: string | null; // Current multiplayer room ID
   isConnected: boolean; // Connection state
   isHost: boolean; // Is this client the host?
+  isTimeForCountdown: boolean;
   webcamEnabled: boolean; // Is the webcam enabled?
   chatMessages: { sender: string; message: string }[]; // Chat message history
   gameStartTime: number | null; // Track when the game starts
@@ -323,8 +337,9 @@ export interface IMultiplayerState {
   setIsConnected: (connected: boolean) => void;
   setRoomId: (id: string) => void;
   setIsHost: (isHost: boolean) => void;
+  setIsTimeForCountdown: (isTime: boolean) => void;
   setWebcamEnabled: (enabled: boolean) => void;
-  setPlayerReady: (id: string, ready: boolean) => void;
+  setPlayerReady: (id: string, ready: boolean, gameId?: string) => void;
   updatePlayerReadyStates: (readyStates: Record<string, boolean>) => void;
   startCountdown: (countdown: number) => void;
   addChatMessage: (message: { sender: string; message: string }) => void;
@@ -345,6 +360,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   isHost: false,
   playerReadyStates: {},
   webcamEnabled: false,
+  isTimeForCountdown: false,
   chatMessages: [],
   gameStartTime: null,
   inviteLink: null,
@@ -412,16 +428,34 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
   // TODO:
   // This setter can also be used to set more Player properties for the
   // multiplayer game like avatar, itemsFound, etc.
-  setPlayerReady: (id: string, ready: boolean) => {
+  setPlayerReady: (id: string, ready: boolean, gameId?: string) => {
     set((state) => ({
       players: {
         ...state.players,
         [id]: { ...state.players[id], isReady: ready },
       },
     }));
-    // use the player's socket to emit the playerReady event
+    const players = useMultiplayerStore.getState().players;
+    console.log("setPlayerReady() ZUSTAND => Players: ", players);
+
     const socket = useMultiplayerStore.getState().socket;
-    socket?.emit("playerReady", { playerId: id });
+    if (socket && gameId) {
+      console.log(
+        "Emitting player ready for player id: ",
+        id,
+        "Adding isReady to server context for gameId: ",
+        gameId
+      );
+      socket.emit("playerReady", { userId: id, gameId });
+    } else {
+      console.log(
+        "Emitting player ready for player id: ",
+        id,
+        "Adding isReady to server context with no gameId(should fail)."
+      );
+      socket?.emit("playerReady", { playerId: id });
+      // fallback if you somehow don't have a gameId
+    }
   },
   updatePlayerReadyStates: (readyStates: Record<string, boolean>) => {
     set((state) => {
@@ -435,6 +469,9 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       }
       return { players: updatedPlayers };
     });
+  },
+  setIsTimeForCountdown: (isTime: boolean) => {
+    console.log("🕛 Its time to start the countdown:", isTime);
   },
   // Countdown sync for multiplayer games
   startCountdown: (countdown: number) => {

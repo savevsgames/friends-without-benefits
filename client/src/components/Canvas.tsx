@@ -7,6 +7,8 @@ import GameStates from "./GameStates.tsx";
 import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
 import ChoiceScreen from "./ChoiceScreen.tsx";
+import DetectionOverlay from "./DetectionBoxes.tsx";
+import GameStoreLiveFeed from "./GameStoreLiveFeed.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -92,10 +94,10 @@ export const Canvas = () => {
 
   useEffect(() => {
     const cv = window.cv;
-    console.log("CV: ", cv);
+    // console.log("CV: ", cv);
 
     const loadOpenCV = async () => {
-      console.log("Waiting for OpenCV.js to be defined...");
+      // console.log("Waiting for OpenCV.js to be defined...");
 
       // Step 1: Wait for `cv` to be defined in the global scope
       await new Promise<void>((resolve) => {
@@ -107,7 +109,7 @@ export const Canvas = () => {
         }, 100); // Check every 100ms
       });
 
-      console.log("OpenCV.js is defined. Initializing...");
+      // console.log("OpenCV.js is defined. Initializing...");
 
       // Step 2: Wait for `cv.onRuntimeInitialized` to be defined
 
@@ -143,8 +145,8 @@ export const Canvas = () => {
 
       // Update Zustand state to indicate the canvas is ready
       setCanvasReady(true);
-      console.log("Canvas is ready: ", useGameStore.getState().canvasReady);
-      console.log("Game State: ", useGameStore.getState().gameState);
+      // console.log("Canvas is ready: ", useGameStore.getState().canvasReady);
+      // console.log("Game State: ", useGameStore.getState().gameState);
     };
 
     loadOpenCV();
@@ -300,6 +302,10 @@ export const Canvas = () => {
           }}
           crossOrigin="anonymous"
         />
+
+        <DetectionOverlay />
+        
+
         <div
           id="debug-overlay"
           style={{
@@ -312,7 +318,7 @@ export const Canvas = () => {
             zIndex: 100,
           }}
         >
-          {/* <GameStoreLiveFeed /> */}
+          <GameStoreLiveFeed />
         </div>
       </div>
       {/* New Div Right of Canvas */}
