@@ -13,6 +13,7 @@ import { createServer } from "node:http";
 import { ExpressPeerServer } from "peer";
 import cors from "cors";
 import { authenticateToken } from "./utils/auth.js";
+import { createSocketManager } from "./socket/index.js";
 
 // Define __dirname manually
 const __filename = fileURLToPath(import.meta.url);
