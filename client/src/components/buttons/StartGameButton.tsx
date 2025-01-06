@@ -3,6 +3,7 @@ import { useMultiplayerStore } from "@/store";
 import { useGameStore } from "@/store";
 import { enableWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
+import { Player } from "@/store";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
 import { useMutation } from "@apollo/client";
@@ -12,8 +13,13 @@ import { useUserSession } from "@/store";
 const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
   const players = useMultiplayerStore((state) => state.players);
-  const setPlayerReady = useMultiplayerStore((state) => state.setPlayerReady);
+  const setPlayerReady = useMultiplayerStore.getState().setPlayerReady;
   const roomId = useMultiplayerStore((state) => state.roomId);
+  // const startCountdown = useMultiplayerStore((state) => state.startCountdown);
+  // const socket = useMultiplayerStore((state) => state.socket);
+  // const updatePlayerReadyStates = useMultiplayerStore(
+  //   (state) => state.updatePlayerReadyStates
+  // );
 
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
@@ -34,8 +40,11 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const socket = useMultiplayerStore((state) => state.socket);
   const setRoomId = useMultiplayerStore((state) => state.setRoomId);
   const setIsHost = useMultiplayerStore((state) => state.setIsHost);
+  const addPlayer = useGameStore((state) => state.addPlayer);
+  const setIsTimeForCountdown =
+    useMultiplayerStore.getState().setIsTimeForCountdown;
 
-  const isReady = players[playerId]?.isReady || false;
+  const isReady = useGameStore.getState().players[playerId]?.isReady || false;
 
   // SINGLE PLAYER VERSION
   const handleSinglePlayerGameCreation = async () => {
@@ -44,11 +53,12 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         console.log("There is no authorized user");
         return;
       }
+      console.log("User Data: ", user.data);
       // call the db with the mutation
       const response = await createGameMutation({
         variables: {
           input: {
-            authorId: user.data.id,
+            authorId: user.data._id,
             items: [], // TODO: might need to sync items here - can be done in updateGame instead
             challengerIds: [],
           },
@@ -56,39 +66,56 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       });
 
       // get the new game data from the response
-      const newGameData = response.data?.createGame;
+      const newGameData = await response.data?.createGame;
+      console.log("Game created: ", newGameData);
       if (!newGameData) {
         console.error("No game was created/returned.");
         return;
       }
       // Set the gameId for the server/user link
-      const gameId = newGameData._id || "69";
+      const gameId = newGameData._id || "THISGAMEIDISAFALLBACK";
       console.log(
         `Host with user data: ${user} has created a game with id: `,
         gameId
       );
 
-      // Emit to the server that a new user is registering (first register)
-      if (!socket) {
-        console.error("❌ No socket exists to broadcast new game.");
-      } else {
-        console.log("Emitting registerUser: ", user?.data.id, gameId);
-        socket.emit("registerUser", {
-          userId: user?.data.id,
-          gameId,
-        });
-      }
+      const player: Player = {
+        ...user.data,
+        isReady: true,
+        score: 0,
+      };
 
       // Update the zustand store
+      setIsTimeForCountdown(true);
+      setRoomId(gameId);
       setIsSingle(true);
       setIsMulti(false);
       setIsHost(true);
-      setRoomId(gameId);
+      // SETTING isReady - adding new logic to make sure number of players in game goes up when they start the game
+      addPlayer(playerId, player);
       setPlayerReady(playerId!, true, gameId!);
+
       console.log(
         "Number of players in the game: ",
         Object.keys(players).length
       );
+
+      // Update the isReady
+      setPlayerReady(user.data._id, true, gameId!);
+
+      // updatePlayerReadyStates({user.data._id, true});
+
+      // Emit to the server that a new user is registering (first register)
+      if (!socket) {
+        console.error("❌ No socket exists to broadcast new game.");
+      } else {
+        console.log("Emitting registerUser: ", user?.data._id, gameId);
+        socket.emit("registerUser", {
+          userId: user?.data._id,
+          gameId,
+        });
+      }
+
       // close the modal
       if (onClose) {
         onClose();
@@ -154,11 +181,12 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         console.error("Error Creating Game", error);
       }
       if (roomId) {
-        setPlayerReady(playerId!, !isReady, roomId);
+        setPlayerReady(playerId!, true, roomId);
         // console.log("Button [StartGameButton] => isReady after click: ", isReady);
       } else {
         console.error("ROOM ID NOT SET! - START BUTTON");
       }
+      const isReady = useGameStore.getState().players[playerId]?.isReady;
 
       if (isReady && videoPlaying && canvasReady) {
         console.log(
@@ -183,19 +211,26 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   useEffect(() => {
+    // const isReady = useGameStore.getState().players[playerId]?.isReady;
+    const isReady = true;
     const conditionsMet = isReady && canvasReady && currentMediaType;
 
     const logConditions = () => {
-      console.log("isReady: ", isReady);
-      console.log("canvasReady: ", canvasReady);
-      console.log("currentMediaType: ", currentMediaType);
+      console.log(
+        "isReady: ",
+        isReady,
+        "canvasReady: ",
+        canvasReady,
+        "currentMediaType: ",
+        currentMediaType
+      );
     };
     if (conditionsMet) {
       runDetectionOnCurrentMedia();
     } else {
       logConditions();
     }
-  }, [isReady, canvasReady, currentMediaType]);
+  }, [canvasReady, currentMediaType, playerId]);
 
   return (
     <div

@@ -5,8 +5,7 @@ import { useMultiplayerStore } from "@/store";
 // TODO: Maybe a useRef for the peer instance? to persist is across re-renders?
 
 export const usePeerJS = () => {
-  const { setPeer, setPlayerId, setRoomId, setIsConnected } =
-    useMultiplayerStore();
+  const { setPeer, setIsConnected } = useMultiplayerStore(); 
 
   const isDevelopment = import.meta.env.MODE === "development";
 
@@ -19,8 +18,8 @@ export const usePeerJS = () => {
 
     peerJs.on("open", (id) => {
       console.log("✅ PeerJS connection established with ID:", id);
-      setPlayerId(id); // Save player ID to store
-      setRoomId(id); // Set initial room ID to player ID
+      // setPlayerId(id); // Save player ID to store playerId
+      // setRoomId(id); // Set initial room ID to player ID
       setPeer(peerJs); // Save peer instance to store
     });
 
@@ -41,5 +40,5 @@ export const usePeerJS = () => {
       peerJs.destroy();
     };
     // Setters dont re-render - they are functions
-  }, [setPeer, setPlayerId, setRoomId, setIsConnected, isDevelopment]);
+  }, [setPeer, setIsConnected, isDevelopment]);
 };

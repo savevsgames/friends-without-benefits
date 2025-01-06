@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useGameStore } from "@/store";
+import { useGameStore, useMultiplayerStore } from "@/store";
 // import { useMultiplayerStore } from "@/store";
 import RiddleCardFlip from "./RiddleCardFlip";
 // import StartGameButton from "./buttons/StartGameButton";
@@ -7,8 +7,9 @@ import Countdown from "./Countdown";
 import "../App.css";
 
 const ScavengerGame = () => {
-  // const startCountdown = useMultiplayerStore((state) => state.startCountdown);
-  // // const socket = useMultiplayerStore((state) => state.socket);
+  const startCountdown = useMultiplayerStore((state) => state.startCountdown);
+  const isTimeForCountdown = useMultiplayerStore.getState().isTimeForCountdown;
+  // const socket = useMultiplayerStore((state) => state.socket);
   // const updatePlayerReadyStates = useMultiplayerStore(
   //   (state) => state.updatePlayerReadyStates
   // );
@@ -75,48 +76,21 @@ const ScavengerGame = () => {
     }
   }, [numFoundItems, timeRemaining, resetGame]);
 
-  // useEffect(() => {
-  //   let countdownTimer: NodeJS.Timeout;
-
-  //   if (gameState === "countdown" && countdown !== null) {
-  //     console.log("🔄 Countdown Started:", countdown);
-
-  //     countdownTimer = setInterval(() => {
-  //       const currentCountdown = useGameStore.getState().countdown;
-  //       if (currentCountdown !== null && currentCountdown > 0) {
-  //         // useGameStore.getState().setCountdown(currentCountdown - 1);
-  //         return currentCountdown - 1;
-  //       } else {
-  //         clearInterval(countdownTimer);
-  //         return 0; // countdown is over
-  //       }
-  //     }, 1000);
-  //   }
-
-  //   return () => {
-  //     if (countdownTimer) {
-  //       clearInterval(countdownTimer);
-  //       console.log("🛑 Countdown Timer Cleared");
-  //     }
-  //   };
-  // }, [gameState, countdown, startTimer]);
-
   useEffect(() => {
-    let countdownTimer: NodeJS.Timeout | null = null;
+    let countdownTimer: NodeJS.Timeout;
 
     if (gameState === "countdown" && countdown !== null) {
       console.log("🔄 Countdown Started:", countdown);
 
       countdownTimer = setInterval(() => {
-        useGameStore.setState((state) => {
-          // Actually set the state of the countdown in the store
-          if (state.countdown && state.countdown > 0) {
-            return { countdown: state.countdown - 1 };
-          } else {
-            clearInterval(countdownTimer!);
-            return { countdown: 0 };
-          }
-        });
+        const currentCountdown = useGameStore.getState().countdown;
+        if (currentCountdown !== null && currentCountdown > 0) {
+          useGameStore.getState().setCountdown(currentCountdown - 1);
+          return currentCountdown - 1;
+        } else {
+          clearInterval(countdownTimer);
+          return 0; // countdown is over
+        }
       }, 1000);
     }
 
@@ -126,7 +100,40 @@ const ScavengerGame = () => {
         console.log("🛑 Countdown Timer Cleared");
       }
     };
-  }, [gameState, countdown]);
+  }, [gameState, countdown, startTimer]);
+
+  useEffect(() => {
+    if (isTimeForCountdown) {
+      startCountdown(5);
+    }
+  }, [isTimeForCountdown, startCountdown]);
+
+  // useEffect(() => {
+  //   let countdownTimer: NodeJS.Timeout | null = null;
+
+  //   if (gameState === "countdown" && countdown !== null) {
+  //     console.log("🔄 Countdown Started:", countdown);
+
+  //     countdownTimer = setInterval(() => {
+  //       useGameStore.setState((state) => {
+  //         // Actually set the state of the countdown in the store
+  //         if (state.countdown && state.countdown > 0) {
+  //           return { countdown: state.countdown - 1 };
+  //         } else {
+  //           clearInterval(countdownTimer!);
+  //           return { countdown: 0 };
+  //         }
+  //       });
+  //     }, 1000);
+  //   }
+
+  //   return () => {
+  //     if (countdownTimer) {
+  //       clearInterval(countdownTimer);
+  //       console.log("🛑 Countdown Timer Cleared");
+  //     }
+  //   };
+  // }, [gameState, countdown]);
 
   useEffect(() => {
     if (
@@ -136,6 +143,7 @@ const ScavengerGame = () => {
       gameState === "countdown" &&
       countdown === 0
     ) {
+      // setGameStartTime(); - TODO: need to update the store and the db
       startTimer();
       console.log("🚀 THE GAME IS STARTING!!!!");
     }
@@ -147,6 +155,7 @@ const ScavengerGame = () => {
     countdown,
     startTimer,
   ]);
+
   // bingoo msg - added itemsArr.length, timeRemaining as missing dependencies
   useEffect(() => {
     if (timeRemaining < 120 || numFoundItems === itemsArr.length) {

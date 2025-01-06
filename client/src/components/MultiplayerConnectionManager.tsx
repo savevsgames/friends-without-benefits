@@ -24,9 +24,8 @@ const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
 
   const {
-    // setSocket,
-    // setPeer,
-    // setPlayerId,
+    playerId,
+    setPlayerId,
     // isHost,
     setIsHost,
     roomId,
@@ -37,11 +36,11 @@ const MultiplayerConnectionManager: React.FC = () => {
 
   // For setting webcam as media type
   const { setCurrentMediaType } = useGameStore();
-  // const adminUser = useUserSession((state) => state.user?.data.isAdmin);
-  const adminUser = false; //debugging other things - temp value TODO: fix
+  const adminUser = useUserSession((state) => state.user?.data.isAdmin);
   const [copied, setCopied] = useState(false);
   // Local State for inputRoomId because it is entered into an input field
   const [inputRoomId, setInputRoomId] = useState<string>("");
+
   const isHost = useMultiplayerStore((state) => state.isHost);
   const isMulti = useGameStore((state) => state.isMulti);
   const setIsSingle = useGameStore((state) => state.setIsSingle);
@@ -51,67 +50,13 @@ const MultiplayerConnectionManager: React.FC = () => {
   // state.user or state?
   const user = useUserSession((state) => state.user);
   const socket = useMultiplayerStore((state) => state.socket);
+  const setInviteLink = useMultiplayerStore((state) => state.setInviteLink);
+  const inviteLink = useMultiplayerStore((state) => state.inviteLink);
+  const setIsTimeForCountdown = useMultiplayerStore((state) => state.setIsTimeForCountdown);
 
   useEffect(() => {
     console.log("Room ID has been copied? ", copied);
   }, [copied]);
-
-  // Initialize PeerJS connection for WebRTC signaling (same port/endpoint as socket.io / server)
-  // USING BUTTON CLICK TO TRIGGER CONNECTION
-
-  // const handlePeerJSInitialization = () => {
-  //   const { socket, playerId } = useMultiplayerStore.getState();
-  //   if (!socket) {
-  //     console.error("❌ Socket.IO connection not established.");
-  //     return;
-  //   }
-  //   console.log("Initializing PeerJS connection...");
-
-  //   // TODO: Check store first to see if peer exists? or disable button if peer exists?
-  //   const hostName = window.location.hostname;
-  //   const peerJs =
-  //     useMultiplayerStore.getState().peer ||
-  //     new Peer({
-  //       host: hostName,
-  //       port: 5173,
-  //       path: "/peerjs",
-  //     });
-  //   // Make sure local scope syncs with store
-
-  //   setPeer(peerJs);
-  //   console.log("✅ PeerJS Connection established.");
-
-  //   // When peer is initialized, update the store with the peerId and player ID and set connection status
-  //   peerJs.on("open", (id) => {
-  //     console.log("PeerJS connection established with ID:", id);
-
-  //     setPlayerId(id); // Save player ID to store
-  //     console.log("🆔 Player ID:", playerId);
-
-  //     setRoomId(id); // Set the room ID to the local peer ID
-  //     console.log("🏠 Room ID:", roomId);
-
-  //     setPeer(peerJs); // Save peer instance to store
-  //   });
-
-  //   // Log data when a peer connection is established
-  //   peerJs.on("connection", (conn) => {
-  //     console.log("Peer connection is incoming: ", conn.peer);
-
-  //     conn.on("data", (data) => {
-  //       console.log("Received data from peer: ", data);
-  //     });
-  //   });
-
-  //   peerJs.on("close", () => {
-  //     console.log("Peer connection is closed.");
-  //   });
-
-  //   peerJs.on("error", (err) => {
-  //     console.error("PeerJS Error:", err);
-  //     // peerJs.destroy(); // because this is in a modal, we don't want to destroy the peer connection
-  //   });
-  // };
 
   const handleMultiplayerGameCreation = async () => {
     if (!user) {
@@ -131,9 +76,6 @@ const MultiplayerConnectionManager: React.FC = () => {
       return;
     }
 
-    // Set the room ID and mark as Host
-
-    setIsHost(true);
     enableWebcam();
     setCurrentMediaType("webcam");
 
@@ -141,7 +83,7 @@ const MultiplayerConnectionManager: React.FC = () => {
       const { data } = await createGameMutation({
         variables: {
           input: {
-            authorId: user.data.id,
+            authorId: user.data._id,
             challengerIds: [],
             items: [],
           },
@@ -157,15 +99,18 @@ const MultiplayerConnectionManager: React.FC = () => {
       const gameId = newGame._id;
       if (socket) {
         socket.emit("registerUser", {
-          userId: user.data.id,
+          userId: user.data._id,
           gameId,
         });
       }
 
+      setPlayerId(user.data._id); // moved from the peerjs to user context
       setIsHost(true);
-      setRoomId(gameId);
+      setRoomId(gameId); // Set the room ID to the gameId
+      setInviteLink(gameId);
       setIsMulti(true);
       setIsSingle(false);
+      setIsTimeForCountdown(true);
       console.log(
         "🏠 Game Room Created: ",
         "Room ID:",
@@ -173,7 +118,9 @@ const MultiplayerConnectionManager: React.FC = () => {
         "Multiplayer: ",
         isMulti,
         "You are the host: ",
-        isHost
+        isHost,
+        "Your PlayerId: ",
+        playerId
       );
 
       // onClose(); ?
@@ -238,79 +185,6 @@ const MultiplayerConnectionManager: React.FC = () => {
       console.log("🧹 No connections to cleanup...");
     }
   };
-
-  // const handleSocketIOConnection = () => {
-  //   const connectedStatus = useMultiplayerStore.getState().isConnected;
-  //   if (connectedStatus) {
-  //     console.error("Socket.IO connection already established.");
-  //     return;
-  //   }
-  //   console.log("Initializing Socket.IO connection...");
-  //   const socketIo = initializeSocket();
-  //   setSocket(socketIo);
-  //   console.log(
-  //     "Socket.IO connection established: ",
-  //     `✅ Socket ID: ${useMultiplayerStore.getState().socket?.id}`
-  //   );
-  // };
-
-  // TODO: THIS MAY STILL BE NEEDED
-  // Turns on the webcam when the connection is established for the challenger
-  // useEffect(() => {
-  //   if (isConnected) {
-  //     console.log("🎥 Enabling Webcam...");
-  //     // Enable webcam and and allow game to start with "start game" type button for both players - isReady?
-  //     enableWebcam();
-  //     setCurrentMediaType("webcam");
-  //   }
-  // }, [isConnected, setCurrentMediaType, roomId, setRoomId]);
-
-  // useEffect(() => {
-  //   const socket = useMultiplayerStore.getState().socket;
-
-  //   if (!socket) {
-  //     console.error("❌ Socket.IO connection not established.");
-  //     return;
-  //   }
-
-  //   // Listen for state updates to either game or multiplayer store
-  //   socket.on(
-  //     "stateUpdate",
-  //     ({
-  //       store,
-  //       updates,
-  //     }: {
-  //       store: "game" | "multiplayer";
-  //       updates: Partial<IGameState | IMultiplayerState>;
-  //     }) => {
-  //       if (store === "game") {
-  //         console.log(`🔄 Incoming GameStore Update (${store}):`, updates);
-  //         useGameStore
-  //           .getState()
-  //           .incomingUpdate(updates as Partial<IGameState>);
-  //       } else if (store === "multiplayer") {
-  //         console.log(
-  //           `🔄 Incoming MultiplayerStore Update (${store}):`,
-  //           updates
-  //         );
-  //         useMultiplayerStore
-  //           .getState()
-  //           .incomingUpdate(updates as Partial<IMultiplayerState>);
-  //       }
-  //     }
-  //   );
-
-  //   // Listen for chat messages
-  //   socket.on("chat-message", (data: { sender: string; message: string }) => {
-  //     console.log("💬 Chat Message Received:", data);
-  //     useMultiplayerStore.getState().addChatMessage(data);
-  //   });
-
-  //   return () => {
-  //     socket.off("stateUpdate");
-  //     socket.off("chat-message");
-  //   };
-  // }, []);
 
   return (
     <div>
@@ -391,7 +265,7 @@ const MultiplayerConnectionManager: React.FC = () => {
                 </a>
               </div>
               <CopyToClipboard
-                text={roomId || ""}
+                text={inviteLink || ""}
                 onCopy={() => setCopied(true)}
               >
                 <button

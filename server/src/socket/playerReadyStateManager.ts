@@ -9,6 +9,7 @@ export const playerReadyStateManager = (context: ServerContext) => {
     socket: Socket,
     { userId, gameId }: { userId: string; gameId: string }
   ) => {
+    io.emit("startCountdown", 5);
     // make sure we are checking the right game room
     const gameRoom = gameRooms.get(gameId);
     if (!gameRoom) {
