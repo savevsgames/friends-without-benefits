@@ -152,7 +152,7 @@ const ScavengerGame = () => {
       countdown === 0
     ) {
       // setGameStartTime(); - TODO: need to update the store and the db
-      startTimer();
+      // startTimer();
       console.log("🚀 THE GAME IS STARTING!!!!");
     }
   }, [
@@ -161,7 +161,7 @@ const ScavengerGame = () => {
     activeDetectionLoop,
     gameState,
     countdown,
-    startTimer,
+    // startTimer,
   ]);
 
   // bingoo msg - added itemsArr.length, timeRemaining as missing dependencies
@@ -177,7 +177,7 @@ const ScavengerGame = () => {
 
   // Game start logic - should update the bd once zustand is updated
   useEffect(() => {
-    if (gameRoom && gameState === "countdown") {
+    if (gameRoom && gameState === "countdown" && countdown === 0) {
       console.log(
         "🚦 Game started. Updating game start state in the database..."
       );
@@ -193,7 +193,7 @@ const ScavengerGame = () => {
           });
 
           console.log("✅ Game start state updated in the database.");
-          startTimer(); // Start the game timer locally
+          // startTimer(); // Start the game timer locally
         } catch (error) {
           console.error("❌ Failed to update game start state:", error);
         }
@@ -201,7 +201,7 @@ const ScavengerGame = () => {
 
       handleGameStart();
     }
-  }, [gameRoom, gameState, startTimer, updateGame]);
+  }, [gameRoom, gameState, startTimer, updateGame, countdown]);
 
   // Game completion logic - needs more logic to determine winner
   // Handles the updating of the game in the database

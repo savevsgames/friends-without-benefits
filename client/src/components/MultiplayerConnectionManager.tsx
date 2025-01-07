@@ -206,6 +206,7 @@ const MultiplayerConnectionManager: React.FC<
   };
 
   const handleJoinMultiplayerRoom = () => {
+    console.log("Joining Room:", inputRoomId);
     if (!user) {
       console.log("No user logged in");
       return;
@@ -214,112 +215,97 @@ const MultiplayerConnectionManager: React.FC<
       console.error("❌ Please enter a Room ID.");
       return;
     }
+    if (!socket) {
+      console.error("❌ Socket.IO not initialized.");
+      return;
+    }
+
+    console.log("Input Room ID before setting states:", inputRoomId); // Log inputRoomId again
+    setGameRoom(inputRoomId); // Explicitly set the gameRoom state
+    setRoomId(inputRoomId); // Set the roomId state
+    console.log("Game Room and Room ID after setting states:", {
+      gameRoom: useGameStore.getState().gameRoom,
+      roomId: useMultiplayerStore.getState().roomId,
+    });
+
     // get the peer instance from the multiplayer store
     const peer = useMultiplayerStore.getState().peer;
     if (!peer) {
       console.error("❌ PeerJS or Socket.IO not initialized.");
       return;
     }
+    console.log("PeerJS instance exists. PeerId: ", peer.id);
     // Join the game using the room ID that was provided by the host
-    const conn = peer.connect(inputRoomId);
-    conn.on("open", () => {
-      console.log("🔗 Connected to Room:", inputRoomId);
-      conn.send("🎥 PeerJS Connection Established!");
-      setIsConnected(true);
-      setGameRoom(inputRoomId);
-      setRoomId(inputRoomId);
-      setPlayerReady(user.data._id, true, inputRoomId);
+    // Update Zustand Store State
+    setRoomId(inputRoomId);
+    setIsConnected(true);
+    setGameRoom(inputRoomId); // Ensure the gameRoom is set in Zustand
+    setIsMulti(true);
+    setIsSingle(false);
+    console.log("🆔 Room ID set in Zustand:", inputRoomId);
 
-      //🍁 Add the Player to useMultiplayerStore player
-      addPlayer(user.data._id, {
-        ...user.data,
-        isReady: true,
-        score: 0,
-      });
-      console.log(
-        `Player with id: ${playerId} has been added to game with id: ${inputRoomId}.`
-      );
-
-      //🍁 REGISTER the player before emitting they are isReady
-      // Emit to the server that a new user is registering (first register)
-      if (!socket) {
-        console.error("❌ No socket exists to broadcast new game.");
-      } else {
-        console.log("Emitting registerUser: ", user?.data._id, inputRoomId);
-        socket.emit("registerUser", {
-          userId: user?.data._id,
-          gameId: inputRoomId,
-          gameType: "multi",
-        });
-      }
-
-      //🍁 Wait for the server to respond with a "userRegistered"
-      if (!socket) {
-        console.error("❌ No socket exists to broadcast new game.");
-      } else {
-        socket.once(
-          "userRegistered",
-          ({ success, message }: { success: string; message: string }) => {
-            if (success) {
-              console.log(
-                "✅ User successfully registered on server:",
-                message
-              );
-
-              // Now mark the player as ready
-              setPlayerReady(user.data._id, true, inputRoomId);
-
-              console.log("📤 Emitting playerReady to server...");
-              socket.emit("playerReady", {
-                userId: user.data._id,
-                gameId: inputRoomId,
-              });
-
-              // Update Zustand
-              updatePlayerReadyStates({ [user.data._id]: true });
-              // setIsTimeForCountdown(true); // fall back trigger
-
-              console.log(
-                "🎯 Player is marked ready locally and on the server."
-              );
-            } else {
-              console.error("❌ User registration failed:", message);
-            }
-          }
-        );
-      }
-      // pass the gameRoom to the parent
-      if (onGameCreation) {
-        onGameCreation(inputRoomId);
-      }
-      // close the modal
-      if (onClose) {
-        onClose();
-      }
-
-      // TODO:
-      // We need a to sync the game state from the host to the challenger here.
-      // Since the game state is created when start game is clicked
-      // we need to sync the game state to the challenger when they join the room.
-      // When we implement the start game button to add an entry to the db, we can
-      // sync the zustand game state of the host to the challenger as well once the db is confirmed.
-      // NOTE: Watch for conflicts before trying to sync the game state - im not sure if doing that
-      // will cause issues with the store or db calls yet.
+    // Emit 'registerUser' event to the server
+    socket.emit("registerUser", {
+      userId: user.data._id,
+      gameId: inputRoomId,
+      gameType: "multi",
     });
 
-    conn.on("data", (data) => {
-      console.log("📥 Received data from host:", data);
-    });
+    // Listen for server confirmation
+    socket.once(
+      "userRegistered",
+      ({ success, message }: { success: boolean; message: string }) => {
+        if (success) {
+          console.log(
+            "✅ Challenger successfully registered on server:",
+            message
+          );
 
-    conn.on("close", () => {
-      console.log("🔌 Disconnected from Room:", inputRoomId);
-      setIsConnected(false);
-    });
+          // Mark Player as Ready
+          setPlayerReady(user.data._id, true, inputRoomId);
+          console.log("📤 Emitting playerReady to server...");
 
-    conn.on("error", (err) => {
-      console.error("❗ Connection Error:", err.message);
-    });
+          socket.emit("playerReady", {
+            userId: user.data._id,
+            gameId: inputRoomId,
+          });
+
+          updatePlayerReadyStates({ [user.data._id]: true });
+
+          console.log("🎯 Player is marked ready locally and on the server.");
+        } else {
+          console.error("❌ Challenger registration failed:", message);
+        }
+      }
+    );
+
+    // pass the gameRoom to the parent
+    if (onGameCreation) {
+      onGameCreation(inputRoomId);
+    }
+    // close the modal
+    if (onClose) {
+      onClose();
+    }
+
+    // TODO:
+    // We need a to sync the game state from the host to the challenger here.
+    // Since the game state is created when start game is clicked
+    // we need to sync the game state to the challenger when they join the room.
+    // When we implement the start game button to add an entry to the db, we can
+    // sync the zustand game state of the host to the challenger as well once the db is confirmed.
+    // NOTE: Watch for conflicts before trying to sync the game state - im not sure if doing that
+    // will cause issues with the store or db calls yet.
   };
+
+  useEffect(() => {
+    const { roomId, players } = useMultiplayerStore.getState();
+    const gameRoom = useGameStore.getState().gameRoom;
+    console.log("🛠️ Zustand Debugging:");
+    console.log("Room ID (Zustand):", roomId);
+    console.log("Game Room (Zustand):", gameRoom);
+    console.log("Players (Zustand):", players);
+  }, [roomId]);
 
   // Cleanup
   const cleanupConnections = () => {
