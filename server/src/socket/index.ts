@@ -29,6 +29,11 @@ export const createSocketManager = (
       socket.on("registerUser", ({ userId, gameId, gameType }) => {
         if (!userId || !gameId || !gameType) {
           console.error("❌ Missing userId or gameId in registerUser event.");
+          // registerUser event triggers userRegistered client event
+          socket.emit("userRegistered", {
+            success: false,
+            message: "Missing userId or gameId in registerUser event.",
+          });
           return;
         }
 
@@ -78,6 +83,12 @@ export const createSocketManager = (
         );
         socket.join(gameId);
 
+        // Emit to client that the user has successfully registered
+        socket.emit("userRegistered", {
+          success: true,
+          message: "User successfully registered.",
+        });
+
         // Check to make sure string has no \n or \r
         const sanitizedGameId = String(gameId).trim();
         console.log(
@@ -119,6 +130,7 @@ export const createSocketManager = (
           process.env.NODE_ENV === "testing"
         ) {
           logContext(context);
+          console.log("📊 Current Active Users: ", context.numCurrentActiveUsers);
         }
       });
 

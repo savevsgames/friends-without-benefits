@@ -1,18 +1,10 @@
 import { useEffect, useState } from "react";
 import { useGameStore, useMultiplayerStore } from "@/store";
-// import { useMultiplayerStore } from "@/store";
 import RiddleCardFlip from "./RiddleCardFlip";
-// import StartGameButton from "./buttons/StartGameButton";
 import Countdown from "./Countdown";
 import "../App.css";
 
 const ScavengerGame = () => {
-  const startCountdown = useMultiplayerStore((state) => state.startCountdown);
-  const isTimeForCountdown = useMultiplayerStore.getState().isTimeForCountdown;
-  // const socket = useMultiplayerStore((state) => state.socket);
-  // const updatePlayerReadyStates = useMultiplayerStore(
-  //   (state) => state.updatePlayerReadyStates
-  // );
 
   const gameState = useGameStore((state) => state.gameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
@@ -120,11 +112,7 @@ const ScavengerGame = () => {
     };
   }, [gameState, countdown, startTimer]);
 
-  useEffect(() => {
-    if (isTimeForCountdown) {
-      startCountdown(5);
-    }
-  }, [isTimeForCountdown, startCountdown]);
+
 
   // useEffect(() => {
   //   let countdownTimer: NodeJS.Timeout | null = null;

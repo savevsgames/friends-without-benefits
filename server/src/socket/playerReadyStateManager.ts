@@ -54,9 +54,7 @@ export const playerReadyStateManager = (context: ServerContext) => {
     );
     io.to(gameId).emit("updateReadyStates", readyStates);
     console.log(
-      `📤 Emitted updated ready states for room ${gameId}:`,
-      readyStates
-    );
+      `📤 Emitted updated ready states for room ${gameId}:`);
 
     // 🚦 Handle Single-Player Game
     if (gameRoom.gameType === "single") {
