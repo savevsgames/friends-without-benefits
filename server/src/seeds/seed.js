@@ -28,13 +28,6 @@ const userSeedData = [
     { username: "ProPlayer", email: "pro@test.com", password: "password123" },
     { username: "NewbieFinder", email: "newbie@test.com", password: "password123" },
     { username: "ItemHunter", email: "hunter@test.com", password: "password123" },
-    { username: "QuickScope", email: "quick@test.com", password: "password123" },
-    { username: "TimeWaster", email: "time@test.com", password: "password123" },
-    { username: "SpeedDemon", email: "demon@test.com", password: "password123" },
-    { username: "ObjectSeeker", email: "seeker@test.com", password: "password123" },
-    { username: "RushRunner", email: "rush@test.com", password: "password123" },
-    { username: "SlowPoke", email: "slow@test.com", password: "password123" },
-    { username: "FastTrack", email: "fast@test.com", password: "password123" }
 ];
 
 // Sample items that can be found in games
