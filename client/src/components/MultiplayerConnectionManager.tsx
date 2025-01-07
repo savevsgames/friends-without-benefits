@@ -120,6 +120,7 @@ const MultiplayerConnectionManager: React.FC = () => {
         isHost,
         "Your PlayerId: ",
         playerId,
+
       );
 
       // onClose(); ?
