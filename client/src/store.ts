@@ -59,6 +59,7 @@ export interface IGameState {
   timerId: number | null; // Store timer ID
   detectMeter: number; // Used for progressbar
   currentDetections: Prediction[]; // Used to draw bbox and progressbar
+  isGameOver: boolean;
 
   // State Setters
   setGameState: (
@@ -105,6 +106,11 @@ export const useGameStore = create<IGameState>((set, get) => ({
   players: {},
   isSingle: true,
   isMulti: false,
+
+  get isGameOver() {
+    const { numFoundItems, timeRemaining } = get();
+    return numFoundItems === 5 || timeRemaining === 0;
+  },
   setGameState: (newState) => set({ gameState: newState }),
   setCanvasReady: (ready) => {
     set({ canvasReady: ready });
