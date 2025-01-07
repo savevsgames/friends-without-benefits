@@ -97,7 +97,7 @@ export const useGameStore = create<IGameState>((set, get) => ({
   currentMediaType: null,
   activeDetectionLoop: null,
   numFoundItems: 0,
-  itemsArr: ["Fork", "Headphones", "Mug", "Remote", "Toothbrush"],
+  itemsArr: ["Headphones", "Mug", "Remote", "Spoon", "Sunglasses"],
   foundItemsArr: [],
   timeRemaining: 120,
   timerId: null,
