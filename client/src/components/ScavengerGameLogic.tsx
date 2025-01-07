@@ -267,7 +267,7 @@ const ScavengerGame = () => {
             {/* time remaining */}
 
             <div className="fixed bottom-4 left-15 flex flex-col gap-">
-              <div className="time-box p-4 bg-gradient-to-br from-teal-700 to-green-500 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl ">
+              <div className="time-box p-4 bg-gradient-to-br from-teal-700 to-teal-500 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl ">
                 <h1 className="text-xl font-extrabold mb-2 text-white tracking-wider">
                   Tick ⏳ Tock
                 </h1>
@@ -276,7 +276,7 @@ const ScavengerGame = () => {
                 </p>
                 <div className="relative w-full bg-gray-300 rounded-full h-2 mt-2">
                   <div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-teal-400 to-orange-500 transition-width duration-500"
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-teal-700 to-teal-500 transition-width duration-500"
                     style={{ width: `${(timeRemaining / 120) * 100}%` }}
                   ></div>
                 </div>
