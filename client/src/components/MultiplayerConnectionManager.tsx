@@ -400,7 +400,7 @@ const MultiplayerConnectionManager: React.FC<
                   <FaLinkedin size={26} />
                 </a>
               </div>
-              <div
+              {/* <div
                 style={{
                   backgroundColor: "#FFFFFF",
                   borderRadius: "0.25rem",
@@ -408,7 +408,14 @@ const MultiplayerConnectionManager: React.FC<
                 }}
               >
                 LINK: {useMultiplayerStore.getState().inviteLink}
-              </div>
+              </div> */}
+              <input
+                type="text"
+                placeholder="Copy Room ID"
+                value={useMultiplayerStore.getState().inviteLink || ""}
+                onChange={(e) => setInputRoomId(e.target.value)}
+                className="border rounded-md p-2 w-full"
+              />
               <CopyToClipboard
                 text={inviteLink || ""}
                 onCopy={() => setCopied(true)}
@@ -437,7 +444,7 @@ const MultiplayerConnectionManager: React.FC<
             <h3 className="text-xl font-semibold text-teal-700 mb-4">
               Join Room
             </h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 mb-20">
               Enter the Room ID to join an existing multiplayer game.
             </p>
             <div className="flex flex-col gap-4">

@@ -16,26 +16,23 @@ const MultiPlayerModal: React.FC<MultiPlayerModalProps> = ({
 }) => {
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Multiplayer Manager</h1>
-
       <ReactModal
         isOpen={isOpen}
         onRequestClose={onClose}
         contentLabel="Multiplayer Manager Modal"
-        
         style={{
-          
           content: {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             padding: "2rem",
             maxWidth: "600px",
+            height: "600px",
           },
           overlay: {
             backgroundColor: "rgba(0, 0, 0, 0.75)",
             zIndex: 1000,
-        },
+          },
         }}
       >
         {/* Button to close the modal */}

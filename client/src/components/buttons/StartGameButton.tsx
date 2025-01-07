@@ -310,7 +310,7 @@ const StartGameButton: React.FC<StartGameButtonProps> = ({
         name="start-game-button"
         disabled={!canvasReady}
         onClick={handleReadyClick}
-        className="card bg-teal-700 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+        className="card bg-teal-700 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full mb-6"
       >
         <h2 className="text-2xl font-bold mb-2">
           {isReady ? "Waiting for other players..." : "Start Game!"}
