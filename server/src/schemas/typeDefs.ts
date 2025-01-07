@@ -78,6 +78,7 @@ const typeDefs = `
   authorId: ID!
   challengerIds: [ID] # array of user IDs
   items: [String]
+  duration: Float
 }
 
   input UpdateGameInput {

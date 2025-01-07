@@ -220,9 +220,9 @@ export const Canvas = () => {
       style={{
         display: "flex",
         flexDirection: "row",
-        alignItems: "stretch",
+        alignItems: "flex-start", // options are: stretch, flex-start, flex-end, center, baseline, first baseline, last baseline, start, end, self-start, self-end
         minWidth: "300px",
-        height: "calc(100vh-64px)",
+        maxHeight: "calc(100vh-64px)",
       }}
     >
       <ChoiceScreen
@@ -248,7 +248,7 @@ export const Canvas = () => {
         style={{
           overflow: "hidden",
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           maxWidth: singlePlayer ? "100vw" : "60vw",
           maxHeight: singlePlayer ? "100vh" : "90vh",
           flex: singlePlayer ? "1 1 auto" : "initial",
@@ -263,11 +263,11 @@ export const Canvas = () => {
             top: "0",
             left: "0",
             width: "100%",
-            height: "100%",
+            height: "auto",
             zIndex: 10,
           }}
         ></canvas>
-{/* 
+        {/* 
         <GameStates /> */}
         <ScavengerGame />
 
