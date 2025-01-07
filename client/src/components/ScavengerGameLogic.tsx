@@ -181,6 +181,8 @@ const ScavengerGame = () => {
       console.log(
         "🚦 Game started. Updating game start state in the database..."
       );
+      // set the local state to playing
+      useGameStore.setState({ gameState: "playing" });
 
       const handleGameStart = async () => {
         try {
@@ -193,7 +195,7 @@ const ScavengerGame = () => {
           });
 
           console.log("✅ Game start state updated in the database.");
-          // startTimer(); // Start the game timer locally
+          startTimer(); // Start the game timer locally
         } catch (error) {
           console.error("❌ Failed to update game start state:", error);
         }
