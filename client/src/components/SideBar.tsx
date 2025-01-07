@@ -160,8 +160,10 @@ const SideBar = () => {
               <div
                 className={`${
                   isCollapsed
+
                     ? "text-center font-bold text-sm flex flex-col pt-2"
                     : "text-base font-medium text-gray-500 dark:text-gray-300"
+
                 }`}
               >
                 {formatTime(timeRemaining)}
