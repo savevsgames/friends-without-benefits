@@ -4,6 +4,8 @@ import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import MultiPlayerModal from "./MultiplayerModal";
 import React, { useState } from "react";
 
+// import { useGameStore } from "../store";
+
 ReactModal.setAppElement("#root");
 
 interface ChoiceScreenProps {
@@ -18,9 +20,8 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
   onClose,
   onStartTuto,
 }) => {
-
   // Local Setter for showing the Multiplayer Modal
-   const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
+  const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
 
   // Modal Handler for multiplayer modal
   const handleOpenMPModal = () => {
@@ -29,18 +30,12 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
 
   const handleCloseMPModal = () => {
     setShowMultiplayerModal(false);
-
   };
 
-
-  
-
-const singlePlayer = useGameStore((state) => state.isSingle);
-const multiPlayer = useGameStore((state) => state.isMulti);
-console.log(singlePlayer);
-console.log(multiPlayer);
-
-
+  // const singlePlayer = useGameStore((state) => state.isSingle);
+  // const multiPlayer = useGameStore((state) => state.isMulti);
+  // console.log(singlePlayer);
+  // console.log(multiPlayer);
 
   return (
     <ReactModal
@@ -77,7 +72,6 @@ console.log(multiPlayer);
             <MultiPlayerModal
               isOpen={showMultiplayerModal}
               onClose={handleCloseMPModal}
-            
             />
             <h2 className="text-2xl font-bold mb-2"></h2>
             <p className="text-sm text-gray-600">
