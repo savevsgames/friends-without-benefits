@@ -60,6 +60,7 @@ const typeDefs = `
     addFriend(input: AddFriendInput): MutateResponse!
     createGame(input: CreateGameInput): Game!
     updateGame(input: UpdateGameInput): Game!
+    updateAvatar(userId: ID!, avatar: String!): User
   }
   
   input AddUserInput {
@@ -77,6 +78,7 @@ const typeDefs = `
   authorId: ID!
   challengerIds: [ID] # array of user IDs
   items: [String]
+  duration: Float
 }
 
   input UpdateGameInput {
