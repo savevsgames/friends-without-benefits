@@ -34,32 +34,75 @@ const resolvers = {
     // querying the top ten users with the shortest rounds
     topTen: async () => {
       try {
-        // Aggregation pipeline
         return await User.aggregate([
           {
             $lookup: {
-              from: "games", // MongoDB collection for the Game model
+              from: "games",
               localField: "shortestRound",
               foreignField: "_id",
               as: "shortestRound",
             },
           },
           {
-            $unwind: "$shortestRound", // Unwind the shortestRound array
+            $unwind: "$shortestRound",
           },
           {
-            $sort: {
-              "shortestRound.duration": 1, // Sort by the Game's duration
+            // Lookup to populate challenger user data
+            $lookup: {
+              from: "users",
+              localField: "shortestRound.challengers.user",
+              foreignField: "_id",
+              as: "challengerUsers",
             },
           },
           {
-            $limit: 10, // Limit to top 10 users
+            // Reconstruct the challengers array to match the Player type
+            $addFields: {
+              "shortestRound.challengers": {
+                $map: {
+                  input: "$shortestRound.challengers",
+                  as: "challenger",
+                  in: {
+                    user: {
+                      $arrayElemAt: [
+                        {
+                          $filter: {
+                            input: "$challengerUsers",
+                            as: "u",
+                            cond: { $eq: ["$$u._id", "$$challenger.user"] }
+                          }
+                        },
+                        0
+                      ]
+                    },
+                    score: "$$challenger.score",
+                    isReady: "$$challenger.isReady",
+                    isHost: "$$challenger.isHost"
+                  }
+                }
+              }
+            }
+          },
+          {
+            $sort: {
+              "shortestRound.duration": 1,
+            },
+          },
+          {
+            $limit: 10,
           },
           {
             $project: {
               username: 1,
-              email: 1,
-              "shortestRound.duration": 1, // Include only relevant fields
+              "shortestRound.duration": 1,
+              "shortestRound.challengers": {
+                user: {
+                  username: 1
+                },
+                score: 1,
+                isReady: 1,
+                isHost: 1
+              }
             },
           },
         ]);
@@ -189,7 +232,7 @@ const resolvers = {
       }
     },
     createGame: async (_: any, { input }: any) => {
-      const { authorId, challengerIds, items } = input;
+      const { authorId, challengerIds, items, duration } = input;
 
       try {
         const author = await User.findById(authorId);
@@ -219,7 +262,7 @@ const resolvers = {
         let game = await Game.create({
           author: author._id,
           challengers: challengers,
-          duration: 0,
+          duration: duration || 0,
           isComplete: false,
           itemsFound: 0,
           items: items || [],
