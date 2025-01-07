@@ -25,7 +25,7 @@ export default function Header() {
       <div className="mx-auto px-2 sm:px-6 lg:px-8 relative">
         <div className="relative flex h-16 items-center justify-end">
           <div className="absolute inset-0 flex flex-col items-center justify-center tracking-wide font-bold text-center">
-            <h1>WELCOME TO THE LAND OF GAMES</h1>
+            <h1 className="text-2xl">WELCOME TO THE LAND OF GAMES</h1>
             <p className=" flex font-thin text-xs">Start By Choosing a Game</p>
           </div>
 

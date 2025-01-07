@@ -1,19 +1,42 @@
 import ReactModal from "react-modal";
 import StartGameButton from "./buttons/StartGameButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
+import MultiPlayerModal from "./MultiplayerModal";
+import React, { useState } from "react";
 
-const ChoiceScreen = ({
-  isOpen,
-  onClose,
-  onStartTuto,
+// import { useGameStore } from "../store";
 
-}: {
+ReactModal.setAppElement("#root");
+
+interface ChoiceScreenProps {
   isOpen: boolean;
   onClose: () => void;
   onStartTuto: () => void;
-
   onTurnOnCamera: () => void;
+}
+
+const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
+  isOpen,
+  onClose,
+  onStartTuto,
 }) => {
+  // Local Setter for showing the Multiplayer Modal
+  const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
+
+  // Modal Handler for multiplayer modal
+  const handleOpenMPModal = () => {
+    setShowMultiplayerModal(true);
+  };
+
+  const handleCloseMPModal = () => {
+    setShowMultiplayerModal(false);
+  };
+
+  // const singlePlayer = useGameStore((state) => state.isSingle);
+  // const multiPlayer = useGameStore((state) => state.isMulti);
+  // console.log(singlePlayer);
+  // console.log(multiPlayer);
+
   return (
     <ReactModal
       isOpen={isOpen}
@@ -40,6 +63,24 @@ const ChoiceScreen = ({
       }}
     >
       <div className="flex flex-col items-center justify-center gap-6">
+        <>
+          {/* Multiplayer Modal Button */}
+          <button
+            onClick={handleOpenMPModal}
+            className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+          >
+            <MultiPlayerModal
+              isOpen={showMultiplayerModal}
+              onClose={handleCloseMPModal}
+            />
+            <h2 className="text-2xl font-bold mb-2"></h2>
+            <p className="text-sm text-gray-600">
+              Playing with friends is always fun!
+            </p>
+          </button>
+          {/* showMultiplayerModal is a local setState now isolated from the button to show it */}
+        </>
+
         {/* start game */}
 
         <StartGameButton onClose={onClose} />
@@ -47,10 +88,12 @@ const ChoiceScreen = ({
         {/* start tutorial */}
         <button
           onClick={onStartTuto}
-          className="card bg-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+          className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
         >
           <h2 className="text-2xl font-bold mb-2">📘 Start Tutorial</h2>
-          <p className="text-sm">Learn how to play before starting.</p>
+          <p className="text-sm text-gray-600">
+            Learn how to play before starting.
+          </p>
         </button>
 
         {/* turn on Webcam */}

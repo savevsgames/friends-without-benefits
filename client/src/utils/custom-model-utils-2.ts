@@ -54,11 +54,11 @@ export function getModel(): any | null {
 }
 
 const YOLO_CLASSES: { [key: number]: string } = {
-  0: "Fork",
-  1: "Headphones",
-  2: "Mug",
-  3: "Remote",
-  4: "Toothbrush",
+  0: "Headphones",
+  1: "Mug",
+  2: "Remote",
+  3: "Spoon",
+  4: "Sunglasses",
 };
 
 /**
@@ -136,7 +136,7 @@ function formatPredictions(
     const height = (y2 - y1) * vidH;
 
     const classIndex = classes[i];
-    // e.g. YOLO_CLASSES: { 0: "Fork", 1: "Headphones", ... }
+    // e.g. YOLO_CLASSES: { 0: "Headphones", ... }
     const label = YOLO_CLASSES[classIndex] ?? "unknown";
 
     results.push({
@@ -314,11 +314,12 @@ const detectFrame = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   model: any,
   videoElement: HTMLVideoElement,
-  callback: (predictions: Prediction[]) => void
+  //callback: (predictions: Prediction[]) => void
 ) => {
   if (!model) return;
 
   const { numFoundItems } = useGameStore.getState();
+  const { setCurrentDetections } = useGameStore.getState();
 
   // Filter predictions based on confidence
   const confidenceThreshold = 0.5; //changed from .1
@@ -333,8 +334,11 @@ const detectFrame = async (
       confidenceThreshold
     );
     // Call callback with predictions for drawing
+
+    setCurrentDetections(predictions);
+
     if (predictions.length > 0) {
-      callback(predictions);
+      //callback(predictions);
 
       const correctObjectPrediction = predictions.find(
         (prediction) => prediction.class === YOLO_CLASSES[numFoundItems]
@@ -383,7 +387,8 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
 
   const detectionLoop = async (timestamp: number) => {
     if (timestamp - lastDetectionTime >= DETECTION_INTERVAL) {
-      await detectFrame(model, videoElement, drawBoundingBoxes);
+      //await detectFrame(model, videoElement, drawBoundingBoxes);
+      await detectFrame(model, videoElement);
       lastDetectionTime = timestamp;
     }
 
@@ -397,7 +402,8 @@ export const runDetectionOnCurrentMedia = async (): Promise<void> => {
     const loopId = requestAnimationFrame(detectionLoop);
     setActiveDetectionLoop(loopId); // ✅ Set activeDetectionLoop when the loop starts
   } else {
-    await detectFrame(model, videoElement, drawBoundingBoxes);
+    //await detectFrame(model, videoElement, drawBoundingBoxes);
+    await detectFrame(model, videoElement);
     setActiveDetectionLoop(null); // No loop for images
   }
 };

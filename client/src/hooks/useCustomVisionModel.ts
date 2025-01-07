@@ -14,7 +14,7 @@ export const useCustomVisionModel = () => {
     return Boolean(window.tf && window.cvstfjs);
   };
 
-  // InitializeModel is wrapped with useCallback 
+  // InitializeModel is wrapped with useCallback
   // Ensures it only updates when setLoading, setError, or setModel change
   const initializeModel = useCallback(async () => {
     try {
