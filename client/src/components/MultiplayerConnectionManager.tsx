@@ -122,7 +122,8 @@ const MultiplayerConnectionManager: React.FC = () => {
         "You are the host: ",
         isHost,
         "Your PlayerId: ",
-        playerId
+        playerId,
+        isTimeForCountdown
       );
 
       // onClose(); ?

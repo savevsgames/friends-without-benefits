@@ -20,13 +20,13 @@ function Game() {
   // We store the model as a global or module-level variable
   const { isLoading, model } = useModel(); // removed error - might be causing refreshes needlessly
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
-  const setCanvasReady = useGameStore((state) => state.setCanvasReady);
+  // const setCanvasReady = useGameStore((state) => state.setCanvasReady);
 
   useEffect(() => {
     // Make sure the model is loaded and there are no errors in the loading process
     try {
       if (model && !isLoading) {
-        setCanvasReady(true);
+        // setCanvasReady(true);
         console.log(
           "Active Detection Loop: ",
           useGameStore.getState().activeDetectionLoop
@@ -35,7 +35,7 @@ function Game() {
     } catch (error) {
       console.log("Error loading model.", error);
     }
-  }, [model, isLoading, setCanvasReady]);
+  }, [model, isLoading]);
 
   if (isLoading) {
     return <div>Loading model...</div>;
