@@ -26,6 +26,11 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
   // Modal Handler for multiplayer modal
   const handleOpenMPModal = () => {
     setShowMultiplayerModal(true);
+    //🍁create a new game in the mongo db
+    //  -set the game id to the response _id
+    //🍁 set the gameRoom in the store and the inviteLink in the store
+    //  - gameRoom should then be avail in the store
+    //🍁 - start the game logic in the create MP game button
   };
 
   const handleCloseMPModal = () => {
