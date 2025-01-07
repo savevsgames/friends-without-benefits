@@ -1,3 +1,4 @@
+// Keeps video aspect ratio and centers the video and canvas
 import React, { useEffect, useState } from "react";
 import { useGameStore } from "../store";
 
@@ -11,33 +12,27 @@ interface DetectionBoxProps {
   prediction: Prediction;
   sourceWidth: number;
   sourceHeight: number;
+  scale: number;
 }
 
 const DetectionBox: React.FC<DetectionBoxProps> = ({
   prediction,
   sourceWidth,
   sourceHeight,
+  scale,
 }) => {
   const { bbox, class: className, score } = prediction;
   const [x, y, width, height] = bbox;
 
   const minDimension = Math.min(sourceHeight, sourceWidth);
-  const textPadding = Math.max(2, Math.floor(minDimension * 0.01));
+  //const textPadding = Math.max(2, Math.floor(minDimension * 0.01));
   const labelHeight = Math.max(20, Math.floor(minDimension * 0.05));
 
-  const containerElement = document.getElementById("canvas-container");
-  const containerWidth = containerElement?.clientWidth || 0;
-  const containerHeight = containerElement?.clientHeight || 0;
-  const scale = Math.min(
-    containerWidth / sourceWidth,
-    containerHeight / sourceHeight
-  );
-
   const scaledStyle = {
-    left: `${x * scale + 50}px`,
+    left: `${x * scale}px`,
     top: `${y * scale}px`,
-    width: `${width * scale * 1.8}px`,
-    height: `${height * scale * 1.8}px`,
+    width: `${width * scale}px`,
+    height: `${height * scale}px`,
     position: "absolute" as const,
     pointerEvents: "none" as const,
   };
@@ -52,23 +47,25 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
     <div style={scaledStyle}>
       <div className="relative w-full h-full border-4 border-blue-500">
         <div
-          className="absolute left-0 right-0 bg-blue-500 text-white font-semibold truncate"
+          className="absolute left-[-4px] right-[-4px] bg-blue-500 text-white font-semibold truncate text-center rounded-t-lg flex items-center justify-center"
           style={{
             top: `-${labelHeight}px`,
             height: `${labelHeight}px`,
-            padding: `${textPadding}px`,
-            width: "100%",
+            width: 'calc(100% + 8px)',
           }}
         >
           {className} {Math.round(score * 100)}%
         </div>
-        <div className="absolute -bottom-3 left-0 right-0 h-3 bg-gray-300">
+        <div className="absolute -bottom-8 left-[-4px] right-[-4px] h-8 bg-gray-300 rounded-b-lg overflow-hidden">
           <div
-            className={`h-full ${getProgressColorClass(
+            className={`absolute top-0 left-0 h-full ${getProgressColorClass(
               score
             )} transition-all duration-300`}
             style={{ width: `${score * 100}%` }}
           />
+          <div className="absolute w-full h-full flex items-center justify-center text-sm font-semibold text-white z-10">
+            detect-O-meter
+          </div>
         </div>
       </div>
     </div>
@@ -79,6 +76,7 @@ const DetectionOverlay: React.FC = () => {
   const { currentMediaType } = useGameStore();
   const { currentDetections } = useGameStore();
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -89,6 +87,8 @@ const DetectionOverlay: React.FC = () => {
         "video-output"
       ) as HTMLVideoElement;
 
+      const containerElement = document.getElementById("canvas-container");
+      
       const sourceWidth =
         currentMediaType === "image"
           ? imageElement?.naturalWidth
@@ -98,15 +98,54 @@ const DetectionOverlay: React.FC = () => {
           ? imageElement?.naturalHeight
           : videoElement?.videoHeight;
 
-      if (sourceWidth && sourceHeight) {
+      if (sourceWidth && sourceHeight && containerElement) {
+        const containerWidth = containerElement.clientWidth;
+        const containerHeight = containerElement.clientHeight;
+
+        const scale = Math.min(
+          containerWidth / sourceWidth,
+          containerHeight / sourceHeight
+        );
+
+        const scaledWidth = sourceWidth * scale;
+        const scaledHeight = sourceHeight * scale;
+
+        const offsetX = (containerWidth - scaledWidth) / 2;
+        const offsetY = (containerHeight - scaledHeight) / 2;
+
         setDimensions({
           width: sourceWidth,
           height: sourceHeight,
         });
+        setScale(scale);
+
+        const mediaElement = currentMediaType === "image" ? imageElement : videoElement;
+        if (mediaElement) {
+          mediaElement.style.width = `${scaledWidth}px`;
+          mediaElement.style.height = `${scaledHeight}px`;
+          mediaElement.style.objectFit = "contain";
+          mediaElement.style.position = "absolute";
+          mediaElement.style.left = `${offsetX}px`;
+          mediaElement.style.top = `${offsetY}px`;
+        }
+
+        const overlayContainer = document.querySelector('[data-overlay-container]');
+        if (overlayContainer instanceof HTMLElement) {
+          overlayContainer.style.width = `${scaledWidth}px`;
+          overlayContainer.style.height = `${scaledHeight}px`;
+          overlayContainer.style.left = `${offsetX}px`;
+          overlayContainer.style.top = `${offsetY}px`;
+        }
       }
     };
 
     updateDimensions();
+
+    const containerElement = document.getElementById("canvas-container");
+    if (containerElement) {
+      const resizeObserver = new ResizeObserver(updateDimensions);
+      resizeObserver.observe(containerElement);
+    }
 
     const element =
       currentMediaType === "image"
@@ -119,6 +158,11 @@ const DetectionOverlay: React.FC = () => {
     }
 
     return () => {
+      const containerElement = document.getElementById("canvas-container");
+      if (containerElement) {
+        const resizeObserver = new ResizeObserver(updateDimensions);
+        resizeObserver.disconnect();
+      }
       element?.removeEventListener("loadedmetadata", updateDimensions);
       if (currentMediaType === "image") {
         element?.removeEventListener("load", updateDimensions);
@@ -130,8 +174,9 @@ const DetectionOverlay: React.FC = () => {
 
   return (
     <div
-      className="absolute top-0 left-0 w-full h-full pointer-events-none"
+      className="absolute pointer-events-none"
       style={{ zIndex: 15 }}
+      data-overlay-container
     >
       {currentDetections.map((prediction, index) => (
         <DetectionBox
@@ -139,6 +184,7 @@ const DetectionOverlay: React.FC = () => {
           prediction={prediction}
           sourceWidth={dimensions.width}
           sourceHeight={dimensions.height}
+          scale={scale}
         />
       ))}
     </div>
