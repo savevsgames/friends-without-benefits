@@ -10,7 +10,15 @@ import { useMutation } from "@apollo/client";
 import { CREATE_GAME } from "../../utils/mutations";
 import { useUserSession } from "@/store";
 
-const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+interface StartGameButtonProps {
+  onClose?: () => void;
+  onGameCreation?: (gameId: string) => void; //adding to pass the gameRoom to the canvas parent
+}
+
+const StartGameButton: React.FC<StartGameButtonProps> = ({
+  onClose,
+  onGameCreation,
+}) => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
   const setPlayerId = useMultiplayerStore((state) => state.setPlayerId);
   const players = useMultiplayerStore((state) => state.players);
@@ -158,34 +166,16 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
           }
         );
       }
+      // the start game button is a child of the choice screen
+      // which is a child of the Canvas.tsx which also holds the scavenger game logic
+      // so we can pass the prop up instead of relying on Zustand
+      if (onGameCreation) {
+        onGameCreation(newGameId);
+      }
       // close the modal
       if (onClose) {
         onClose();
       }
-
-      // setPlayerReady(user.data._id, true, newGameId!);
-
-      // console.log(
-      //   "Players in the game -> Zustand: ",
-      //   useMultiplayerStore.getState().players
-      // );
-
-      // // Update the isReady
-      // setPlayerReady(user.data._id, true, newGameId!);
-      // const readyStates = { [user.data._id]: true };
-      // console.log("Updating player ready states: ", readyStates);
-      // updatePlayerReadyStates(readyStates);
-
-      // // Explicitly emit playerReady to the server
-      // if (socket) {
-      //   console.log("📤 Emitting playerReady event to server");
-      //   socket.emit("playerReady", {
-      //     userId: user.data._id,
-      //     gameId: newGameId,
-      //   });
-      // } else {
-      //   console.error("❌ No socket connection to emit playerReady");
-      // }
     } catch (error) {
       console.log("Error creating game in Choice Screen: ", error);
     }

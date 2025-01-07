@@ -19,6 +19,10 @@ export const useUpdateGame = () => {
     itemsFound,
     winnerId,
   }: UpdateGameInput) => {
+
+    if(!gameId || gameId === "") {
+      throw new Error("Game ID is required to update a game");
+    }
     try {
       const response = await updateGameMutation({
         variables: {
