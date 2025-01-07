@@ -8,11 +8,13 @@ ReactModal.setAppElement("#root");
 interface MultiPlayerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onGameCreation: (gameId: string) => void;
 }
 
 const MultiPlayerModal: React.FC<MultiPlayerModalProps> = ({
   isOpen,
   onClose,
+  onGameCreation,
 }) => {
   return (
     <div>
@@ -45,7 +47,7 @@ const MultiPlayerModal: React.FC<MultiPlayerModalProps> = ({
 
         {/* <h2 className="text-xl font-bold mb-4">Multiplayer Options</h2> */}
         {/* TODO: MultiplayerConnectionManager - child no longer controls isOpen*/}
-        <MultiplayerConnectionManager />
+        <MultiplayerConnectionManager onGameCreation={onGameCreation} />
       </ReactModal>
     </div>
   );
