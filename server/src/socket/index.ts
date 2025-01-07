@@ -34,7 +34,9 @@ export const createSocketManager = (
 
         let gameRoom = context.gameRooms.get(gameId);
         if (!gameRoom) {
-          console.log(`🛠️ Game room ${gameId} not found. Creating a new room...`);
+          console.log(
+            `🛠️ Game room ${gameId} not found. Creating a new room...`
+          );
           gameRoom = {
             gameId,
             hostId: userId,
@@ -47,35 +49,34 @@ export const createSocketManager = (
 
         // Check if they are already registered with a userId
         // IF NOT, register them with the server context!!!!!!
-        const userConnection = context.userConnections.get(userId) || {
-          userId,
-          socketId: socket.id,
-          peerId: "", // MAY NEED TO FIND A WAY TO GET THIS?
-          gameId,
-          isHost: gameRoom.hostId === userId,
-          isReady: false,
-        };
-
+        let userConnection = context.userConnections.get(userId);
+        if (!userConnection) {
+          userConnection = {
+            userId,
+            socketId: socket.id,
+            peerId: "", // MAY NEED TO FIND A WAY TO GET THIS?
+            gameId,
+            isHost: gameRoom.hostId === userId,
+            isReady: false, // may need to change this ...
+          };
+          // set the user connection in the server context since it WAS NOT THERE BEFORE!!!!
+          context.userConnections.set(userId, userConnection);
+        } else {
+          console.log(`🔄 Updating existing user connection for ${userId}`);
+          userConnection.socketId = socket.id;
+          userConnection.gameId = gameId;
+          context.userConnections.set(userId, userConnection);
+        }
+        // Add the user's connection details to the game room players map
         gameRoom.players.set(userId, userConnection);
         context.userConnections.set(userId, userConnection);
 
-        if (userConnection) {
-          console.log(
-            "User is already connected to the server, registering new connection settings..."
-          );
-          userConnection.socketId = socket.id;
-          userConnection.gameId = gameId;
-          // update the server context
-          context.userConnections.set(userId, userConnection);
+        // Join the gameId room with socket.join()
+        console.log(
+          `Player with id: ${userId} is joining room with id: ${gameId}`
+        );
+        socket.join(gameId);
 
-          // check for a gameId in the user connection to RECONNECT!
-          if (gameId) {
-            console.log(
-              `Player with id: ${userId} is joining room with id: ${gameId}`
-            );
-            socket.join(gameId);
-          }
-        }
         console.log(
           "🕵️‍♂️ User registered in manager with id: ",
           userId,
