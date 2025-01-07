@@ -58,9 +58,10 @@ export const CREATE_GAME = gql`
         username
       }
     }
-  }
+}`;
 
-//export const CREATE_GAME = gql`
+
+// export const CREATE_GAME = gql`
 //    mutation CreateGame($input: CreateGameInput) {
 //        createGame(input: $input) {
 //           _id
@@ -75,4 +76,4 @@ export const CREATE_GAME = gql`
 //        }
 //    }
 
-`;
+// `;
