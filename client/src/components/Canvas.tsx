@@ -12,7 +12,6 @@ import DetectionOverlay from "./DetectionBoxes.tsx";
 
 const Canvas: React.FC = () => {
   const gameRoom = useGameStore((state) => state.gameRoom);
-  const [gameId, setGameId] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { gameState, videoPlaying } = useGameStore(); // Access Zustand state
@@ -223,11 +222,11 @@ const Canvas: React.FC = () => {
     console.log("🎮 Game Room ID updated:", gameRoom);
   }, [gameRoom]);
 
-  const handleGameCreated = (newGameId: string) => {
-    console.log("🎯 Game created with ID:", newGameId);
-    console.log("🎮 GameID updated too?:", gameId);
-    setGameId(newGameId);
-  };
+  // const handleGameCreated = (newGameId: string) => {
+  //   console.log("🎯 Game created with ID:", newGameId);
+  //   console.log("🎮 GameID updated too?:", gameId);
+  //   setGameId(newGameId);
+  // };
 
   return (
     <div>
@@ -246,7 +245,6 @@ const Canvas: React.FC = () => {
           onClose={() => setShowChoices(false)}
           onStartTuto={handleStartTuto}
           onTurnOnCamera={handleTurnOnCamera}
-          onGameCreation={handleGameCreated}
         />
         {/* tutorial modal */}
         {!multiPlayer && (

@@ -173,7 +173,7 @@ const ScavengerGame = () => {
       }, 1000); //  displayed for 1 second
       return () => clearTimeout(timeout);
     }
-  }, [numFoundItems]);
+  }, [numFoundItems, itemsArr.length, timeRemaining]);
 
   // Game start logic - should update the bd once zustand is updated
   useEffect(() => {
@@ -236,7 +236,7 @@ const ScavengerGame = () => {
 
       handleGameComplete();
     }
-  }, [numFoundItems, timeRemaining, gameRoom, updateGame, resetGame]);
+  }, [numFoundItems, timeRemaining, gameRoom, updateGame, resetGame, playerId]);
 
   return (
     <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">
