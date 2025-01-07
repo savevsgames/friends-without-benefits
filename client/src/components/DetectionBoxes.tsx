@@ -34,10 +34,10 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
   );
 
   const scaledStyle = {
-    left: `${x * scale}px`,
+    left: `${x * scale + 50}px`,
     top: `${y * scale}px`,
-    width: `${width * scale}px`,
-    height: `${height * scale}px`,
+    width: `${width * scale * 1.8}px`,
+    height: `${height * scale * 1.8}px`,
     position: "absolute" as const,
     pointerEvents: "none" as const,
   };
