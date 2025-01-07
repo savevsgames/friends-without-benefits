@@ -17,6 +17,7 @@ const ChoiceScreen = ({
 }) => {
   const singlePlayer = useGameStore((state) => state.isSingle);
   const multiPlayer = useGameStore((state) => state.isMulti);
+  console.log(singlePlayer);
 
   return (
     <ReactModal
