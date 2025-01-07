@@ -52,12 +52,7 @@ const MultiplayerConnectionManager: React.FC = () => {
   const socket = useMultiplayerStore((state) => state.socket);
   const setInviteLink = useMultiplayerStore((state) => state.setInviteLink);
   const inviteLink = useMultiplayerStore((state) => state.inviteLink);
-  const setIsTimeForCountdown = useMultiplayerStore(
-    (state) => state.setIsTimeForCountdown
-  );
-  const isTimeForCountdown = useMultiplayerStore(
-    (state) => state.isTimeForCountdown
-  );
+
 
   useEffect(() => {
     console.log("Room ID has been copied? ", copied);
@@ -115,7 +110,6 @@ const MultiplayerConnectionManager: React.FC = () => {
       setInviteLink(gameId);
       setIsMulti(true);
       setIsSingle(false);
-      setIsTimeForCountdown(true);
       console.log(
         "🏠 Game Room Created: ",
         "Room ID:",
@@ -126,7 +120,6 @@ const MultiplayerConnectionManager: React.FC = () => {
         isHost,
         "Your PlayerId: ",
         playerId,
-        isTimeForCountdown
       );
 
       // onClose(); ?
