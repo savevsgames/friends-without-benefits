@@ -32,9 +32,9 @@ createRoot(document.getElementById("root")!).render(
           <Route
             path="/home"
             element={
-              // <ProtectedRoute>
-              <Home />
-              //  </ProtectedRoute>
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
             }
           />
 
@@ -49,9 +49,9 @@ createRoot(document.getElementById("root")!).render(
           <Route
             path="/game"
             element={
-              // <ProtectedRoute>
-              <Game />
-              // </ProtectedRoute>
+              <ProtectedRoute>
+                <Game />
+              </ProtectedRoute>
             }
           />
           <Route

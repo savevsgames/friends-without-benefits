@@ -3,9 +3,9 @@ import { useGameStore, useMultiplayerStore } from "@/store";
 import RiddleCardFlip from "./RiddleCardFlip";
 import Countdown from "./Countdown";
 import "../App.css";
+import { useUpdateGame } from "@/hooks/useUpdateGame";
 
 const ScavengerGame = () => {
-
   const gameState = useGameStore((state) => state.gameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
@@ -19,6 +19,10 @@ const ScavengerGame = () => {
   const startTimer = useGameStore((state) => state.startTimer);
   const resetGame = useGameStore((state) => state.resetGame);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  const gameRoom = useGameStore((state) => state.gameRoom);
+  const { updateGame } = useUpdateGame();
+  const playerId = useMultiplayerStore((state) => state.playerId);
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -112,8 +116,6 @@ const ScavengerGame = () => {
     };
   }, [gameState, countdown, startTimer]);
 
-
-
   // useEffect(() => {
   //   let countdownTimer: NodeJS.Timeout | null = null;
 
@@ -171,7 +173,70 @@ const ScavengerGame = () => {
       }, 1000); //  displayed for 1 second
       return () => clearTimeout(timeout);
     }
-  }, [numFoundItems]);
+  }, [numFoundItems, itemsArr.length, timeRemaining]);
+
+  // Game start logic - should update the bd once zustand is updated
+  useEffect(() => {
+    if (gameRoom && gameState === "countdown") {
+      console.log(
+        "🚦 Game started. Updating game start state in the database..."
+      );
+
+      const handleGameStart = async () => {
+        try {
+          await updateGame({
+            gameId: gameRoom,
+            isComplete: false,
+            duration: 120, // Initial duration (or dynamic if needed)
+            itemsFound: 0,
+            winnerId: "", // Empty winner at game start
+          });
+
+          console.log("✅ Game start state updated in the database.");
+          startTimer(); // Start the game timer locally
+        } catch (error) {
+          console.error("❌ Failed to update game start state:", error);
+        }
+      };
+
+      handleGameStart();
+    }
+  }, [gameRoom, gameState, startTimer, updateGame]);
+
+  // Game completion logic - needs more logic to determine winner
+  // Handles the updating of the game in the database
+  useEffect(() => {
+    // Check if the game has completed based on conditions
+    const isGameComplete = numFoundItems >= 5 || timeRemaining === 0;
+
+    if (isGameComplete && gameRoom) {
+      console.log(
+        "🎯 Game is complete. Preparing to update in the database..."
+      );
+
+      const handleGameComplete = async () => {
+        try {
+          await updateGame({
+            gameId: gameRoom,
+            isComplete: true,
+            duration: 120 - timeRemaining,
+            itemsFound: numFoundItems,
+            winnerId: playerId || "THEWINNER", //TODO: make sure proper winner is determined
+          });
+
+          console.log("✅ Game completion updated in the database.");
+          resetGame(); // Reset the game locally after DB update
+        } catch (error) {
+          console.error(
+            "❌ Failed to update game completion in the database:",
+            error
+          );
+        }
+      };
+
+      handleGameComplete();
+    }
+  }, [numFoundItems, timeRemaining, gameRoom, updateGame, resetGame, playerId]);
 
   return (
     <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">
@@ -194,7 +259,7 @@ const ScavengerGame = () => {
             {/* time remaining */}
 
             <div className="fixed bottom-4 left-15 flex flex-col gap-">
-              <div className="time-box p-4 bg-gradient-to-br from-teal-700 to-green-500 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl " >
+              <div className="time-box p-4 bg-gradient-to-br from-teal-700 to-green-500 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl ">
                 <h1 className="text-xl font-extrabold mb-2 text-white tracking-wider">
                   Tick ⏳ Tock
                 </h1>

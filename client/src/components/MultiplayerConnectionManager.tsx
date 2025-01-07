@@ -20,8 +20,12 @@ import {
 import { Tooltip } from "react-tooltip";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
+
+
 const MultiplayerConnectionManager: React.FC = () => {
   // Destructure Mutiplayer Store State
+
+  // const{ onGameCreation} = props.onGameCreation;
 
   const {
     playerId,
