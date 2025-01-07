@@ -34,10 +34,10 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
 
 
   
-<!-- 
-  const singlePlayer = useGameStore((state) => state.isSingle);
-  const multiPlayer = useGameStore((state) => state.isMulti);
-  console.log(singlePlayer); -->
+//<!-- 
+//  const singlePlayer = useGameStore((state) => state.isSingle);
+// const multiPlayer = useGameStore((state) => state.isMulti);
+//  console.log(singlePlayer); -->
 
 
 
