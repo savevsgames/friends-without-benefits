@@ -55,9 +55,6 @@ const MultiplayerConnectionManager: React.FC = () => {
   const setIsTimeForCountdown = useMultiplayerStore(
     (state) => state.setIsTimeForCountdown
   );
-  const isTimeForCountdown = useMultiplayerStore(
-    (state) => state.isTimeForCountdown
-  );
 
   useEffect(() => {
     console.log("Room ID has been copied? ", copied);
@@ -277,8 +274,9 @@ const MultiplayerConnectionManager: React.FC = () => {
                 <button
                   data-tooltip-id="create-room"
                   onClick={handleMultiplayerGameCreation}
+                  className="w-full py-2 px-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-lg hover:scale-105 transition-transform duration-300"
                 >
-                  Create Multiplayer Game
+                  Create Game
                 </button>
               </CopyToClipboard>
 

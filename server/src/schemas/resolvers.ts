@@ -286,6 +286,18 @@ const resolvers = {
         throw GQLMutationError("updateGame", error);
       }
     },
+    updateAvatar: async (_: any, { input }: any) => {
+      const { userId, avatar } = input;
+      try {
+        return await User.findByIdAndUpdate(
+          { _id: userId },
+          { avatar },
+          { new: true }
+        );
+      } catch (error) {
+        throw GQLMutationError("UpdateAvatar", error);
+      }
+    },
   },
 };
 

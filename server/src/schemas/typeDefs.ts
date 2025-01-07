@@ -60,6 +60,7 @@ const typeDefs = `
     addFriend(input: AddFriendInput): MutateResponse!
     createGame(input: CreateGameInput): Game!
     updateGame(input: UpdateGameInput): Game!
+    updateAvatar(userId: ID!, avatar: String!): User
   }
   
   input AddUserInput {

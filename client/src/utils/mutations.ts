@@ -31,6 +31,7 @@ export const LOGIN_USER = gql`
   }
 `;
 
+
 export const CREATE_GAME = gql`
   mutation createGame($input: CreateGameInput!) {
     createGame(input: $input) {
@@ -57,6 +58,7 @@ export const CREATE_GAME = gql`
         username
       }
     }
+
   }
 `;
 
@@ -83,3 +85,4 @@ export const UPDATE_GAME = gql`
     }
   }
 `;
+

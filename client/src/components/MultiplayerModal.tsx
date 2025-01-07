@@ -16,13 +16,15 @@ const MultiPlayerModal: React.FC<MultiPlayerModalProps> = ({
 }) => {
   return (
     <div>
-      <h1>Multiplayer Manager</h1>
+      <h1 className="text-2xl font-bold mb-2">Multiplayer Manager</h1>
 
       <ReactModal
         isOpen={isOpen}
         onRequestClose={onClose}
         contentLabel="Multiplayer Manager Modal"
+        
         style={{
+          
           content: {
             top: "50%",
             left: "50%",
@@ -33,15 +35,15 @@ const MultiPlayerModal: React.FC<MultiPlayerModalProps> = ({
           overlay: {
             backgroundColor: "rgba(0, 0, 0, 0.75)",
             zIndex: 1000,
-          },
+        },
         }}
       >
         {/* Button to close the modal */}
-        <button onClick={onClose} className="border p-2 rounded mb-4">
+        {/* <button onClick={onClose} className="border p-2 rounded mb-4">
           Close
-        </button>
+        </button> */}
 
-        <h2 className="text-xl font-bold mb-4">Multiplayer Options</h2>
+        {/* <h2 className="text-xl font-bold mb-4">Multiplayer Options</h2> */}
         {/* TODO: MultiplayerConnectionManager - child no longer controls isOpen*/}
         <MultiplayerConnectionManager />
       </ReactModal>
