@@ -73,12 +73,12 @@ export const useSocketIO = () => {
 
     socketIo.on("startCountdown", (countdown: number) => {
       console.log("startCountdown event received:", countdown);
-      useMultiplayerStore.getState().startCountdown(countdown);
+      // useMultiplayerStore.getState().startCountdown(countdown); // set in scavengerGameLogic.tsx
     });
 
     socketIo.on("updateReadyStates", (readyStates: Record<string, boolean>) => {
       console.log("updateReadyStates event received:", readyStates);
-      useMultiplayerStore.getState().updatePlayerReadyStates(readyStates);
+      // useMultiplayerStore.getState().updatePlayerReadyStates(readyStates); // set in scavengerGameLogic.tsx
     });
 
     socketIo.on("connect_error", (error: Error) => {

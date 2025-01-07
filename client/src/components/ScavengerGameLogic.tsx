@@ -33,33 +33,51 @@ const ScavengerGame = () => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // useEffect(() => {
-  //   if (socket) {
-  //     try {
-  //       // console.log("socket testing for start game button: ", socket);
-  //       // Server sends the countdown to start the game
-  //       socket.on("startCountdown", (countdown: number) => {
-  //         console.log("startCountdown event received: ", countdown);
-  //         startCountdown(countdown);
-  //       });
-  //       // When the game is multiplayer, we need to update the ready
-  //       // states of the players in the store when the server sends an update
-  //       socket.on("updateReadyStates", updatePlayerReadyStates);
+  // use effect to set isReady and start countdown when sever emits countdown
+  useEffect(() => {
+    const socket = useMultiplayerStore.getState().socket;
+    const updatePlayerReadyStates =
+      useMultiplayerStore.getState().updatePlayerReadyStates;
+    const startCountdown = useMultiplayerStore.getState().startCountdown;
 
-  //       socket.on("disconnect", () => {
-  //         console.warn("Socket IO DISCONNECTED UNEXPECTEDLY");
-  //       });
+    if (socket) {
+      try {
+        console.log("🔗 Setting up Socket.IO event listeners...");
 
-  //       return () => {
-  //         socket.off("startCountdown");
-  //         socket.off("updateReadyStates");
-  //         socket.off("disconnect");
-  //       };
-  //     } catch (error) {
-  //       console.log("Error starting countdown", error);
-  //     }
-  //   }
-  // }, [socket, startCountdown, updatePlayerReadyStates]);
+        // Listen for the countdown to start
+        socket.on("startCountdown", (countdown: number) => {
+          console.log("🚦 startCountdown event received:", countdown);
+          startCountdown(countdown);
+        });
+
+        // Listen for ready state updates
+        socket.on(
+          "updateReadyStates",
+          (readyStates: Record<string, boolean>) => {
+            console.log("📥 updateReadyStates event received:", readyStates);
+            updatePlayerReadyStates(readyStates);
+          }
+        );
+
+        // Handle disconnect
+        socket.on("disconnect", () => {
+          console.warn("❌ Socket.IO disconnected unexpectedly!");
+        });
+
+        // Cleanup listeners on unmount
+        return () => {
+          socket.off("startCountdown");
+          socket.off("updateReadyStates");
+          socket.off("disconnect");
+          console.log("🧹 Socket.IO listeners cleaned up");
+        };
+      } catch (error) {
+        console.error("❌ Error setting up socket listeners:", error);
+      }
+    } else {
+      console.warn("⚠️ Socket.IO connection not established yet.");
+    }
+  }, []);
 
   useEffect(() => {
     if (numFoundItems >= 5 || timeRemaining === 0) {

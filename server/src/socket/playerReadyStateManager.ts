@@ -30,17 +30,44 @@ export const playerReadyStateManager = (context: ServerContext) => {
     console.log("socket: ", socket, "has playerId: ", userId);
     console.log(`🎯 Player ${userId} is ready.`);
 
-    // update the GameRoom with the status of the user
-    gameRoom.players.set(userId, userConnection);
-    console.log(`🎯 Player ${userId} is in game room: `, gameId);
+    // ✅ Update Ready State in `gameRooms` by extracting the player and
+    // updating the isReady property
+    if (gameRoom.players.has(userId)) {
+      const player = gameRoom.players.get(userId);
+      if (player) {
+        player.isReady = true;
+        gameRoom.players.set(userId, player);
+        console.log(
+          `✅ Player ${userId} marked as ready in game room ${gameId}`
+        );
+      }
+    } else {
+      console.error(`❌ Player ${userId} not found in game room players.`);
+    }
 
-    // Check readiness based on game type
+    // 🔄 Broadcast Updated Ready States to Clients
+    const readyStates = Object.fromEntries(
+      Array.from(gameRoom.players.entries()).map(([id, player]) => [
+        id,
+        player.isReady,
+      ])
+    );
+    io.to(gameId).emit("updateReadyStates", readyStates);
+    console.log(
+      `📤 Emitted updated ready states for room ${gameId}:`,
+      readyStates
+    );
+
+    // 🚦 Handle Single-Player Game
     if (gameRoom.gameType === "single") {
       console.log("🚦 Single-player game detected. Starting countdown...");
       io.to(gameId).emit("startCountdown", 5);
+      // Update the game state to countdown in server context
+      gameRoom.gameState = "countdown";
       return;
     }
 
+    // 🚦 Handle Multiplayer Game
     if (gameRoom.gameType === "multi") {
       const allPlayersReady = Array.from(gameRoom.players.values()).every(
         (player) => player.isReady
@@ -49,18 +76,21 @@ export const playerReadyStateManager = (context: ServerContext) => {
       if (allPlayersReady) {
         console.log("✅ All players are ready. Starting countdown...");
         io.to(gameId).emit("startCountdown", 5);
+        // Update the game state to countdown in server context
+        gameRoom.gameState = "countdown";
+      } else {
+        console.log("⏳ Waiting for more players to be ready...");
       }
     }
 
-    // Ready states are Maps of userIds and isReady from players in the game room
-    const readyStates = Object.fromEntries(
-      Array.from(gameRoom.players.entries()).map(([id, connection]) => [
-        id,
-        connection.isReady,
-      ])
+    // Table log of the ready states for debugging
+    console.log("🏃‍♀️ Ready States in Game Room:");
+    console.table(
+      Array.from(gameRoom.players.entries()).map(([id, player]) => ({
+        userId: id,
+        isReady: player.isReady,
+      }))
     );
-
-    io.to(gameId).emit("updateReadyStates", readyStates);
   };
 };
 

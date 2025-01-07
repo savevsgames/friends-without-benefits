@@ -30,7 +30,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const canvasReady = useGameStore((state) => state.canvasReady);
   const videoPlaying = useGameStore((state) => state.videoPlaying);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
-  const setGameSate = useGameStore((state) => state.setGameState);
+  // const setGameSate = useGameStore((state) => state.setGameState);
 
   const setIsSingle = useGameStore((state) => state.setIsSingle);
   const setIsMulti = useGameStore((state) => state.setIsMulti);
@@ -140,6 +140,17 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       console.log("Updating player ready states: ", readyStates);
       updatePlayerReadyStates(readyStates);
 
+      // Explicitly emit playerReady to the server
+      if (socket) {
+        console.log("📤 Emitting playerReady event to server");
+        socket.emit("playerReady", {
+          userId: user.data._id,
+          gameId: newGameId,
+        });
+      } else {
+        console.error("❌ No socket connection to emit playerReady");
+      }
+
       // Emit to the server that a new user is registering (first register)
       if (!socket) {
         console.error("❌ No socket exists to broadcast new game.");
@@ -213,7 +224,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       await handleWebcamStart();
       try {
         await handleSinglePlayerGameCreation();
-        setGameSate("countdown");
+        // setGameSate("countdown"); TODO: This is not needed here
       } catch (error) {
         console.error("Error Creating Game", error);
       }

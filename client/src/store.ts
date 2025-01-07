@@ -371,7 +371,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       if (!id || !data) {
         console.error("❌ Invalid player data. ID or data is missing.");
         return state;
-      }  
+      }
       return {
         players: {
           ...state.players,
@@ -435,25 +435,19 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       },
     }));
     const players = useMultiplayerStore.getState().players;
-    console.log("setPlayerReady() ZUSTAND => Players: ", players);
-
+    console.log("✅ Zustand Players State Updated: ", players);
+  
     const socket = useMultiplayerStore.getState().socket;
     if (socket && gameId) {
       console.log(
-        "Emitting player ready for player id: ",
+        "📤 Emitting playerReady event to server:",
         id,
-        "Adding isReady to server context for gameId: ",
+        "Game ID:",
         gameId
       );
       socket.emit("playerReady", { userId: id, gameId });
     } else {
-      console.log(
-        "Emitting player ready for player id: ",
-        id,
-        "Adding isReady to server context with no gameId(should fail)."
-      );
-      socket?.emit("playerReady", { playerId: id });
-      // fallback if you somehow don't have a gameId
+      console.error("❌ Socket or gameId is undefined in setPlayerReady");
     }
   },
   updatePlayerReadyStates: (readyStates: Record<string, boolean>) => {
