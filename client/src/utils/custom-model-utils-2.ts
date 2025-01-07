@@ -54,11 +54,11 @@ export function getModel(): any | null {
 }
 
 const YOLO_CLASSES: { [key: number]: string } = {
-  0: "Fork",
-  1: "Headphones",
-  2: "Mug",
-  3: "Remote",
-  4: "Toothbrush",
+  0: "Headphones",
+  1: "Mug",
+  2: "Remote",
+  3: "Spoon",
+  4: "Sunglasses",
 };
 
 /**
@@ -136,7 +136,7 @@ function formatPredictions(
     const height = (y2 - y1) * vidH;
 
     const classIndex = classes[i];
-    // e.g. YOLO_CLASSES: { 0: "Fork", 1: "Headphones", ... }
+    // e.g. YOLO_CLASSES: { 0: "Headphones", ... }
     const label = YOLO_CLASSES[classIndex] ?? "unknown";
 
     results.push({
