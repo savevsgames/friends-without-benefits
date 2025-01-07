@@ -48,7 +48,6 @@ export interface IGameState {
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
-  players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
   isSingle: boolean;
   isMulti: boolean;
   numFoundItems: number; // 0-5
@@ -59,7 +58,11 @@ export interface IGameState {
   timerId: number | null; // Store timer ID
   detectMeter: number; // Used for progressbar
   currentDetections: Prediction[]; // Used to draw bbox and progressbar
+
+  gameRoom: string | null; // Game ID from db
+
   isGameOver: boolean;
+
 
   // State Setters
   setGameState: (
@@ -70,7 +73,6 @@ export interface IGameState {
   setCurrentMediaRef: (ref: string | null) => void;
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   setActiveDetectionLoop: (iteration: number | null) => void;
-  addPlayer: (id: string, player: Player) => void;
   setIsSingle: (value: boolean) => void;
   setIsMulti: (value: boolean) => void;
   setNumFoundItems: (numberFound: number) => void;
@@ -79,6 +81,7 @@ export interface IGameState {
   stopTimer: () => void;
   setDetectMeter: (value: number) => void;
   setCurrentDetections: (predictions: Prediction[]) => void;
+  setGameRoom: (gameId: string) => void;
   setCountdown: (countdown: number | null) => void;
   resetGame: () => void;
 
@@ -102,8 +105,8 @@ export const useGameStore = create<IGameState>((set, get) => ({
   timerId: null,
   detectMeter: 0,
   currentDetections: [],
+  gameRoom: null,
   countdown: null,
-  players: {},
   isSingle: true,
   isMulti: false,
 
@@ -143,6 +146,9 @@ export const useGameStore = create<IGameState>((set, get) => ({
   setDetectMeter: (detectMeter: number) => set({ detectMeter }),
   setCurrentDetections: (predictions) =>
     set({ currentDetections: predictions }),
+  setGameRoom: (gameId) => {
+    set({ gameRoom: gameId });
+  },
   startTimer: () => {
     const currentTimer = get().timerId;
     if (currentTimer !== null) {
@@ -194,24 +200,11 @@ export const useGameStore = create<IGameState>((set, get) => ({
       };
     });
   },
-
-  addPlayer: (id, player) => {
-    set((state) => ({
-      players: { ...state.players, [id]: player },
-    }));
-  },
   setIsSingle: (value) => {
     set({ isSingle: value, isMulti: !value });
   },
   setIsMulti: (value) => {
     set({ isMulti: value, isSingle: !value });
-  },
-  removePlayer: (id: string) => {
-    set((state) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [id]: _data, ...rest } = state.players;
-      return { players: { ...rest } };
-    });
   },
   // Local update and emit via Socket.IO to challenger
   outgoingUpdate: (updates) => {
@@ -383,9 +376,18 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
     set({ socket });
   },
   addPlayer: (id, data) =>
-    set((state) => ({
-      players: { ...state.players, [id]: data },
-    })),
+    set((state) => {
+      if (!id || !data) {
+        console.error("❌ Invalid player data. ID or data is missing.");
+        return state;
+      }
+      return {
+        players: {
+          ...state.players,
+          [id]: { ...state.players[id], ...data }, // Merge new data with existing
+        },
+      };
+    }),
   removePlayer: (id) =>
     set((state) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -442,25 +444,19 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       },
     }));
     const players = useMultiplayerStore.getState().players;
-    console.log("setPlayerReady() ZUSTAND => Players: ", players);
-
+    console.log("✅ Zustand Players State Updated: ", players);
+  
     const socket = useMultiplayerStore.getState().socket;
     if (socket && gameId) {
       console.log(
-        "Emitting player ready for player id: ",
+        "📤 Emitting playerReady event to server:",
         id,
-        "Adding isReady to server context for gameId: ",
+        "Game ID:",
         gameId
       );
       socket.emit("playerReady", { userId: id, gameId });
     } else {
-      console.log(
-        "Emitting player ready for player id: ",
-        id,
-        "Adding isReady to server context with no gameId(should fail)."
-      );
-      socket?.emit("playerReady", { playerId: id });
-      // fallback if you somehow don't have a gameId
+      console.error("❌ Socket or gameId is undefined in setPlayerReady");
     }
   },
   updatePlayerReadyStates: (readyStates: Record<string, boolean>) => {
@@ -471,6 +467,16 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       for (const id in readyStates) {
         if (updatedPlayers[id]) {
           updatedPlayers[id].isReady = readyStates[id];
+          console.log(
+            `The id: ${id}. updated players object at "id" key: ${updatedPlayers[id]}. updated players ready state: ${updatedPlayers[id].isReady}`
+          );
+        } else {
+          console.error(
+            "Player not found in the updated players object.",
+            id,
+            updatedPlayers,
+            useMultiplayerStore.getState().players
+          );
         }
       }
       return { players: updatedPlayers };

@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMultiplayerStore } from "@/store";
 import { useGameStore } from "@/store";
 import { enableWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
-import { Player } from "@/store";
+// import { Player } from "@/store";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
 import { useMutation } from "@apollo/client";
@@ -12,14 +12,16 @@ import { useUserSession } from "@/store";
 
 const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const playerId = useMultiplayerStore((state) => state.playerId) || "";
+  const setPlayerId = useMultiplayerStore((state) => state.setPlayerId);
   const players = useMultiplayerStore((state) => state.players);
   const setPlayerReady = useMultiplayerStore.getState().setPlayerReady;
+  const [isLocalReady, setIsLocalReady] = useState<boolean>(false);
   const roomId = useMultiplayerStore((state) => state.roomId);
   // const startCountdown = useMultiplayerStore((state) => state.startCountdown);
   // const socket = useMultiplayerStore((state) => state.socket);
-  // const updatePlayerReadyStates = useMultiplayerStore(
-  //   (state) => state.updatePlayerReadyStates
-  // );
+  const updatePlayerReadyStates = useMultiplayerStore(
+    (state) => state.updatePlayerReadyStates
+  );
 
   const setCurrentMediaType = useGameStore(
     (state) => state.setCurrentMediaType
@@ -29,7 +31,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const canvasReady = useGameStore((state) => state.canvasReady);
   const videoPlaying = useGameStore((state) => state.videoPlaying);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
-  const setGameSate = useGameStore((state) => state.setGameState);
+  // const setGameSate = useGameStore((state) => state.setGameState);
 
   const setIsSingle = useGameStore((state) => state.setIsSingle);
   const setIsMulti = useGameStore((state) => state.setIsMulti);
@@ -38,13 +40,13 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   // state.user or state?
   const user = useUserSession((state) => state.user);
   const socket = useMultiplayerStore((state) => state.socket);
-  const setRoomId = useMultiplayerStore((state) => state.setRoomId);
+  // const setRoomId = useMultiplayerStore((state) => state.setRoomId);
+  const setGameRoom = useGameStore((state) => state.setGameRoom);
+  // const gameRoom = useGameStore((state) => state.gameRoom);
   const setIsHost = useMultiplayerStore((state) => state.setIsHost);
-  const addPlayer = useGameStore((state) => state.addPlayer);
-  const setIsTimeForCountdown =
-    useMultiplayerStore.getState().setIsTimeForCountdown;
+  const addPlayer = useMultiplayerStore((state) => state.addPlayer);
 
-  const isReady = useGameStore.getState().players[playerId]?.isReady || false;
+  const isReady = useMultiplayerStore.getState().players[playerId]?.isReady;
 
   // SINGLE PLAYER VERSION
   const handleSinglePlayerGameCreation = async () => {
@@ -53,8 +55,21 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         console.log("There is no authorized user");
         return;
       }
-      console.log("User Data: ", user.data);
+      //🍁 Set the playerId in the store
+      setPlayerId(user.data._id);
+      console.log("Player ID (playerId): ", playerId);
+      console.log("playerId (user.data._id) : ", user.data._id);
+      // console.log("User Data: ", user.data);
       // call the db with the mutation
+      // console.log("Author ID:", user.data._id);
+      // console.log("Items:", []);
+      // console.log("Challenger IDs:", []);
+      console.log("====================================");
+      // console.log("Frontend User Context:", user.data);
+      console.log("Author ID (sent in mutation):", user.data._id);
+      // console.log("Token (if available):", localStorage.getItem("id_token"));
+
+      //🍁 Get the response from the db
       const response = await createGameMutation({
         variables: {
           input: {
@@ -65,61 +80,112 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         },
       });
 
-      // get the new game data from the response
+      //🍁 get the new game data from the response
       const newGameData = await response.data?.createGame;
       console.log("Game created: ", newGameData);
       if (!newGameData) {
         console.error("No game was created/returned.");
         return;
       }
-      // Set the gameId for the server/user link
-      const gameId = newGameData._id || "THISGAMEIDISAFALLBACK";
+
+      const newGameId = String(newGameData._id).trim(); // ensuring no whitespace due to previous issues
       console.log(
         `Host with user data: ${user} has created a game with id: `,
-        gameId
+        newGameId
       );
 
-      const player: Player = {
-        ...user.data,
-        isReady: true,
-        score: 0,
-      };
-
-      // Update the zustand store
-      setIsTimeForCountdown(true);
-      setRoomId(gameId);
+      //🍁 Zustand setters
+      setGameRoom(newGameId);
       setIsSingle(true);
       setIsMulti(false);
       setIsHost(true);
-      // SETTING isReady - adding new logic to make sure number of players in game goes up when they start the game
-      addPlayer(playerId, player);
-      setPlayerReady(playerId!, true, gameId!);
 
+      //🍁 Add the Player to useMultiplayerStore players
+      addPlayer(user.data._id, {
+        ...user.data,
+        isReady: true,
+        score: 0,
+      });
       console.log(
-        "Number of players in the game: ",
-        Object.keys(players).length
+        `Player with id: ${playerId} has been added to game with id: ${newGameId}.`
       );
 
-      // Update the isReady
-      setPlayerReady(user.data._id, true, gameId!);
-
-      // updatePlayerReadyStates({user.data._id, true});
-
+      //🍁 REGISTER the player before emitting they are isReady
       // Emit to the server that a new user is registering (first register)
       if (!socket) {
         console.error("❌ No socket exists to broadcast new game.");
       } else {
-        console.log("Emitting registerUser: ", user?.data._id, gameId);
+        console.log("Emitting registerUser: ", user?.data._id, newGameId);
         socket.emit("registerUser", {
           userId: user?.data._id,
-          gameId,
+          gameId: newGameId,
+          gameType: "single",
         });
       }
 
+      //🍁 Wait for the server to respond with a "userRegistered"
+      if (!socket) {
+        console.error("❌ No socket exists to broadcast new game.");
+      } else {
+        socket.once(
+          "userRegistered",
+          ({ success, message }: { success: string; message: string }) => {
+            if (success) {
+              console.log(
+                "✅ User successfully registered on server:",
+                message
+              );
+
+              // Now mark the player as ready
+              setPlayerReady(user.data._id, true, newGameId);
+
+              console.log("📤 Emitting playerReady to server...");
+              socket.emit("playerReady", {
+                userId: user.data._id,
+                gameId: newGameId,
+              });
+
+              // Update Zustand
+              updatePlayerReadyStates({ [user.data._id]: true });
+              // setIsTimeForCountdown(true); // fall back trigger
+
+              console.log(
+                "🎯 Player is marked ready locally and on the server."
+              );
+            } else {
+              console.error("❌ User registration failed:", message);
+            }
+          }
+        );
+      }
       // close the modal
       if (onClose) {
         onClose();
       }
+
+      // setPlayerReady(user.data._id, true, newGameId!);
+
+      // console.log(
+      //   "Players in the game -> Zustand: ",
+      //   useMultiplayerStore.getState().players
+      // );
+
+      // // Update the isReady
+      // setPlayerReady(user.data._id, true, newGameId!);
+      // const readyStates = { [user.data._id]: true };
+      // console.log("Updating player ready states: ", readyStates);
+      // updatePlayerReadyStates(readyStates);
+
+      // // Explicitly emit playerReady to the server
+      // if (socket) {
+      //   console.log("📤 Emitting playerReady event to server");
+      //   socket.emit("playerReady", {
+      //     userId: user.data._id,
+      //     gameId: newGameId,
+      //   });
+      // } else {
+      //   console.error("❌ No socket connection to emit playerReady");
+      // }
     } catch (error) {
       console.log("Error creating game in Choice Screen: ", error);
     }
@@ -140,6 +206,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         setCurrentMediaType("webcam");
         setCurrentMediaRef("webcam-stream");
         setVideoPlaying(true);
+
         console.log(
           "Webcam is enabled and the SINGLE PLAYER GAME context has been updated."
         );
@@ -176,7 +243,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       await handleWebcamStart();
       try {
         await handleSinglePlayerGameCreation();
-        setGameSate("countdown");
+        // setGameSate("countdown"); TODO: This is not needed here
       } catch (error) {
         console.error("Error Creating Game", error);
       }
@@ -186,7 +253,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       } else {
         console.error("ROOM ID NOT SET! - START BUTTON");
       }
-      const isReady = useGameStore.getState().players[playerId]?.isReady;
+      const isReady = useMultiplayerStore.getState().players[playerId]?.isReady;
 
       if (isReady && videoPlaying && canvasReady) {
         console.log(
@@ -210,27 +277,34 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     //setGameSate("playing");
   };
 
+  // Attempt to Sync Zustand isReady with local isLocalReady state
   useEffect(() => {
-    // const isReady = useGameStore.getState().players[playerId]?.isReady;
-    const isReady = true;
-    const conditionsMet = isReady && canvasReady && currentMediaType;
+    const ready = players[playerId]?.isReady ?? false;
+    setIsLocalReady(ready);
+  }, [players, playerId]);
+
+  // Run detection when all conditions are met
+  useEffect(() => {
+    const conditionsMet = isLocalReady && canvasReady && currentMediaType;
 
     const logConditions = () => {
       console.log(
-        "isReady: ",
-        isReady,
+        "isLocalReady: ",
+        isLocalReady,
         "canvasReady: ",
         canvasReady,
         "currentMediaType: ",
         currentMediaType
       );
     };
+
     if (conditionsMet) {
+      console.log("✅ Conditions met. Starting detection...");
       runDetectionOnCurrentMedia();
     } else {
       logConditions();
     }
-  }, [canvasReady, currentMediaType, playerId]);
+  }, [isLocalReady, canvasReady, currentMediaType]);
 
   return (
     <div

@@ -37,6 +37,7 @@ export interface GameRoom {
   hostId: string;
   players: Map<string, UserConnection>;
   gameState: string;
+  gameType: "single" | "multi"; // Adding game type so isReady can be simplified
 }
 
 // interface for back-end context (Map)
