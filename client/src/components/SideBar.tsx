@@ -149,8 +149,8 @@ const SideBar = () => {
               <span
                 className={`${
                   isCollapsed
-                    ? "text-center text-sm"
-                    : "text-base font-medium text-gray-500 dark:text-gray-300"
+                    ? "text-center text-sm flex flex-col"
+                    : "text-base font-medium text-gray-500 dark:text-gray-300 flex flex-row"
                 }`}
               >
                 {formatTime(timeRemaining)}

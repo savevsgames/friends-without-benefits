@@ -11,7 +11,7 @@ const CardFlipRiddle = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentRiddle, setCurrentRiddle] = useState("");
   const [nextRiddle, setNextRiddle] = useState("");
-  const [riddleColor, setRiddleColor] = useState("from-teal-700 to-green-600");
+  const [riddleColor, setRiddleColor] = useState("from-teal-700 to-green-500");
 
   // Function to retrieve riddles
   const getRiddle = (item: string) => {
@@ -41,9 +41,9 @@ const CardFlipRiddle = ({
 
       // Alternate between teal-green gradients
       setRiddleColor((prev) =>
-        prev === "from-teal-700 to-green-600"
-          ? "from-teal-800 via-cyan-100 to-green-700"
-          : "from-teal-400 via-green-500 to-yellow-500"
+        prev === "from-teal-700 to-green-500"
+          ? "from-teal-900 to-green-600"
+          : "from-teal-700 to-green-500"
       );
     }, 500);
 

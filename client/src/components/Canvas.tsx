@@ -8,7 +8,6 @@ import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
 import ChoiceScreen from "./ChoiceScreen.tsx";
 import DetectionOverlay from "./DetectionBoxes.tsx";
-import GameStoreLiveFeed from "./GameStoreLiveFeed.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {

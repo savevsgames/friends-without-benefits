@@ -181,7 +181,7 @@ const ScavengerGame = () => {
           <div>
             {/* Success Message */}
             {showSuccessMessage && (
-              <div className="fixed top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br bg-gradient-to-br from-teal-400 via-green-500 to-yellow-500 text-white text-4xl font-bold py-4 px-8 rounded-lg shadow-lg animate-bounce">
+              <div className="fixed top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2  bg-gradient-to-br from-teal-400 via-green-500 to-yellow-500 text-white text-4xl font-bold py-4 px-8 rounded-lg shadow-lg animate-bounce">
                 🎉 BINGO! 🎉
               </div>
             )}
