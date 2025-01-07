@@ -173,7 +173,7 @@ const ScavengerGame = () => {
       }, 1000); //  displayed for 1 second
       return () => clearTimeout(timeout);
     }
-  }, [numFoundItems, itemsArr.length, timeRemaining]);
+  }, [numFoundItems]);
 
   // Game start logic - should update the bd once zustand is updated
   useEffect(() => {
