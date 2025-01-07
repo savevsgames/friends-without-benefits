@@ -59,3 +59,27 @@ export const CREATE_GAME = gql`
     }
   }
 `;
+
+export const UPDATE_GAME = gql`
+  mutation updateGame($input: UpdateGameInput!) {
+    updateGame(input: $input) {
+      _id
+      isComplete
+      duration
+      itemsFound
+      winner {
+        _id
+        username
+      }
+      challengers {
+        user {
+          _id
+          username
+        }
+        score
+        isReady
+        isHost
+      }
+    }
+  }
+`;

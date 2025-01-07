@@ -16,6 +16,7 @@ export const playerReadyStateManager = (context: ServerContext) => {
       console.error(`❌ Game room ${gameId} not found`);
       return;
     }
+    
 
     const userConnection = userConnections.get(userId);
     if (!userConnection) {

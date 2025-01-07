@@ -75,7 +75,7 @@ const typeDefs = `
 
   input CreateGameInput {
   authorId: ID!
-  challengerIds: [ID!] # array of user IDs
+  challengerIds: [ID] # array of user IDs
   items: [String]
 }
 

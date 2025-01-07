@@ -48,7 +48,6 @@ export interface IGameState {
   currentMediaRef: string | null; // Reference to the current media (URL or ID)
   currentMediaType: "image" | "video" | "webcam" | null;
   activeDetectionLoop: number | null; // Active detection loop ID
-  players: Record<string, Player>; // Stores our user_id strings - Zustand/SocketIo Host: [id1, id2], Challenger: [id2, id1] - swapped order
   isSingle: boolean;
   isMulti: boolean;
   numFoundItems: number; // 0-5
@@ -69,7 +68,6 @@ export interface IGameState {
   setCurrentMediaRef: (ref: string | null) => void;
   setCurrentMediaType: (type: "image" | "video" | "webcam" | null) => void;
   setActiveDetectionLoop: (iteration: number | null) => void;
-  addPlayer: (id: string, player: Player) => void;
   setIsSingle: (value: boolean) => void;
   setIsMulti: (value: boolean) => void;
   setNumFoundItems: (numberFound: number) => void;
@@ -102,7 +100,6 @@ export const useGameStore = create<IGameState>((set, get) => ({
   detectMeter: 0,
   currentDetections: [],
   countdown: null,
-  players: {},
   isSingle: true,
   isMulti: false,
   setGameState: (newState) => set({ gameState: newState }),
@@ -188,24 +185,11 @@ export const useGameStore = create<IGameState>((set, get) => ({
       };
     });
   },
-
-  addPlayer: (id, player) => {
-    set((state) => ({
-      players: { ...state.players, [id]: player },
-    }));
-  },
   setIsSingle: (value) => {
     set({ isSingle: value, isMulti: !value });
   },
   setIsMulti: (value) => {
     set({ isMulti: value, isSingle: !value });
-  },
-  removePlayer: (id: string) => {
-    set((state) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [id]: _data, ...rest } = state.players;
-      return { players: { ...rest } };
-    });
   },
   // Local update and emit via Socket.IO to challenger
   outgoingUpdate: (updates) => {
@@ -465,6 +449,16 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
       for (const id in readyStates) {
         if (updatedPlayers[id]) {
           updatedPlayers[id].isReady = readyStates[id];
+          console.log(
+            `The id: ${id}. updated players object at "id" key: ${updatedPlayers[id]}. updated players ready state: ${updatedPlayers[id].isReady}`
+          );
+        } else {
+          console.error(
+            "Player not found in the updated players object.",
+            id,
+            updatedPlayers,
+            useMultiplayerStore.getState().players
+          );
         }
       }
       return { players: updatedPlayers };

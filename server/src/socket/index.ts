@@ -29,11 +29,13 @@ export const createSocketManager = (
       socket.on("registerUser", ({ userId, gameId }) => {
         // Check if they are already registered with a userId
         const userConnection = context.userConnections.get(userId);
+
         if (userConnection) {
           console.log(
             "User is already connected to the server, registering new connection settings..."
           );
           userConnection.socketId = socket.id;
+          userConnection.gameId = gameId;
           // update the server context
           context.userConnections.set(userId, userConnection);
 
@@ -45,10 +47,17 @@ export const createSocketManager = (
             socket.join(gameId);
           }
         }
+        console.log(
+          "🕵️‍♂️ User registered in manager with id: ",
+          userId,
+          "to game ",
+          gameId
+        );
       });
 
       // Set up all the event listeners for the socket
       socket.on("playerReady", (data) => playerReadyManager(socket, data));
+
       socket.on("chat-message", (data: ChatMessage) =>
         chatManager(socket, data)
       );
