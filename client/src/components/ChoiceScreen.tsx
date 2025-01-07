@@ -3,6 +3,7 @@ import StartGameButton from "./buttons/StartGameButton";
 import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import MultiPlayerModal from "./MultiplayerModal";
 import React, { useState } from "react";
+import { useGameStore } from "@/store"
 
 // import { useGameStore } from "../store";
 
