@@ -165,7 +165,7 @@ const ScavengerGame = () => {
       }, 1000); //  displayed for 1 second
       return () => clearTimeout(timeout);
     }
-  }, [numFoundItems, gameState, itemsArr.length, timeRemaining]);
+  }, [numFoundItems]);
 
   return (
     <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">
@@ -181,12 +181,12 @@ const ScavengerGame = () => {
           <div>
             {/* Success Message */}
             {showSuccessMessage && (
-              <div className="fixed top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-br from-teal-900 via-indigo-800 to-green-600 text-white text-4xl font-bold py-4 px-8 rounded-lg shadow-lg animate-bounce">
+              <div className="fixed top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2  bg-gradient-to-br from-teal-400 via-green-500 to-yellow-500 text-white text-4xl font-bold py-4 px-8 rounded-lg shadow-lg animate-bounce">
                 🎉 BINGO! 🎉
               </div>
             )}
             {/* time remaining */}
-            <div className="time-box p-4 bg-gradient-to-br from-teal-600 to-indigo-800 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl">
+            <div className="time-box p-4 bg-gradient-to-br from-teal-700 to-green-500 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl">
               <h1 className="text-xl font-bold mb-2 text-white">
                 ⏳ Time Remaining:
               </h1>

@@ -8,7 +8,6 @@ import ControlPanel from "./ControlPanel.tsx";
 import TutoModal from "./TutoModal.tsx";
 import ChoiceScreen from "./ChoiceScreen.tsx";
 import DetectionOverlay from "./DetectionBoxes.tsx";
-import GameStoreLiveFeed from "./GameStoreLiveFeed.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
 export const Canvas = () => {
@@ -37,9 +36,9 @@ export const Canvas = () => {
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
   // Tutorial modal content
   const tutorialContent = [
-    "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
-    "🧩 Solve the riddle: A riddle will appear on the screen. Solve it to identify the item you need to find. Let your detective skills shine!",
-    "⏳ Watch the clock:Tick-tock! Keep an eye on the riddle timer. Time is precious and every second counts!",
+    "👋 Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
+    "🧩 Solve the riddle: A riddle will appear on the screen. Solve it to identify the item you need to find!",
+    "⏳ Watch the clock: Tick-tock! Keep an eye on the riddle timer. Time is precious and every second counts!",
     "🚀 Start the game: Ready, set, go! Click 'Start Game' on the main menu to kick off the countdown",
     "🕵️‍♂️ Begin the Hunt: Let the Scavenger Hunt begin! Search for items, solve riddles, and HAVE FUN!",
   ];
@@ -304,7 +303,6 @@ export const Canvas = () => {
         />
 
         <DetectionOverlay />
-        
 
         <div
           id="debug-overlay"
@@ -318,7 +316,7 @@ export const Canvas = () => {
             zIndex: 100,
           }}
         >
-          <GameStoreLiveFeed />
+          {/* <GameStoreLiveFeed /> */}
         </div>
       </div>
       {/* New Div Right of Canvas */}

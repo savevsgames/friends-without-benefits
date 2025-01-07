@@ -11,7 +11,7 @@ const CardFlipRiddle = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentRiddle, setCurrentRiddle] = useState("");
   const [nextRiddle, setNextRiddle] = useState("");
-  const [riddleColor, setRiddleColor] = useState("from-teal-500 to-indigo-900");
+  const [riddleColor, setRiddleColor] = useState("from-teal-700 to-green-500");
 
   // Function to retrieve riddles
   const getRiddle = (item: string) => {
@@ -39,11 +39,11 @@ const CardFlipRiddle = ({
     const flipTimeout = setTimeout(() => {
       setIsFlipped(false);
 
-      // Alternate between teal-indigo and teal-purple gradients
+      // Alternate between teal-green gradients
       setRiddleColor((prev) =>
-        prev === "from-teal-500 to-indigo-900"
-          ? "from-teal-600 to-purple-900"
-          : "from-teal-500 to-indigo-900"
+        prev === "from-teal-700 to-green-500"
+          ? "from-teal-900 to-green-600"
+          : "from-teal-700 to-green-500"
       );
     }, 500);
 
@@ -58,7 +58,7 @@ const CardFlipRiddle = ({
       <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
         {/* Front of the card */}
         <div
-          className={`card-front flex items-center justify-center bg-gradient-to-br ${riddleColor} text-white p-6 rounded-lg shadow-lg`}
+          className={`card-front flex items-center justify-center bg-gradient-to-br ${riddleColor} text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300`}
         >
           <div>
             <h2 className="text-xl font-bold mb-2">🧩 Solve This:</h2>
@@ -68,7 +68,7 @@ const CardFlipRiddle = ({
 
         {/* Back of the card */}
         <div
-          className={`card-back flex items-center justify-center bg-gradient-to-br ${riddleColor} text-white p-6 rounded-lg shadow-lg`}
+          className={`card-back flex items-center justify-center bg-gradient-to-br ${riddleColor} text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300`}
         >
           <div>
             <h2 className="text-xl font-bold mb-2">✨ Get Ready For Next:</h2>

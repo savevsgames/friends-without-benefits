@@ -4,7 +4,6 @@ import LoadWebcamButton from "./buttons/LoadWebcamButton";
 import MultiPlayerModal from "./MultiplayerModal";
 import React, { useState } from "react";
 
-
 ReactModal.setAppElement("#root");
 
 interface ChoiceScreenProps {
@@ -33,10 +32,11 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
   }; -->
 
   
-
+<!-- 
   const singlePlayer = useGameStore((state) => state.isSingle);
   const multiPlayer = useGameStore((state) => state.isMulti);
-  console.log(singlePlayer);
+  console.log(singlePlayer); -->
+
 
 
   return (
@@ -71,16 +71,17 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
             onClick={handleOpenMPModal}
             className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
           >
+            <MultiPlayerModal
+              isOpen={showMultiplayerModal}
+              onClose={handleCloseMPModal}
+            
+            />
             <h2 className="text-2xl font-bold mb-2"></h2>
             <p className="text-sm text-gray-600">
               Playing with friends is always fun!
             </p>
           </button>
           {/* showMultiplayerModal is a local setState now isolated from the button to show it */}
-          <MultiPlayerModal
-            isOpen={showMultiplayerModal}
-            onClose={handleCloseMPModal}
-          />
         </>
 
         {/* start game */}
