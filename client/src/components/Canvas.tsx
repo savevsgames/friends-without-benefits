@@ -3,8 +3,8 @@ import { useGameStore } from "../store"; // Import Zustand store
 import MultiplayerChat from "./MultiplayerChat";
 import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
 import ScavengerGame from "./ScavengerGameLogic";
-import GameStates from "./GameStates.tsx";
-import ControlPanel from "./ControlPanel.tsx";
+// import GameStates from "./GameStates.tsx";
+
 import TutoModal from "./TutoModal.tsx";
 import ChoiceScreen from "./ChoiceScreen.tsx";
 import DetectionOverlay from "./DetectionBoxes.tsx";
@@ -267,8 +267,8 @@ export const Canvas = () => {
             zIndex: 10,
           }}
         ></canvas>
-        <ControlPanel />
-        <GameStates />
+{/* 
+        <GameStates /> */}
         <ScavengerGame />
 
         <video
