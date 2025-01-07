@@ -20,7 +20,7 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
 }) => {
 
   // Local Setter for showing the Multiplayer Modal
-<!--   const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
+   const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
 
   // Modal Handler for multiplayer modal
   const handleOpenMPModal = () => {
