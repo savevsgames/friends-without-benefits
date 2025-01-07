@@ -87,15 +87,18 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         console.error("No game was created/returned.");
         return;
       }
+
+      const newGameId = String(newGameData._id).trim();
+      console.log(`🛠️ Game ID Length: ${newGameId.length}`);
       // Set the gameId for the server/user link
-      const gameId = newGameData._id || "THISGAMEIDISAFALLBACK";
+      // const gameId = newGameData._id || "THISGAMEIDISAFALLBACK";
       console.log(
         `Host with user data: ${user} has created a game with id: `,
-        gameId
+        newGameId
       );
 
       setIsTimeForCountdown(true);
-      setGameRoom(gameId);
+      setGameRoom(newGameId);
 
       // Game Room does not set in time?
       // if (!gameId || !gameRoom) {
@@ -106,9 +109,9 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       // Update the zustand store
 
       // setRoomId(gameId);
-      console.log("Room ID === Game ID: ", gameRoom === gameId);
+      console.log("Room ID === Game ID: ", gameRoom === newGameId);
       console.log("Game Room ID: ", gameRoom);
-      console.log("Game ID: ", gameId);
+      console.log("Game ID: ", newGameId);
       setIsSingle(true);
       setIsMulti(false);
       setIsHost(true);
@@ -121,10 +124,10 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         score: 0,
       });
       console.log(
-        `Player with id: ${playerId} has been added to game with id: ${gameId}.`
+        `Player with id: ${playerId} has been added to game with id: ${newGameId}.`
       );
 
-      setPlayerReady(user.data._id, true, gameId!);
+      setPlayerReady(user.data._id, true, newGameId!);
 
       console.log(
         "Players in the game -> Zustand: ",
@@ -132,7 +135,7 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       );
 
       // Update the isReady
-      setPlayerReady(user.data._id, true, gameId!);
+      setPlayerReady(user.data._id, true, newGameId!);
       const readyStates = { [user.data._id]: true };
       console.log("Updating player ready states: ", readyStates);
       updatePlayerReadyStates(readyStates);
@@ -141,10 +144,11 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       if (!socket) {
         console.error("❌ No socket exists to broadcast new game.");
       } else {
-        console.log("Emitting registerUser: ", user?.data._id, gameId);
+        console.log("Emitting registerUser: ", user?.data._id, newGameId);
         socket.emit("registerUser", {
           userId: user?.data._id,
-          gameId,
+          gameId: newGameId,
+          gameType: "single",
         });
       }
 

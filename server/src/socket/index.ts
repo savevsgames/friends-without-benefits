@@ -26,8 +26,8 @@ export const createSocketManager = (
       console.log("🔌 New SOCKET-IO Connection: ", socket.id);
 
       // Register connections with server context
-      socket.on("registerUser", ({ userId, gameId }) => {
-        if (!userId || !gameId) {
+      socket.on("registerUser", ({ userId, gameId, gameType }) => {
+        if (!userId || !gameId || !gameType) {
           console.error("❌ Missing userId or gameId in registerUser event.");
           return;
         }
@@ -42,6 +42,7 @@ export const createSocketManager = (
             hostId: userId,
             players: new Map(),
             gameState: "setup",
+            gameType, // single or multi type added so isReady is easier to manage
           };
           context.gameRooms.set(gameId, gameRoom);
           console.log(`✅ Game room ${gameId} created with host ${userId}`);
@@ -77,12 +78,48 @@ export const createSocketManager = (
         );
         socket.join(gameId);
 
+        // Check to make sure string has no \n or \r
+        const sanitizedGameId = String(gameId).trim();
         console.log(
-          "🕵️‍♂️ User registered in manager with id: ",
-          userId,
-          "to game ",
-          gameId
+          `🕵️‍♂️ User registered in manager with id: ${userId} to game: [${sanitizedGameId}]`
         );
+        console.log(`✅ User ${userId} joined game room ${sanitizedGameId}.`);
+        socket
+          .to(sanitizedGameId)
+          .emit("playerJoined", { userId, isHost: userConnection.isHost });
+
+        // Function for logging / debugging the context that will not run in production
+        function logContext(context: ServerContext) {
+          console.log("📊 Game Rooms Context:");
+          for (const [id, room] of context.gameRooms.entries()) {
+            console.log(`  - Room ID: ${id}`);
+            console.log(`    Host ID: ${room.hostId}`);
+            console.log(`    Game State: ${room.gameState}`);
+            console.log(`    Game Type: ${room.gameType}`);
+            console.log(
+              `    Players in Room: ${Array.from(room.players.keys()).join(
+                ", "
+              )}`
+            );
+          }
+
+          console.log("📊 User Connections Context:");
+          for (const [id, connection] of context.userConnections.entries()) {
+            console.log(`  - User ID: ${id}`);
+            console.log(`    Socket ID: ${connection.socketId}`);
+            console.log(`    Game ID: ${connection.gameId}`);
+            console.log(`    Is Host: ${connection.isHost}`);
+            console.log(`    Is Ready: ${connection.isReady}`);
+          }
+        }
+
+        if (
+          process.env.NODE_ENV === "development" ||
+          process.env.NODE_ENV === "staging" ||
+          process.env.NODE_ENV === "testing"
+        ) {
+          logContext(context);
+        }
       });
 
       // Set up all the event listeners for the socket

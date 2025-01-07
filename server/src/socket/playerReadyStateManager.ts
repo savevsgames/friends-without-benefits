@@ -34,16 +34,22 @@ export const playerReadyStateManager = (context: ServerContext) => {
     gameRoom.players.set(userId, userConnection);
     console.log(`🎯 Player ${userId} is in game room: `, gameId);
 
-    // Check that all players in the gameRoom are .isReady
-    const allPlayersReady = Array.from(gameRoom.players.values()).every(
-      (player) => player.isReady
-    );
-    // If all values are ready => return the countdown to start the "countdown"
-    // gameState in gameStore.ts by emmiting the countdown to all clients
-    if (allPlayersReady) {
-      console.log("✅ All players are ready. Starting 5-second countdown.");
-      // send the emit to the gameId to start the countdown
+    // Check readiness based on game type
+    if (gameRoom.gameType === "single") {
+      console.log("🚦 Single-player game detected. Starting countdown...");
       io.to(gameId).emit("startCountdown", 5);
+      return;
+    }
+
+    if (gameRoom.gameType === "multi") {
+      const allPlayersReady = Array.from(gameRoom.players.values()).every(
+        (player) => player.isReady
+      );
+
+      if (allPlayersReady) {
+        console.log("✅ All players are ready. Starting countdown...");
+        io.to(gameId).emit("startCountdown", 5);
+      }
     }
 
     // Ready states are Maps of userIds and isReady from players in the game room
