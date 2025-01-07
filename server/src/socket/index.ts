@@ -27,8 +27,37 @@ export const createSocketManager = (
 
       // Register connections with server context
       socket.on("registerUser", ({ userId, gameId }) => {
+        if (!userId || !gameId) {
+          console.error("❌ Missing userId or gameId in registerUser event.");
+          return;
+        }
+
+        let gameRoom = context.gameRooms.get(gameId);
+        if (!gameRoom) {
+          console.log(`🛠️ Game room ${gameId} not found. Creating a new room...`);
+          gameRoom = {
+            gameId,
+            hostId: userId,
+            players: new Map(),
+            gameState: "setup",
+          };
+          context.gameRooms.set(gameId, gameRoom);
+          console.log(`✅ Game room ${gameId} created with host ${userId}`);
+        }
+
         // Check if they are already registered with a userId
-        const userConnection = context.userConnections.get(userId);
+        // IF NOT, register them with the server context!!!!!!
+        const userConnection = context.userConnections.get(userId) || {
+          userId,
+          socketId: socket.id,
+          peerId: "", // MAY NEED TO FIND A WAY TO GET THIS?
+          gameId,
+          isHost: gameRoom.hostId === userId,
+          isReady: false,
+        };
+
+        gameRoom.players.set(userId, userConnection);
+        context.userConnections.set(userId, userConnection);
 
         if (userConnection) {
           console.log(

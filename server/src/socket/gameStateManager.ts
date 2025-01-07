@@ -7,23 +7,23 @@ import { ServerContext } from "./socketTypes";
 
 export const gameStateManager = (context: ServerContext) => {
   // Will return a socket and gameState data for whichever store is called.
-  const { userConnections, gameRooms } = context;
-  console.log(
-    "Game State Manager : ",
-    "User Connections",
-    userConnections,
-    "Game Rooms:",
-    gameRooms
-  );
+  const { io, gameRooms } = context;
+
   return (socket: Socket, data: any) => {
-    const { store, updates } = data;
+    const { store, updates, gameId } = data;
+    console.log("Socket ID returning: ", socket.id);
     try {
+      if (!gameId || !gameRooms.has(gameId)) {
+        console.error(`❗ Game ID: ${gameId} not found in gameRooms map.`);
+        return;
+      }
+
       if (store === "game") {
         console.log("🔄 Game State Update:", updates);
-        socket.broadcast.emit("stateUpdate", { store: "game", updates });
+        io.to(gameId).emit("stateUpdate", { store: "game", updates });
       } else if (store === "multiplayer") {
         console.log("🔄 Multiplayer State Update:", updates);
-        socket.broadcast.emit("stateUpdate", { store: "multiplayer", updates });
+        io.to(gameId).emit("stateUpdate", { store: "multiplayer", updates });
       } else {
         console.error("❗ Error accessing ZUSTAND store: ", store);
       }

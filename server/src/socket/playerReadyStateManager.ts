@@ -9,20 +9,20 @@ export const playerReadyStateManager = (context: ServerContext) => {
     socket: Socket,
     { userId, gameId }: { userId: string; gameId: string }
   ) => {
-    io.emit("startCountdown", 5);
     // make sure we are checking the right game room
     const gameRoom = gameRooms.get(gameId);
     if (!gameRoom) {
       console.error(`❌ Game room ${gameId} not found`);
       return;
     }
-    
 
     const userConnection = userConnections.get(userId);
     if (!userConnection) {
       console.error(`❌ User with ${userId} not found`);
       return;
     }
+
+    io.to(gameId).emit("startCountdown", 5);
 
     // Update the user's readiness
     userConnection.isReady = true;

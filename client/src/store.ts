@@ -58,6 +58,7 @@ export interface IGameState {
   timerId: number | null; // Store timer ID
   detectMeter: number; // Used for progressbar
   currentDetections: Prediction[]; // Used to draw bbox and progressbar
+  gameRoom: string | null; // Game ID from db
 
   // State Setters
   setGameState: (
@@ -76,6 +77,7 @@ export interface IGameState {
   stopTimer: () => void;
   setDetectMeter: (value: number) => void;
   setCurrentDetections: (predictions: Prediction[]) => void;
+  setGameRoom: (gameId: string) => void;
   setCountdown: (countdown: number | null) => void;
   resetGame: () => void;
 
@@ -99,6 +101,7 @@ export const useGameStore = create<IGameState>((set, get) => ({
   timerId: null,
   detectMeter: 0,
   currentDetections: [],
+  gameRoom: null,
   countdown: null,
   isSingle: true,
   isMulti: false,
@@ -134,6 +137,9 @@ export const useGameStore = create<IGameState>((set, get) => ({
   setDetectMeter: (detectMeter: number) => set({ detectMeter }),
   setCurrentDetections: (predictions) =>
     set({ currentDetections: predictions }),
+  setGameRoom: (gameId) => {
+    set({ gameRoom: gameId });
+  },
   startTimer: () => {
     const currentTimer = get().timerId;
     if (currentTimer !== null) {
@@ -361,9 +367,18 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
     set({ socket });
   },
   addPlayer: (id, data) =>
-    set((state) => ({
-      players: { ...state.players, [id]: data },
-    })),
+    set((state) => {
+      if (!id || !data) {
+        console.error("❌ Invalid player data. ID or data is missing.");
+        return state;
+      }  
+      return {
+        players: {
+          ...state.players,
+          [id]: { ...state.players[id], ...data }, // Merge new data with existing
+        },
+      };
+    }),
   removePlayer: (id) =>
     set((state) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

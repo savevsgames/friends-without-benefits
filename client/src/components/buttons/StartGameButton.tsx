@@ -3,7 +3,7 @@ import { useMultiplayerStore } from "@/store";
 import { useGameStore } from "@/store";
 import { enableWebcam } from "@/utils/model-utils";
 import { runDetectionOnCurrentMedia } from "../../utils/custom-model-utils-2";
-import { Player } from "@/store";
+// import { Player } from "@/store";
 // import { stopDetection } from "../../utils/custom-model-utils-2";
 
 import { useMutation } from "@apollo/client";
@@ -39,7 +39,9 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   // state.user or state?
   const user = useUserSession((state) => state.user);
   const socket = useMultiplayerStore((state) => state.socket);
-  const setRoomId = useMultiplayerStore((state) => state.setRoomId);
+  // const setRoomId = useMultiplayerStore((state) => state.setRoomId);
+  const setGameRoom = useGameStore((state) => state.setGameRoom);
+  const gameRoom = useGameStore((state) => state.gameRoom);
   const setIsHost = useMultiplayerStore((state) => state.setIsHost);
   const addPlayer = useMultiplayerStore((state) => state.addPlayer);
   const setIsTimeForCountdown =
@@ -54,13 +56,19 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         console.log("There is no authorized user");
         return;
       }
+      // Set the playerId in the store
       setPlayerId(user.data._id);
-      console.log("playerId : ", user.data._id);
-      console.log("User Data: ", user.data);
+      console.log("Player ID (playerId): ", playerId);
+      console.log("playerId (user.data._id) : ", user.data._id);
+      // console.log("User Data: ", user.data);
       // call the db with the mutation
-      console.log("Author ID:", user.data._id);
-      console.log("Items:", []);
-      console.log("Challenger IDs:", []);
+      // console.log("Author ID:", user.data._id);
+      // console.log("Items:", []);
+      // console.log("Challenger IDs:", []);
+      console.log("====================================");
+      // console.log("Frontend User Context:", user.data);
+      console.log("Author ID (sent in mutation):", user.data._id);
+      // console.log("Token (if available):", localStorage.getItem("id_token"));
 
       const response = await createGameMutation({
         variables: {
@@ -86,25 +94,41 @@ const StartGameButton: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         gameId
       );
 
-      const player: Player = {
-        ...user.data,
-        isReady: true,
-        score: 0,
-      };
+      setIsTimeForCountdown(true);
+      setGameRoom(gameId);
+
+      // Game Room does not set in time?
+      // if (!gameId || !gameRoom) {
+      //   console.error("Game ID or Game Room not set!");
+      //   return;
+      // }
 
       // Update the zustand store
-      setIsTimeForCountdown(true);
-      setRoomId(gameId);
+
+      // setRoomId(gameId);
+      console.log("Room ID === Game ID: ", gameRoom === gameId);
+      console.log("Game Room ID: ", gameRoom);
+      console.log("Game ID: ", gameId);
       setIsSingle(true);
       setIsMulti(false);
       setIsHost(true);
       // SETTING isReady - adding new logic to make sure number of players in game goes up when they start the game
-      addPlayer(playerId, player);
-      setPlayerReady(playerId!, true, gameId!);
+
+      // ???? playerId ? setPlayerId
+      addPlayer(user.data._id, {
+        ...user.data,
+        isReady: true,
+        score: 0,
+      });
+      console.log(
+        `Player with id: ${playerId} has been added to game with id: ${gameId}.`
+      );
+
+      setPlayerReady(user.data._id, true, gameId!);
 
       console.log(
-        "Number of players in the game: ",
-        Object.keys(players).length
+        "Players in the game -> Zustand: ",
+        useMultiplayerStore.getState().players
       );
 
       // Update the isReady
