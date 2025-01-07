@@ -10,7 +10,7 @@
     "build:watch": "tsc -w",
     "start": "node dist/server.js",
     "dev": "concurrently \"tsc -w\" \"nodemon dist/server.js\"",
-    "seed": "node dist/seeds/multiplayer-testing.js",
+    "seed": "node dist/seeds/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
