@@ -4,9 +4,11 @@ import RiddleCardFlip from "./RiddleCardFlip";
 import Countdown from "./Countdown";
 import "../App.css";
 import { useUpdateGame } from "@/hooks/useUpdateGame";
+import GameCompletionModal from "./GameCompleteModal";
 
 const ScavengerGame = () => {
   const gameState = useGameStore((state) => state.gameState);
+  const setGameState = useGameStore((state) => state.setGameState)
   const canvasReady = useGameStore((state) => state.canvasReady);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
   const activeDetectionLoop = useGameStore(
@@ -17,6 +19,7 @@ const ScavengerGame = () => {
   const timeRemaining = useGameStore((state) => state.timeRemaining);
   const countdown = useGameStore((state) => state.countdown);
   const startTimer = useGameStore((state) => state.startTimer);
+  const stopTimer = useGameStore((state) => state.stopTimer);
   const resetGame = useGameStore((state) => state.resetGame);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -28,6 +31,7 @@ const ScavengerGame = () => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // use effect to set isReady and start countdown when sever emits countdown
   useEffect(() => {
@@ -75,20 +79,20 @@ const ScavengerGame = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (numFoundItems >= 5 || timeRemaining === 0) {
-      resetGame(); //this currently sets the game to "setup"
-      // TODO: Add DB Call to save/ updateGame data
-      //TODO: DONT JUST RESET GAME - GIVE OPTIONS:
-      // 1. Play Again
-      // 2. Return to Tutorial
-      // 3. Return to Home
-      // 4. View Leaderboard
-      // 5. Play a Multiplayer Game
-      // TODO: currently sets the game to "setup" -> Need to change to "complete" and wait for user input
-      // stop detecting, etc. and show a modal with the results
-    }
-  }, [numFoundItems, timeRemaining, resetGame]);
+  // useEffect(() => {
+  //   if (numFoundItems >= 5 || timeRemaining === 0) {
+  //     resetGame(); //this currently sets the game to "setup"
+  //     // TODO: Add DB Call to save/ updateGame data
+  //     //TODO: DONT JUST RESET GAME - GIVE OPTIONS:
+  //     // 1. Play Again
+  //     // 2. Return to Tutorial
+  //     // 3. Return to Home
+  //     // 4. View Leaderboard
+  //     // 5. Play a Multiplayer Game
+  //     // TODO: currently sets the game to "setup" -> Need to change to "complete" and wait for user input
+  //     // stop detecting, etc. and show a modal with the results
+  //   }
+  // }, [numFoundItems, timeRemaining, resetGame]);
 
   useEffect(() => {
     let countdownTimer: NodeJS.Timeout;
@@ -216,6 +220,7 @@ const ScavengerGame = () => {
 
       const handleGameComplete = async () => {
         try {
+          stopTimer();
           await updateGame({
             gameId: gameRoom,
             isComplete: true,
@@ -225,7 +230,8 @@ const ScavengerGame = () => {
           });
 
           console.log("✅ Game completion updated in the database.");
-          resetGame(); // Reset the game locally after DB update
+          setGameState("complete"); // Reset the game locally after DB update
+          setIsModalOpen(true);
         } catch (error) {
           console.error(
             "❌ Failed to update game completion in the database:",
@@ -280,13 +286,22 @@ const ScavengerGame = () => {
             </div>
           </div>
         )}
-        {gameState === "complete" && (
+        {/* {gameState === "complete" && (
           <div>
             <h1>Game Over</h1>
             <p>YOU WON OR LOST & FOUND {itemsArr[numFoundItems]} ITEMS!</p>
             <p>YOU HAD {timeRemaining} time left!</p>
           </div>
-        )}
+        )} */}
+        <GameCompletionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        // timeRemaining={timeRemaining}
+        // itemsFound={numFoundItems}
+        // totalItems={itemsArr.length}
+        // setGameState={setGameState}
+        // resetGame={resetGame}
+      />
       </div>
     </div>
   );
