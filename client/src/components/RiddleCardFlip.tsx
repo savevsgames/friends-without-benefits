@@ -19,9 +19,9 @@ const CardFlipRiddle = ({
       Mug: "I hold your drink, be it coffee or tea, find me! ☕",
       Headphones:
         "Put me on to hear a tune, I sit on your ears and block out the room, find me! 🎧",
-      Toothbrush:
-        "I help you keep your teeth pearly white, use me in the morning and at night, find me! 🪥",
-      Fork: "I have prongs but I'm not a plug. I sit at the table and help you eat! 🍴",
+      Sunglasses:
+        "I protect your eyes from the sun, but you still should not look directly at it! 🕶",
+      Spoon: "I am rounded but I am not a ball. I sit at the table and help you eat! 🥄",
       Remote: "I let you switch channels while you relax, find me! 📺",
     };
     return riddles[item] || "Scavenge Complete!";
