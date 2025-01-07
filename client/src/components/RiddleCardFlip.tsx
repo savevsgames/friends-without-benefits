@@ -49,7 +49,7 @@ const CardFlipRiddle = ({
     }, 500);
 
     return () => clearTimeout(flipTimeout);
-  }, [numFoundItems]);
+  }, [numFoundItems, itemsArr]);
 
   return (
     <div
@@ -62,7 +62,9 @@ const CardFlipRiddle = ({
           className={`card-front flex items-center justify-center bg-gradient-to-br ${riddleColor} text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300`}
         >
           <div>
-            <h2 className="text-xl font-extrabold mb-2 tracking-wider">🧩 Connect the dots:</h2>
+            <h2 className="text-xl font-extrabold mb-2 tracking-wider">
+              🧩 Connect the dots:
+            </h2>
             <p className="text-lg font-semibold">{currentRiddle}</p>
           </div>
         </div>

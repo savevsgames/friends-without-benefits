@@ -13,14 +13,12 @@ interface ChoiceScreenProps {
   onClose: () => void;
   onStartTuto: () => void;
   onTurnOnCamera: () => void;
-  onGameCreation: (gameId: string) => void;
 }
 
 const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
   isOpen,
   onClose,
   onStartTuto,
-  onGameCreation,
 }) => {
   // Local Setter for showing the Multiplayer Modal
   const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
@@ -74,7 +72,6 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
             <MultiPlayerModal
               isOpen={showMultiplayerModal}
               onClose={handleCloseMPModal}
-              onGameCreation={onGameCreation}
             />
             <h2 className="text-2xl font-bold mb-2"></h2>
             <p className="text-sm text-gray-600">
@@ -86,7 +83,7 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
 
         {/* start game */}
 
-        <StartGameButton onClose={onClose} onGameCreation={onGameCreation} />
+        <StartGameButton onClose={onClose} />
 
         {/* start tutorial */}
         <button
