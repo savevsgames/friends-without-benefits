@@ -1,8 +1,13 @@
 import Footer from "@/components/Footer.tsx";
 import Header from "../components/Header.tsx";
 import SideBar from "@/components/SideBar.tsx";
+import LeaderBoardComponent from "../components/LeaderBoardComponent";
 
 function LeaderBoard() {
+
+
+
+
   return (
     <>
       <Header />
@@ -11,6 +16,7 @@ function LeaderBoard() {
         <div className="h-full flex-none">
           <SideBar />
         </div>
+        <LeaderBoardComponent />
       </div>
       <Footer/>
     </>
