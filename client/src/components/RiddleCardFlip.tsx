@@ -21,7 +21,8 @@ const CardFlipRiddle = ({
         "Put me on to hear a tune, I sit on your ears and block out the room, find me! 🎧",
       Sunglasses:
         "I protect your eyes from the sun, but you still should not look directly at it! 🕶",
-      Spoon: "I am rounded but I am not a ball. I sit at the table and help you eat! 🥄",
+      Spoon:
+        "I am rounded but I am not a ball. I sit at the table and help you eat! 🥄",
       Remote: "I let you switch channels while you relax, find me! 📺",
     };
     return riddles[item] || "Scavenge Complete!";
@@ -61,7 +62,7 @@ const CardFlipRiddle = ({
           className={`card-front flex items-center justify-center bg-gradient-to-br ${riddleColor} text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300`}
         >
           <div>
-            <h2 className="text-xl font-bold mb-2">🧩 Solve This:</h2>
+            <h2 className="text-xl font-extrabold mb-2 tracking-wider">🧩 Connect the dots:</h2>
             <p className="text-lg font-semibold">{currentRiddle}</p>
           </div>
         </div>

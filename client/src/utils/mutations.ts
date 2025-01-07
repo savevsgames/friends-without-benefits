@@ -58,7 +58,7 @@ export const CREATE_GAME = gql`
         username
       }
     }
-  }
+}`;
 
 
 // export const CREATE_GAME = gql`

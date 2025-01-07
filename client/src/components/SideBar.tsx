@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { FaBars, FaTimes, FaHome, FaHourglassEnd } from "react-icons/fa";
 import { IoLogoGameControllerA } from "react-icons/io";
@@ -24,6 +24,17 @@ const SideBar = () => {
   const itemsArr = useGameStore((state) => state.itemsArr);
   const timeRemaining = useGameStore((state) => state.timeRemaining);
   const gameState = useGameStore((state) => state.gameState);
+  const videoPlaying = useGameStore((state) => state.videoPlaying);
+  const [flash, setFlash] = useState(false);
+
+  // trigger the flash animation when the camera turns on
+  useEffect(() => {
+    if (videoPlaying) {
+      setFlash(true);
+    } else {
+      setFlash(false);
+    }
+  }, [videoPlaying]);
 
   const sidebarIcon = () => {
     return isCollapsed ? <FaBars size={22} /> : <FaTimes size={22} />;
@@ -51,7 +62,7 @@ const SideBar = () => {
   return (
     <Sidebar
       collapsed={isCollapsed}
-      className="bg-zinc-100 dark:bg-teal-950 h-screen absolute top-0 left-0 z-30"
+      className="bg-zinc-100 dark:bg-teal-950 h-screen absolute top-0 left-0 z-30 flex flex-col"
     >
       {/* Hamburger Button */}
       <div className="flex justify-center py-4">
@@ -127,7 +138,7 @@ const SideBar = () => {
             } mb-2`}
           >
             <span
-              className={`text-sm text-center font-semibold text-gray-750 dark:text-gray-300 ${
+              className={`text-sm text-center font-bold text-gray-750 dark:text-gray-300 ${
                 isCollapsed ? "inline" : "block"
               }`}
             >
@@ -139,56 +150,103 @@ const SideBar = () => {
               isCollapsed ? "flex-col gap-1" : "flex-row gap-2"
             }`}
           >
-            {/* Time Remaining */}
-            <MenuItem
+            {/* Time Remaining  */}
+            {/* <MenuItem
               className={`flex items-center pb-3 pt-1 ${
                 isCollapsed ? "flex-col gap-1" : "flex-row gap-2"
               }`}
             >
               <FaHourglassEnd size={22} />
-              <span
+              <div
                 className={`${
                   isCollapsed
-                    ? "text-center text-sm flex flex-col"
-                    : "text-base font-medium text-gray-500 dark:text-gray-300 flex flex-row"
+                    ? "text-center font-bold text-sm flex flex-col pt-2"
+                    : "text-base font-medium text-gray-500 dark:text-gray-300"
                 }`}
               >
                 {formatTime(timeRemaining)}
-              </span>
+              </div>
+            </MenuItem> */}
+
+            {/*             refactoredddddddd */}
+
+            {/* Time Remaining  */}
+            <MenuItem className="pb-4">
+              {isCollapsed ? (
+                <>
+                  <FaHourglassEnd size={22} className="mb-1" />
+
+                  <div
+                    className={`
+                    "text-center font-bold text-sm pt-2"
+                   
+                `}
+                  >
+                    {formatTime(timeRemaining)}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-row">
+                  <FaHourglassEnd size={22} />
+                  <p className="ml-5">
+                    {" "}
+                    Game Time: 0{formatTime(timeRemaining)}
+                  </p>
+                </div>
+              )}
             </MenuItem>
 
             {/* Items Found */}
-            <MenuItem
-              className={`flex items-center w-full pb-3 pt-1  ${
-                isCollapsed
-                  ? "flex-col gap-1 justify-center"
-                  : "flex-row gap-2 justify-start"
-              }`}
-            >
-              <MdEmojiObjects size={24} />
-              <span
-                className={`${
-                  isCollapsed
-                    ? "text-center text-sm font-normal"
-                    : "text-left text-base font-medium text-gray-500 dark:text-gray-300"
-                }`}
-              >
-                {isCollapsed
-                  ? `${numFoundItems} / ${itemsArr.length}`
-                  : `Items Found: ${numFoundItems} / ${itemsArr.length}`}
-              </span>
+
+            <MenuItem className="pb-4">
+              {isCollapsed ? (
+                <>
+                  <MdEmojiObjects size={26} className="mb-1" />
+
+                  <div
+                    className={`
+                    "text-center font-bold text-sm pt-2"
+                   
+                `}
+                  >
+                    {numFoundItems} / {itemsArr.length}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-row">
+                  <MdEmojiObjects size={26} />
+                  <p className="ml-5">
+                    {" "}
+                    Items Found: {numFoundItems} / {itemsArr.length}
+                  </p>
+                </div>
+              )}
             </MenuItem>
-            <MenuItem>
-              <SlMagnifier size={22} />
-              <span
-                className={`${
-                  isCollapsed
-                    ? "text-center text-sm"
-                    : "text-base text-center font-medium text-gray-500 dark:text-gray-300"
-                }`}
-              >
-                {gameState === "playing" ? `${itemsArr[numFoundItems]}` : "?"}
-              </span>
+
+            <MenuItem className="pb-2">
+              {isCollapsed ? (
+                <>
+                  <SlMagnifier size={26} className="mb-1" />
+
+                  <div
+                    className={`
+                    "text-center font-bold text-sm pt-2"
+                   
+                `}
+                  >
+                    {numFoundItems} / {itemsArr.length}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-row">
+                  <SlMagnifier size={26} />
+                  <p className="ml-5">
+                    {gameState === "playing"
+                      ? `${itemsArr[numFoundItems]}`
+                      : "?????"}
+                  </p>
+                </div>
+              )}
             </MenuItem>
           </Menu>
         </div>
@@ -201,7 +259,7 @@ const SideBar = () => {
             } mb-2`}
           >
             <span
-              className={`text-sm text-center font-semibold text-gray-750 dark:text-gray-300 ${
+              className={`text-sm text-center font-bold text-gray-750 dark:text-gray-300 ${
                 isCollapsed ? "inline" : "block"
               }`}
             >
@@ -251,6 +309,21 @@ const SideBar = () => {
           </MenuItem>
         )}
       </Menu>
+      <div className="font-semibold truncate absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <span
+          className="font-semibold truncate"
+          style={{
+            fontSize: "30px",
+            animation: flash ? "flash 1s linear infinite" : "none",
+          }}
+          data-tooltip-id="detecting"
+        >
+          {isDetectionActive ? "🟢" : "🔴"}
+        </span>
+        <Tooltip id="detecting" place="bottom" className="font-thin text-xs">
+          {isDetectionActive ? "Detecting.." : "Detection Inactive"}
+        </Tooltip>
+      </div>
     </Sidebar>
   );
 };
