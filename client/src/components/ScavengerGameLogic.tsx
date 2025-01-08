@@ -33,6 +33,8 @@ const ScavengerGame = () => {
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  
+
   // use effect to set isReady and start countdown when sever emits countdown
   useEffect(() => {
     const socket = useMultiplayerStore.getState().socket;
