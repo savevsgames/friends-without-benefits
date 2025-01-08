@@ -156,7 +156,7 @@ const Canvas: React.FC = () => {
 
   // TEMPORARY - FOR MAKING SURE THE CANVAS WORKS - LOADS AN IMAGE TO CANVAS ON FIRST LOAD
   // Onload, load the welcome image as a file and display it on the canvas
-  const welcomeImgPath = "/assets/household_items_01.png";
+  const welcomeImgPath = "/assets/GameIMG.png";
   useEffect(() => {
     if (welcomeImageLoaded) return; // Ensure this runs only once
 
@@ -177,7 +177,7 @@ const Canvas: React.FC = () => {
         if (!response.ok) throw new Error("Failed to fetch the image");
 
         const blob = await response.blob();
-        const file = new File([blob], "household_items_01.png", {
+        const file = new File([blob], "GameIMG.png", {
           type: "image/png",
         });
 
