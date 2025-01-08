@@ -140,6 +140,31 @@ export const createSocketManager = (
         // }
       });
 
+      socket.on("requestOpponentId", ({ from }) => {
+        console.log(`📤 Sending opponentId to player: ${from}`);
+
+        const gameId = context.userConnections.get(from)?.gameId;
+        if (!gameId) {
+          socket.emit("opponentId", null);
+          return;
+        }
+
+        const players = context.gameRooms.get(gameId)?.players;
+        if (!players) {
+          socket.emit("opponentId", null);
+          return;
+        }
+
+        for (const [userId, player] of players.entries()) {
+          if (userId !== from && player.peerId) {
+            socket.emit("opponentId", player.peerId);
+            return;
+          }
+        }
+
+        // socket.emit("opponentId", null);
+      });
+
       // Set up all the event listeners for the socket
       socket.on("playerReady", (data) => playerReadyManager(socket, data));
 

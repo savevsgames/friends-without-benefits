@@ -63,7 +63,6 @@ export interface IGameState {
 
   isGameOver: boolean;
 
-
   // State Setters
   setGameState: (
     newState: "setup" | "countdown" | "playing" | "complete"
@@ -164,12 +163,17 @@ export const useGameStore = create<IGameState>((set, get) => ({
         if (newTime <= 1) {
           window.clearInterval(intervalId);
           return {
+            ...state,
             timeRemaining: 0,
-            timerId: null,
             gameState: "complete",
-            // numFoundItems: 0,
-            // foundItemsArr: [],
+            timerId: null,
           };
+          //   timeRemaining: 0,
+          //   timerId: null,
+          //   gameState: "complete",
+          //   // numFoundItems: 0,
+          //   // foundItemsArr: [],
+          // };
         }
         // Since the interval is 1000ms (1 second), we can just subtract 1
         return { timeRemaining: state.timeRemaining - 1 };
@@ -445,7 +449,7 @@ export const useMultiplayerStore = create<IMultiplayerState>((set) => ({
     }));
     const players = useMultiplayerStore.getState().players;
     console.log("✅ Zustand Players State Updated: ", players);
-  
+
     const socket = useMultiplayerStore.getState().socket;
     if (socket && gameId) {
       console.log(

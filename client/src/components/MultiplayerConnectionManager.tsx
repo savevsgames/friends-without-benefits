@@ -68,6 +68,46 @@ const MultiplayerConnectionManager: React.FC<
     (state) => state.updatePlayerReadyStates
   );
 
+  const players = useMultiplayerStore((state) => state.players);
+  const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
+  const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
+
+  const handleWebcamStart = async () => {
+    try {
+      console.log("Starting webcam...");
+
+      // webcamOn is the webcam stream object when it is first enabled
+      const webcamOn = await enableWebcam();
+      // players object contains all the Players in the game so we take the number of
+      // keys/indexes to determine if the webcam needs to be shared (audio enabled)
+      if (webcamOn) {
+        setCurrentMediaType("webcam");
+        setCurrentMediaRef("webcam-stream");
+        setVideoPlaying(true);
+
+        console.log(
+          "Webcam is enabled and the SINGLE PLAYER GAME context has been updated."
+        );
+      } else {
+        console.error("Failed to load webcam stream.");
+        // setCurrentMediaType(null);
+        // setCurrentMediaRef(null);
+        // setVideoPlaying(false);
+        // TODO: Give the player a modal to try again (tutorial) or leave the game options
+      } // end of if
+      console.log("Webcam stream object: ", webcamOn);
+      console.log("Players in the game: ", players);
+      console.log(
+        "Number of players in the game: ",
+        Object.keys(players).length
+      );
+      // Return the webcam stream object
+      return webcamOn;
+    } catch (error) {
+      console.error("Failed to start webcam: ", error);
+    }
+  };
+
   useEffect(() => {
     console.log("Invite Link changed: ", inviteLink);
   }, [inviteLink]);
@@ -96,8 +136,8 @@ const MultiplayerConnectionManager: React.FC<
       return;
     }
 
-    enableWebcam();
-    setCurrentMediaType("webcam");
+    // WEBCAM START
+    await handleWebcamStart();
 
     try {
       //🍁 Get the response from the db
@@ -205,7 +245,10 @@ const MultiplayerConnectionManager: React.FC<
     }
   };
 
-  const handleJoinMultiplayerRoom = () => {
+  const handleJoinMultiplayerRoom = async () => {
+    // WEBCAM START
+    await handleWebcamStart();
+    setCurrentMediaType("webcam");
     console.log("Joining Room:", inputRoomId);
     if (!user) {
       console.log("No user logged in");
@@ -283,6 +326,7 @@ const MultiplayerConnectionManager: React.FC<
     if (onGameCreation) {
       onGameCreation(inputRoomId);
     }
+
     // close the modal
     if (onClose) {
       onClose();
