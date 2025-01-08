@@ -27,12 +27,18 @@ export const createSocketManager = (
 
       // Register connections with server context
       socket.on("registerUser", ({ userId, gameId, gameType }) => {
+        console.log("🔑 Registering Challenger");
+        console.log("🧑👧 userId:", userId);
+        console.log("🎯 gameId:", gameId);
+        console.log("1️⃣💫2️⃣ gameType:", gameType);
+
         if (!userId || !gameId || !gameType) {
-          console.error("❌ Missing userId or gameId in registerUser event.");
-          // registerUser event triggers userRegistered client event
+          console.error(
+            "❌ Missing userId, gameId, or gameType in registerUser."
+          );
           socket.emit("userRegistered", {
             success: false,
-            message: "Missing userId or gameId in registerUser event.",
+            message: "Missing required parameters.",
           });
           return;
         }
@@ -100,38 +106,63 @@ export const createSocketManager = (
           .emit("playerJoined", { userId, isHost: userConnection.isHost });
 
         // Function for logging / debugging the context that will not run in production
-        function logContext(context: ServerContext) {
-          console.log("📊 Game Rooms Context:");
-          for (const [id, room] of context.gameRooms.entries()) {
-            console.log(`  - Room ID: ${id}`);
-            console.log(`    Host ID: ${room.hostId}`);
-            console.log(`    Game State: ${room.gameState}`);
-            console.log(`    Game Type: ${room.gameType}`);
-            console.log(
-              `    Players in Room: ${Array.from(room.players.keys()).join(
-                ", "
-              )}`
-            );
-          }
+        // function logContext(context: ServerContext) {
+        //   console.log("📊 Game Rooms Context:");
+        //   for (const [id, room] of context.gameRooms.entries()) {
+        //     console.log(`  - Room ID: ${id}`);
+        //     console.log(`    Host ID: ${room.hostId}`);
+        //     console.log(`    Game State: ${room.gameState}`);
+        //     console.log(`    Game Type: ${room.gameType}`);
+        //     console.log(
+        //       `    Players in Room: ${Array.from(room.players.keys()).join(
+        //         ", "
+        //       )}`
+        //     );
+        //   }
 
-          console.log("📊 User Connections Context:");
-          for (const [id, connection] of context.userConnections.entries()) {
-            console.log(`  - User ID: ${id}`);
-            console.log(`    Socket ID: ${connection.socketId}`);
-            console.log(`    Game ID: ${connection.gameId}`);
-            console.log(`    Is Host: ${connection.isHost}`);
-            console.log(`    Is Ready: ${connection.isReady}`);
+        //   console.log("📊 User Connections Context:");
+        //   for (const [id, connection] of context.userConnections.entries()) {
+        //     console.log(`  - User ID: ${id}`);
+        //     console.log(`    Socket ID: ${connection.socketId}`);
+        //     console.log(`    Game ID: ${connection.gameId}`);
+        //     console.log(`    Is Host: ${connection.isHost}`);
+        //     console.log(`    Is Ready: ${connection.isReady}`);
+        //   }
+        // }
+
+        // if (
+        //   process.env.NODE_ENV === "development" ||
+        //   process.env.NODE_ENV === "staging" ||
+        //   process.env.NODE_ENV === "testing"
+        // ) {
+        //   logContext(context);
+        //   console.log("📊 Current Active Users: ", context.numCurrentActiveUsers);
+        // }
+      });
+
+      socket.on("requestOpponentId", ({ from }) => {
+        console.log(`📤 Sending opponentId to player: ${from}`);
+
+        const gameId = context.userConnections.get(from)?.gameId;
+        if (!gameId) {
+          socket.emit("opponentId", null);
+          return;
+        }
+
+        const players = context.gameRooms.get(gameId)?.players;
+        if (!players) {
+          socket.emit("opponentId", null);
+          return;
+        }
+
+        for (const [userId, player] of players.entries()) {
+          if (userId !== from && player.peerId) {
+            socket.emit("opponentId", player.peerId);
+            return;
           }
         }
 
-        if (
-          process.env.NODE_ENV === "development" ||
-          process.env.NODE_ENV === "staging" ||
-          process.env.NODE_ENV === "testing"
-        ) {
-          logContext(context);
-          console.log("📊 Current Active Users: ", context.numCurrentActiveUsers);
-        }
+        // socket.emit("opponentId", null);
       });
 
       // Set up all the event listeners for the socket

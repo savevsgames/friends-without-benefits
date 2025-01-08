@@ -119,7 +119,7 @@ Check the [live production link](https://friends-without-benefits.onrender.com) 
 | **Greg Barker**            | gregcbarker@gmail.com | [@savevsgames](https://github.com/savevsgames)     |
 | **Thomas Stemler**         | thomas@stemler.dev    | [@OccultParrot](https://github.com/OccultParrot)   |
 | **Souad Hassen-Bouzouita** | souadsalahh@gmail.com | [@SouadHB](https://github.com/SouadHB)             |
-| **Dario Zambrano**         | dario@example.com     | [@DarioZambrano](https://github.com/DarioZambrano) |
+| **Dario Zambrano**         | dariojzb87@gmail.com  | [@DarioZambrano](https://github.com/DarioJZB)      |
 
 _We have also collaborated on [Tomogatch.ai](https://github.com/OccultParrot/Tomogatch.ai) and other AI/ML projects._
 

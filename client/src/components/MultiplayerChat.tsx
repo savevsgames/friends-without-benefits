@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 import { useMultiplayerStore } from "@/store";
-import GameStoreLiveFeed from "./GameStoreLiveFeed";
+// import GameStoreLiveFeed from "./GameStoreLiveFeed";
 
 const MultiplayerChat = () => {
   const {
@@ -17,6 +17,7 @@ const MultiplayerChat = () => {
 
   // Use a Ref to ensure only one listener is attached (avoid echoing messages in chat)
   const isListenerAttached = useRef(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Handle incoming socket.io chat messages
   useEffect(() => {
@@ -86,42 +87,55 @@ const MultiplayerChat = () => {
   // }
 
   return (
-    <div>
-      <h3>Multiplayer Chat</h3>
+    <div className="chat-container p-4 rounded-lg shadow-lg bg-white max-w-md mx-auto">
+      <h3 className="text-xl font-bold text-center mb-2">
+        💬 Multiplayer Chat
+      </h3>
+
+      {/* Chat Messages */}
       <div
-        style={{
-          display: "flex",
-          gap: "1rem",
-          justifyContent: "space-between",
-        }}
+        ref={chatContainerRef}
+        className="chat-messages overflow-y-auto max-h-60 bg-gray-100 rounded-lg p-3 mb-2"
+        style={{ display: "flex", flexDirection: "column-reverse" }}
       >
+        {chatMessages.map((msg, index) => (
+          <div
+            key={index}
+            className={`chat-message p-2 rounded-md mb-1 ${
+              msg.sender === playerId
+                ? "bg-teal-200 text-right"
+                : "bg-gray-200 text-left"
+            }`}
+          >
+            <strong className="block text-sm text-gray-600">
+              {msg.sender === playerId ? "You" : msg.sender}
+            </strong>
+            <span className="text-gray-800 text-sm">{msg.message}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Input & Send Button */}
+      <div className="chat-input flex gap-2 mt-2">
         <input
           id="message_input"
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message here..."
+          className="flex-1 p-2 border border-gray-300 rounded-lg"
         />
         <button
           id="send_message_button"
           onClick={sendMessage}
-          style={{
-            marginLeft: "1rem",
-            border: "1px solid black",
-            padding: "0.25rem 0.5rem",
-          }}
+          className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600"
         >
-          Send Message
+          Send
         </button>
       </div>
-      <div>
-        {chatMessages.map((msg, index) => (
-          <p key={index}>
-            <strong>{msg.sender}</strong>: {msg.message}
-          </p>
-        ))}
-      </div>
-      <GameStoreLiveFeed />
+
+      {/* Optional Game Feed */}
+      {/* <GameStoreLiveFeed /> */}
     </div>
   );
 };

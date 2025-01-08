@@ -51,7 +51,7 @@ const DetectionBox: React.FC<DetectionBoxProps> = ({
           style={{
             top: `-${labelHeight}px`,
             height: `${labelHeight}px`,
-            width: 'calc(100% + 8px)',
+            width: "calc(100% + 8px)",
           }}
         >
           {className} {Math.round(score * 100)}%
@@ -88,7 +88,7 @@ const DetectionOverlay: React.FC = () => {
       ) as HTMLVideoElement;
 
       const containerElement = document.getElementById("canvas-container");
-      
+
       const sourceWidth =
         currentMediaType === "image"
           ? imageElement?.naturalWidth
@@ -110,7 +110,7 @@ const DetectionOverlay: React.FC = () => {
         const scaledWidth = sourceWidth * scale;
         const scaledHeight = sourceHeight * scale;
 
-        const offsetX = (containerWidth - scaledWidth) / 2;
+        const offsetX = 0;
         const offsetY = (containerHeight - scaledHeight) / 2;
 
         setDimensions({
@@ -119,7 +119,8 @@ const DetectionOverlay: React.FC = () => {
         });
         setScale(scale);
 
-        const mediaElement = currentMediaType === "image" ? imageElement : videoElement;
+        const mediaElement =
+          currentMediaType === "image" ? imageElement : videoElement;
         if (mediaElement) {
           mediaElement.style.width = `${scaledWidth}px`;
           mediaElement.style.height = `${scaledHeight}px`;
@@ -129,7 +130,9 @@ const DetectionOverlay: React.FC = () => {
           mediaElement.style.top = `${offsetY}px`;
         }
 
-        const overlayContainer = document.querySelector('[data-overlay-container]');
+        const overlayContainer = document.querySelector(
+          "[data-overlay-container]"
+        );
         if (overlayContainer instanceof HTMLElement) {
           overlayContainer.style.width = `${scaledWidth}px`;
           overlayContainer.style.height = `${scaledHeight}px`;

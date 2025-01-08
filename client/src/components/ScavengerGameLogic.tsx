@@ -4,9 +4,11 @@ import RiddleCardFlip from "./RiddleCardFlip";
 import Countdown from "./Countdown";
 import "../App.css";
 import { useUpdateGame } from "@/hooks/useUpdateGame";
+import GameCompletionModal from "./GameCompleteModal";
 
 const ScavengerGame = () => {
   const gameState = useGameStore((state) => state.gameState);
+  const setGameState = useGameStore((state) => state.setGameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
   const activeDetectionLoop = useGameStore(
@@ -17,6 +19,7 @@ const ScavengerGame = () => {
   const timeRemaining = useGameStore((state) => state.timeRemaining);
   const countdown = useGameStore((state) => state.countdown);
   const startTimer = useGameStore((state) => state.startTimer);
+  const stopTimer = useGameStore((state) => state.stopTimer);
   const resetGame = useGameStore((state) => state.resetGame);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -28,6 +31,9 @@ const ScavengerGame = () => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  
 
   // use effect to set isReady and start countdown when sever emits countdown
   useEffect(() => {
@@ -38,35 +44,38 @@ const ScavengerGame = () => {
 
     if (socket) {
       try {
-        console.log("🔗 Setting up Socket.IO event listeners...");
+        const isSingle = useGameStore.getState().isSingle;
+        if (isSingle) {
+          console.log("🔗 Setting up Socket.IO event listeners...");
 
-        // Listen for the countdown to start
-        socket.on("startCountdown", (countdown: number) => {
-          console.log("🚦 startCountdown event received:", countdown);
-          startCountdown(countdown);
-        });
+          // Listen for the countdown to start
+          socket.on("startCountdown", (countdown: number) => {
+            console.log("🚦 startCountdown event received:", countdown);
+            startCountdown(countdown);
+          });
 
-        // Listen for ready state updates
-        socket.on(
-          "updateReadyStates",
-          (readyStates: Record<string, boolean>) => {
-            console.log("📥 updateReadyStates event received:", readyStates);
-            updatePlayerReadyStates(readyStates);
-          }
-        );
+          // Listen for ready state updates
+          socket.on(
+            "updateReadyStates",
+            (readyStates: Record<string, boolean>) => {
+              console.log("📥 updateReadyStates event received:", readyStates);
+              updatePlayerReadyStates(readyStates);
+            }
+          );
 
-        // Handle disconnect
-        socket.on("disconnect", () => {
-          console.warn("❌ Socket.IO disconnected unexpectedly!");
-        });
+          // Handle disconnect
+          socket.on("disconnect", () => {
+            console.warn("❌ Socket.IO disconnected unexpectedly!");
+          });
 
-        // Cleanup listeners on unmount
-        return () => {
-          socket.off("startCountdown");
-          socket.off("updateReadyStates");
-          socket.off("disconnect");
-          console.log("🧹 Socket.IO listeners cleaned up");
-        };
+          // Cleanup listeners on unmount
+          return () => {
+            socket.off("startCountdown");
+            socket.off("updateReadyStates");
+            socket.off("disconnect");
+            console.log("🧹 Socket.IO listeners cleaned up");
+          };
+        } // no else
       } catch (error) {
         console.error("❌ Error setting up socket listeners:", error);
       }
@@ -75,20 +84,20 @@ const ScavengerGame = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (numFoundItems >= 5 || timeRemaining === 0) {
-      resetGame(); //this currently sets the game to "setup"
-      // TODO: Add DB Call to save/ updateGame data
-      //TODO: DONT JUST RESET GAME - GIVE OPTIONS:
-      // 1. Play Again
-      // 2. Return to Tutorial
-      // 3. Return to Home
-      // 4. View Leaderboard
-      // 5. Play a Multiplayer Game
-      // TODO: currently sets the game to "setup" -> Need to change to "complete" and wait for user input
-      // stop detecting, etc. and show a modal with the results
-    }
-  }, [numFoundItems, timeRemaining, resetGame]);
+  // useEffect(() => {
+  //   if (numFoundItems >= 5 || timeRemaining === 0) {
+  //     resetGame(); //this currently sets the game to "setup"
+  //     // TODO: Add DB Call to save/ updateGame data
+  //     //TODO: DONT JUST RESET GAME - GIVE OPTIONS:
+  //     // 1. Play Again
+  //     // 2. Return to Tutorial
+  //     // 3. Return to Home
+  //     // 4. View Leaderboard
+  //     // 5. Play a Multiplayer Game
+  //     // TODO: currently sets the game to "setup" -> Need to change to "complete" and wait for user input
+  //     // stop detecting, etc. and show a modal with the results
+  //   }
+  // }, [numFoundItems, timeRemaining, resetGame]);
 
   useEffect(() => {
     let countdownTimer: NodeJS.Timeout;
@@ -115,33 +124,6 @@ const ScavengerGame = () => {
       }
     };
   }, [gameState, countdown, startTimer]);
-
-  // useEffect(() => {
-  //   let countdownTimer: NodeJS.Timeout | null = null;
-
-  //   if (gameState === "countdown" && countdown !== null) {
-  //     console.log("🔄 Countdown Started:", countdown);
-
-  //     countdownTimer = setInterval(() => {
-  //       useGameStore.setState((state) => {
-  //         // Actually set the state of the countdown in the store
-  //         if (state.countdown && state.countdown > 0) {
-  //           return { countdown: state.countdown - 1 };
-  //         } else {
-  //           clearInterval(countdownTimer!);
-  //           return { countdown: 0 };
-  //         }
-  //       });
-  //     }, 1000);
-  //   }
-
-  //   return () => {
-  //     if (countdownTimer) {
-  //       clearInterval(countdownTimer);
-  //       console.log("🛑 Countdown Timer Cleared");
-  //     }
-  //   };
-  // }, [gameState, countdown]);
 
   useEffect(() => {
     if (
@@ -173,14 +155,16 @@ const ScavengerGame = () => {
       }, 1000); //  displayed for 1 second
       return () => clearTimeout(timeout);
     }
-  }, [numFoundItems, itemsArr.length, timeRemaining]);
+  }, [numFoundItems]);
 
   // Game start logic - should update the bd once zustand is updated
   useEffect(() => {
-    if (gameRoom && gameState === "countdown") {
+    if (gameRoom && gameState === "countdown" && countdown === 0) {
       console.log(
         "🚦 Game started. Updating game start state in the database..."
       );
+      // set the local state to playing
+      useGameStore.setState({ gameState: "playing" });
 
       const handleGameStart = async () => {
         try {
@@ -201,7 +185,7 @@ const ScavengerGame = () => {
 
       handleGameStart();
     }
-  }, [gameRoom, gameState, startTimer, updateGame]);
+  }, [gameRoom, gameState, startTimer, updateGame, countdown]);
 
   // Game completion logic - needs more logic to determine winner
   // Handles the updating of the game in the database
@@ -216,6 +200,7 @@ const ScavengerGame = () => {
 
       const handleGameComplete = async () => {
         try {
+          stopTimer();
           await updateGame({
             gameId: gameRoom,
             isComplete: true,
@@ -225,7 +210,8 @@ const ScavengerGame = () => {
           });
 
           console.log("✅ Game completion updated in the database.");
-          resetGame(); // Reset the game locally after DB update
+          setGameState("complete"); // Reset the game locally after DB update
+          setIsModalOpen(true);
         } catch (error) {
           console.error(
             "❌ Failed to update game completion in the database:",
@@ -236,7 +222,42 @@ const ScavengerGame = () => {
 
       handleGameComplete();
     }
-  }, [numFoundItems, timeRemaining, gameRoom, updateGame, resetGame, playerId]);
+  }, [
+    numFoundItems,
+    timeRemaining,
+    gameRoom,
+    updateGame,
+    resetGame,
+    playerId,
+    setGameState,
+    stopTimer,
+  ]);
+
+  // START THE GAME listener
+  useEffect(() => {
+    const socket = useMultiplayerStore.getState().socket;
+    const startCountdown = useMultiplayerStore.getState().startCountdown;
+    const isMulti = useGameStore.getState().isMulti;
+    if (isMulti) {
+      if (socket) {
+        console.log("🔗 Setting up Socket.IO event listeners...");
+        const numberOfPlayers = Object.keys(
+          useMultiplayerStore.getState().players
+        ).length;
+        console.log("Number of players in the room: ", numberOfPlayers);
+        if (numberOfPlayers > 1) {
+          socket.on("startCountdown", (countdown: number) => {
+            console.log("🚦 startCountdown event received:", countdown);
+            startCountdown(countdown);
+          });
+
+          return () => {
+            socket.off("startCountdown");
+          };
+        }
+      }
+    }
+  }, []);
 
   return (
     <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">
@@ -252,14 +273,17 @@ const ScavengerGame = () => {
           <div>
             {/* Success Message */}
             {showSuccessMessage && (
-              <div className="fixed top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2  bg-gradient-to-br from-teal-400 via-green-500 to-yellow-500 text-white text-4xl font-bold py-4 px-8 rounded-lg shadow-lg animate-bounce">
+              <div className="fixed top-12 right-4 bg-gradient-to-br from-teal-400 via-green-500 to-yellow-500 text-white text-4xl font-bold py-4 px-8 rounded-lg shadow-lg animate-bounce">
                 🎉 BINGO! 🎉
               </div>
             )}
             {/* time remaining */}
 
-            <div className="fixed bottom-4 left-15 flex flex-col gap-">
-              <div className="time-box p-4 bg-gradient-to-br from-teal-700 to-green-500 text-center mb-6 bottom-12 left-24 transform rounded-lg shadow-xl ">
+            <div className="fixed inset-y-0 right-4 flex flex-col items-end justify-center">
+              <div
+                style={{ width: "300px" }}
+                className="time-box p-4 bg-gradient-to-br from-teal-700 to-green-500 text-center mb-6 rounded-lg shadow-xl"
+              >
                 <h1 className="text-xl font-extrabold mb-2 text-white tracking-wider">
                   Tick ⏳ Tock
                 </h1>
@@ -268,7 +292,7 @@ const ScavengerGame = () => {
                 </p>
                 <div className="relative w-full bg-gray-300 rounded-full h-2 mt-2">
                   <div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-teal-400 to-orange-500 transition-width duration-500"
+                    className="absolute right-0 h-full bg-gradient-to-r from-teal-700 to-teal-500 transition-width duration-500"
                     style={{ width: `${(timeRemaining / 120) * 100}%` }}
                   ></div>
                 </div>
@@ -280,13 +304,22 @@ const ScavengerGame = () => {
             </div>
           </div>
         )}
-        {gameState === "complete" && (
+        {/* {gameState === "complete" && (
           <div>
             <h1>Game Over</h1>
             <p>YOU WON OR LOST & FOUND {itemsArr[numFoundItems]} ITEMS!</p>
             <p>YOU HAD {timeRemaining} time left!</p>
           </div>
-        )}
+        )} */}
+        <GameCompletionModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          // timeRemaining={timeRemaining}
+          // itemsFound={numFoundItems}
+          // totalItems={itemsArr.length}
+          // setGameState={setGameState}
+          // resetGame={resetGame}
+        />
       </div>
     </div>
   );

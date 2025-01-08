@@ -26,6 +26,11 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
   // Modal Handler for multiplayer modal
   const handleOpenMPModal = () => {
     setShowMultiplayerModal(true);
+    //🍁create a new game in the mongo db
+    //  -set the game id to the response _id
+    //🍁 set the gameRoom in the store and the inviteLink in the store
+    //  - gameRoom should then be avail in the store
+    //🍁 - start the game logic in the create MP game button
   };
 
   const handleCloseMPModal = () => {
@@ -62,33 +67,29 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
         },
       }}
     >
+      {/* start game */}
+
+      <StartGameButton onClose={onClose} />
+      {/* Multiplayer Modal Button */}
       <div className="flex flex-col items-center justify-center gap-6">
-        <>
-          {/* Multiplayer Modal Button */}
-          <button
-            onClick={handleOpenMPModal}
-            className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
-          >
-            <MultiPlayerModal
-              isOpen={showMultiplayerModal}
-              onClose={handleCloseMPModal}
-            />
-            <h2 className="text-2xl font-bold mb-2"></h2>
-            <p className="text-sm text-gray-600">
-              Playing with friends is always fun!
-            </p>
-          </button>
-          {/* showMultiplayerModal is a local setState now isolated from the button to show it */}
-        </>
-
-        {/* start game */}
-
-        <StartGameButton onClose={onClose} />
+        <button
+          onClick={handleOpenMPModal}
+          className="card bg-teal-600 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+        >
+          <h2 className="text-2xl font-bold mb-2">Multiplayer Manager</h2>
+          <p className="text-sm text-gray-300">
+            Playing with friends is always fun!
+          </p>
+        </button>
+        <MultiPlayerModal
+          isOpen={showMultiplayerModal}
+          onClose={handleCloseMPModal}
+        />
 
         {/* start tutorial */}
         <button
           onClick={onStartTuto}
-          className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+          className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full mb-7"
         >
           <h2 className="text-2xl font-bold mb-2">📘 Start Tutorial</h2>
           <p className="text-sm text-gray-600">
