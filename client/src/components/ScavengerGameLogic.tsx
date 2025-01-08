@@ -8,7 +8,7 @@ import GameCompletionModal from "./GameCompleteModal";
 
 const ScavengerGame = () => {
   const gameState = useGameStore((state) => state.gameState);
-  const setGameState = useGameStore((state) => state.setGameState)
+  const setGameState = useGameStore((state) => state.setGameState);
   const canvasReady = useGameStore((state) => state.canvasReady);
   const currentMediaType = useGameStore((state) => state.currentMediaType);
   const activeDetectionLoop = useGameStore(
@@ -33,6 +33,8 @@ const ScavengerGame = () => {
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  
+
   // use effect to set isReady and start countdown when sever emits countdown
   useEffect(() => {
     const socket = useMultiplayerStore.getState().socket;
@@ -42,35 +44,38 @@ const ScavengerGame = () => {
 
     if (socket) {
       try {
-        console.log("🔗 Setting up Socket.IO event listeners...");
+        const isSingle = useGameStore.getState().isSingle;
+        if (isSingle) {
+          console.log("🔗 Setting up Socket.IO event listeners...");
 
-        // Listen for the countdown to start
-        socket.on("startCountdown", (countdown: number) => {
-          console.log("🚦 startCountdown event received:", countdown);
-          startCountdown(countdown);
-        });
+          // Listen for the countdown to start
+          socket.on("startCountdown", (countdown: number) => {
+            console.log("🚦 startCountdown event received:", countdown);
+            startCountdown(countdown);
+          });
 
-        // Listen for ready state updates
-        socket.on(
-          "updateReadyStates",
-          (readyStates: Record<string, boolean>) => {
-            console.log("📥 updateReadyStates event received:", readyStates);
-            updatePlayerReadyStates(readyStates);
-          }
-        );
+          // Listen for ready state updates
+          socket.on(
+            "updateReadyStates",
+            (readyStates: Record<string, boolean>) => {
+              console.log("📥 updateReadyStates event received:", readyStates);
+              updatePlayerReadyStates(readyStates);
+            }
+          );
 
-        // Handle disconnect
-        socket.on("disconnect", () => {
-          console.warn("❌ Socket.IO disconnected unexpectedly!");
-        });
+          // Handle disconnect
+          socket.on("disconnect", () => {
+            console.warn("❌ Socket.IO disconnected unexpectedly!");
+          });
 
-        // Cleanup listeners on unmount
-        return () => {
-          socket.off("startCountdown");
-          socket.off("updateReadyStates");
-          socket.off("disconnect");
-          console.log("🧹 Socket.IO listeners cleaned up");
-        };
+          // Cleanup listeners on unmount
+          return () => {
+            socket.off("startCountdown");
+            socket.off("updateReadyStates");
+            socket.off("disconnect");
+            console.log("🧹 Socket.IO listeners cleaned up");
+          };
+        } // no else
       } catch (error) {
         console.error("❌ Error setting up socket listeners:", error);
       }
@@ -120,33 +125,6 @@ const ScavengerGame = () => {
     };
   }, [gameState, countdown, startTimer]);
 
-  // useEffect(() => {
-  //   let countdownTimer: NodeJS.Timeout | null = null;
-
-  //   if (gameState === "countdown" && countdown !== null) {
-  //     console.log("🔄 Countdown Started:", countdown);
-
-  //     countdownTimer = setInterval(() => {
-  //       useGameStore.setState((state) => {
-  //         // Actually set the state of the countdown in the store
-  //         if (state.countdown && state.countdown > 0) {
-  //           return { countdown: state.countdown - 1 };
-  //         } else {
-  //           clearInterval(countdownTimer!);
-  //           return { countdown: 0 };
-  //         }
-  //       });
-  //     }, 1000);
-  //   }
-
-  //   return () => {
-  //     if (countdownTimer) {
-  //       clearInterval(countdownTimer);
-  //       console.log("🛑 Countdown Timer Cleared");
-  //     }
-  //   };
-  // }, [gameState, countdown]);
-
   useEffect(() => {
     if (
       canvasReady &&
@@ -156,7 +134,7 @@ const ScavengerGame = () => {
       countdown === 0
     ) {
       // setGameStartTime(); - TODO: need to update the store and the db
-      // startTimer();
+      startTimer();
       console.log("🚀 THE GAME IS STARTING!!!!");
     }
   }, [
@@ -165,7 +143,7 @@ const ScavengerGame = () => {
     activeDetectionLoop,
     gameState,
     countdown,
-    // startTimer,
+    startTimer,
   ]);
 
   // bingoo msg - added itemsArr.length, timeRemaining as missing dependencies
@@ -244,7 +222,42 @@ const ScavengerGame = () => {
 
       handleGameComplete();
     }
-  }, [numFoundItems, timeRemaining, gameRoom, updateGame, resetGame, playerId]);
+  }, [
+    numFoundItems,
+    timeRemaining,
+    gameRoom,
+    updateGame,
+    resetGame,
+    playerId,
+    setGameState,
+    stopTimer,
+  ]);
+
+  // START THE GAME listener
+  useEffect(() => {
+    const socket = useMultiplayerStore.getState().socket;
+    const startCountdown = useMultiplayerStore.getState().startCountdown;
+    const isMulti = useGameStore.getState().isMulti;
+    if (isMulti) {
+      if (socket) {
+        console.log("🔗 Setting up Socket.IO event listeners...");
+        const numberOfPlayers = Object.keys(
+          useMultiplayerStore.getState().players
+        ).length;
+        console.log("Number of players in the room: ", numberOfPlayers);
+        if (numberOfPlayers > 1) {
+          socket.on("startCountdown", (countdown: number) => {
+            console.log("🚦 startCountdown event received:", countdown);
+            startCountdown(countdown);
+          });
+
+          return () => {
+            socket.off("startCountdown");
+          };
+        }
+      }
+    }
+  }, []);
 
   return (
     <div className="game-container flex flex-col items-start text-white rounded-lg z-50 absolute right-0 gap-4 w-full bg-opacity-90 p-4">
@@ -296,14 +309,14 @@ const ScavengerGame = () => {
           </div>
         )} */}
         <GameCompletionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        // timeRemaining={timeRemaining}
-        // itemsFound={numFoundItems}
-        // totalItems={itemsArr.length}
-        // setGameState={setGameState}
-        // resetGame={resetGame}
-      />
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          // timeRemaining={timeRemaining}
+          // itemsFound={numFoundItems}
+          // totalItems={itemsArr.length}
+          // setGameState={setGameState}
+          // resetGame={resetGame}
+        />
       </div>
     </div>
   );

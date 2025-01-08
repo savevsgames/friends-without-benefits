@@ -68,6 +68,7 @@ export const playerReadyStateManager = (context: ServerContext) => {
     let allPlayersReady = false;
     if (gameRoom.gameType === "multi") {
       const numPlayers = gameRoom.players.size;
+      
 
       if (numPlayers < 2) {
         console.log(
