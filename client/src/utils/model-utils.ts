@@ -133,9 +133,7 @@ export const loadVideoToVideoOutput = async (file: File): Promise<void> => {
  * @param shareMyStream Flag to share the webcam stream for multiplayer games
  * @returns MediaStream object
  */
-export const enableWebcam = async (
-  shareMyStream = false
-): Promise<MediaStream | null> => {
+export const enableWebcam = async (): Promise<MediaStream | null> => {
   try {
     const videoElement = document.getElementById(
       "video-output"
@@ -151,52 +149,58 @@ export const enableWebcam = async (
       console.error("Canvas container not found.");
       return null;
     }
-    const setWebcamEnabled = useMultiplayerStore.getState().setWebcamEnabled;
-    // Stop any existing streams
-    if (videoElement.srcObject) {
+    const webcamEnabled = (): boolean => {
+      const webcamType: string = useGameStore.getState().currentMediaType || "";
+      const videoPlaying: boolean = useGameStore.getState().videoPlaying;
+      if (webcamType === "webcam" && videoPlaying) return true;
+      else return false;
+    };
+
+    if (webcamEnabled()) {
+      // setWebcamEnabled is a Zustand store flag setter for multiplayer state / still set in single player though
+      const setWebcamEnabled = useMultiplayerStore.getState().setWebcamEnabled;
+      setWebcamEnabled(true);
+    }
+
+    // Stop any existing streams if not "webcam" media type
+    if (videoElement.srcObject && !webcamEnabled()) {
       const existingStream = videoElement.srcObject as MediaStream;
       existingStream.getTracks().forEach((track) => track.stop());
       videoElement.srcObject = null;
     }
 
-    //
-    // Get the webcam stream
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true, // UPDATED FOR MULTIPLAYER
-    });
-    // Set the video element source to the stream
-    videoElement.srcObject = stream;
-    videoElement.autoplay = true;
-    videoElement.muted = true;
-    videoElement.playsInline = true;
+    if (!webcamEnabled()) {
+      // Get the webcam stream
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true, // UPDATED FOR MULTIPLAYER
+      });
+      // Set the video element source to the stream
+      videoElement.srcObject = stream;
+      videoElement.autoplay = true;
+      videoElement.muted = true; // TODO: may need to change this for multiplayer
+      videoElement.playsInline = true;
 
-    console.log("Webcam enabled:", videoElement.srcObject);
+      console.log("Webcam enabled:", videoElement.srcObject);
 
-    if (shareMyStream) {
-      console.log(
-        "Sharing webcam stream for multiplayer game...TODO - Add more logic here."
-      );
-      // Unmute the video when sharing webcam connection.
-      videoElement.muted = false;
-      //TODO: Add streaming logic here for peer.js
-      setWebcamEnabled(true);
+      await new Promise<void>((resolve) => {
+        videoElement.onloadedmetadata = () => {
+          console.log(
+            `Webcam dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`
+          );
+          // Dynamically set the canvas-container height to update the css so that the relative positioning works
+          canvasContainer.style.height = `${videoElement.clientHeight}px`;
+          resolve();
+        };
+      });
+      // Play the video
+      await videoElement.play();
+
+      return stream;
+    } else {
+      console.log("Webcam already enabled, sending stream...");
+      return videoElement.srcObject as MediaStream;
     }
-
-    await new Promise<void>((resolve) => {
-      videoElement.onloadedmetadata = () => {
-        console.log(
-          `Webcam dimensions: ${videoElement.videoWidth}x${videoElement.videoHeight}`
-        );
-        // Dynamically set the canvas-container height to update the css so that the relative positioning works
-        canvasContainer.style.height = `${videoElement.clientHeight}px`;
-        resolve();
-      };
-    });
-    // Play the video
-    await videoElement.play();
-
-    return stream;
   } catch (error) {
     console.error("Error enabling webcam:", error);
   }
@@ -225,15 +229,8 @@ export const disableWebcam = (): void => {
  */
 export const toggleWebcam = async (isEnabled: boolean): Promise<boolean> => {
   if (isEnabled) {
-    const isSinglePlayer = useGameStore.getState().isSingle;
-    if (isSinglePlayer) {
-      const stream = await enableWebcam();
-      return stream !== null;
-    } else {
-      // Multiplayer Game
-      const stream = await enableWebcam(true);
-      return stream !== null;
-    }
+    const stream = await enableWebcam();
+    return stream !== null;
   } else {
     disableWebcam();
     return false;

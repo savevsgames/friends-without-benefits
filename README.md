@@ -25,7 +25,7 @@ This project is built by the same team behind [Tomogatch.ai](https://github.com/
 ## Table of Contents
 
 - [FRIENDS WITHOUT BENEFITS](#friends-without-benefits)
-    - [Production Link](#production-link)
+  - [Production Link](#production-link)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Tech Stack](#tech-stack)
@@ -117,9 +117,9 @@ Check the [live production link](https://friends-without-benefits.onrender.com) 
 | Developer                  | Email                 | GitHub                                             |
 | -------------------------- | --------------------- | -------------------------------------------------- |
 | **Greg Barker**            | gregcbarker@gmail.com | [@savevsgames](https://github.com/savevsgames)     |
-| **Thomas Stemler**         | thomas@example.com    | [@ThomasStemler](https://github.com/ThomasStemler) |
-| **Souad Hassen-Bouzouita** | souad@example.com     | [@SouadHB](https://github.com/SouadHB)             |
-| **Dario Zambrano**         | dario@example.com     | [@DarioZambrano](https://github.com/DarioZambrano) |
+| **Thomas Stemler**         | thomas@stemler.dev    | [@OccultParrot](https://github.com/OccultParrot)   |
+| **Souad Hassen-Bouzouita** | souadsalahh@gmail.com | [@SouadHB](https://github.com/SouadHB)             |
+| **Dario Zambrano**         | dariojzb87@gmail.com  | [@DarioZambrano](https://github.com/DarioJZB)      |
 
 _We have also collaborated on [Tomogatch.ai](https://github.com/OccultParrot/Tomogatch.ai) and other AI/ML projects._
 

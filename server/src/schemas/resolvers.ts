@@ -6,7 +6,6 @@ import {
   GQLQueryError,
 } from "../utils/graphQLErrorThrower.js";
 
-
 interface User {
   _id: string;
   username: string;
@@ -34,32 +33,75 @@ const resolvers = {
     // querying the top ten users with the shortest rounds
     topTen: async () => {
       try {
-        // Aggregation pipeline
         return await User.aggregate([
           {
             $lookup: {
-              from: "games", // MongoDB collection for the Game model
+              from: "games",
               localField: "shortestRound",
               foreignField: "_id",
               as: "shortestRound",
             },
           },
           {
-            $unwind: "$shortestRound", // Unwind the shortestRound array
+            $unwind: "$shortestRound",
           },
           {
-            $sort: {
-              "shortestRound.duration": 1, // Sort by the Game's duration
+            // Lookup to populate challenger user data
+            $lookup: {
+              from: "users",
+              localField: "shortestRound.challengers.user",
+              foreignField: "_id",
+              as: "challengerUsers",
             },
           },
           {
-            $limit: 10, // Limit to top 10 users
+            // Reconstruct the challengers array to match the Player type
+            $addFields: {
+              "shortestRound.challengers": {
+                $map: {
+                  input: "$shortestRound.challengers",
+                  as: "challenger",
+                  in: {
+                    user: {
+                      $arrayElemAt: [
+                        {
+                          $filter: {
+                            input: "$challengerUsers",
+                            as: "u",
+                            cond: { $eq: ["$$u._id", "$$challenger.user"] }
+                          }
+                        },
+                        0
+                      ]
+                    },
+                    score: "$$challenger.score",
+                    isReady: "$$challenger.isReady",
+                    isHost: "$$challenger.isHost"
+                  }
+                }
+              }
+            }
+          },
+          {
+            $sort: {
+              "shortestRound.duration": 1,
+            },
+          },
+          {
+            $limit: 10,
           },
           {
             $project: {
               username: 1,
-              email: 1,
-              "shortestRound.duration": 1, // Include only relevant fields
+              "shortestRound.duration": 1,
+              "shortestRound.challengers": {
+                user: {
+                  username: 1
+                },
+                score: 1,
+                isReady: 1,
+                isHost: 1
+              }
             },
           },
         ]);
@@ -189,11 +231,12 @@ const resolvers = {
       }
     },
     createGame: async (_: any, { input }: any) => {
-      const { authorId, challengerIds, items } = input;
+      const { authorId, challengerIds, items, duration } = input;
 
       try {
         const author = await User.findById(authorId);
         if (!author) {
+          console.error(`Author with ID: ${authorId} not found`);
           throw new Error(`User with ID: ${authorId} does not exist`);
         }
 
@@ -201,10 +244,13 @@ const resolvers = {
         const challengers = [];
         if (challengerIds && challengerIds.length > 0) {
           for (const userId of challengerIds) {
+            console.log(`Checking challenger with ID: ${userId}`);
             const userDocument = await User.findById(userId);
             if (!userDocument) {
+              console.error(`Challenger with ID: ${userId} not found`);
               throw new Error(`User with ID: ${userId} does not exist`);
             }
+            console.log("Challengers prepared:", challengers);
 
             challengers.push({
               user: userId, // Stored directly on subdocument
@@ -219,16 +265,20 @@ const resolvers = {
         let game = await Game.create({
           author: author._id,
           challengers: challengers,
-          duration: 0,
+          duration: duration || 0,
           isComplete: false,
           itemsFound: 0,
           items: items || [],
           winner: null,
         });
 
+        console.log("Game created:", game._id);
+
         game = await game.populate("author");
         game = await game.populate("winner");
         game = await game.populate("challengers.user");
+
+        console.log("Game populated and returned:", game);
 
         return game;
       } catch (error) {
@@ -236,38 +286,35 @@ const resolvers = {
       }
     },
     updateGame: async (_: any, { input }: any) => {
-      const {
-        gameId,
-        isComplete,
-        duration,
-        itemsFound,
-        winnerId,
-        challengers,
-      } = input;
+      console.log("Incoming updateGame mutation with input:", input);
       try {
-        let game = await Game.findById(gameId);
+        let game = await Game.findById(input.gameId);
         if (!game) {
-          throw new Error(`Game (id: ${gameId}) not found`);
+          console.error(`Game with ID: ${input.gameId} not found`);
+          throw new Error(`Game (id: ${input.gameId}) not found`);
         }
 
-        if (typeof isComplete === "boolean") {
-          game.isComplete = isComplete;
+        console.log("Game found for update:", game._id);
+
+        if (typeof input.isComplete === "boolean") {
+          game.isComplete = input.isComplete;
         }
-        if (typeof duration === "number") {
-          game.duration = duration;
+        if (typeof input.duration === "number") {
+          game.duration = input.duration;
         }
-        if (typeof itemsFound === "number") {
-          game.itemsFound = itemsFound;
+        if (typeof input.itemsFound === "number") {
+          game.itemsFound = input.itemsFound;
         }
-        if (challengers && challengers.length > 0) {
-          game.challengers = challengers;
+        if (input.challengers && input.challengers.length > 0) {
+          game.challengers = input.challengers;
         }
-        if (winnerId) {
-          const winner = await User.findById(winnerId);
+        if (input.winnerId) {
+          const winner = await User.findById(input.winnerId);
           if (!winner) {
-            throw new Error(`User (winnerId: ${winnerId}) not found`);
+            console.error(`Winner with ID: ${input.winnerId} not found`);
+            throw new Error(`User (winnerId: ${input.winnerId}) not found`);
           }
-          game.winner = winnerId;
+          game.winner = input.winnerId;
         }
 
         game = await game.save();
@@ -275,9 +322,23 @@ const resolvers = {
         await game.populate("winner");
         await game.populate("challengers.user");
 
+        console.log("Game updated:", game._id);
         return game;
       } catch (error) {
+        console.error("Error during updateGame mutation:", error);
         throw GQLMutationError("updateGame", error);
+      }
+    },
+    updateAvatar: async (_: any, { input }: any) => {
+      const { userId, avatar } = input;
+      try {
+        return await User.findByIdAndUpdate(
+          { _id: userId },
+          { avatar },
+          { new: true }
+        );
+      } catch (error) {
+        throw GQLMutationError("UpdateAvatar", error);
       }
     },
   },

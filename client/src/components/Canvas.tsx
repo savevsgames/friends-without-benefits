@@ -3,13 +3,16 @@ import { useGameStore } from "../store"; // Import Zustand store
 import MultiplayerChat from "./MultiplayerChat";
 import MultiplayerVideoFeed from "./MultiplayerVideoFeed";
 import ScavengerGame from "./ScavengerGameLogic";
-import GameStates from "./GameStates.tsx";
-import ControlPanel from "./ControlPanel.tsx";
+// import GameStates from "./GameStates.tsx";
+
 import TutoModal from "./TutoModal.tsx";
 import ChoiceScreen from "./ChoiceScreen.tsx";
+import DetectionOverlay from "./DetectionBoxes.tsx";
 // import { loadImageToCanvas } from "@/utils/model-utils";
 
-export const Canvas = () => {
+const Canvas: React.FC = () => {
+  const gameRoom = useGameStore((state) => state.gameRoom);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { gameState, videoPlaying } = useGameStore(); // Access Zustand state
 
@@ -35,15 +38,14 @@ export const Canvas = () => {
   const [tutorialStep, setTutorialStep] = useState(0); // Manage tutorial steps
   // Tutorial modal content
   const tutorialContent = [
-    "Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
-    "🧩 Solve the riddle: A riddle will appear on the screen. Solve it to identify the item you need to find. Let your detective skills shine!",
-    "⏳ Watch the clock:Tick-tock! Keep an eye on the riddle timer. Time is precious and every second counts!",
+    "👋 Welcome to Scavenger Hunt! Let's learn how to play, shall we?",
+    "🧩 Solve the riddle: A riddle will appear on the screen. Solve it to identify the item you need to find!",
+    "⏳ Watch the clock: Tick-tock! Keep an eye on the riddle timer. Time is precious and every second counts!",
     "🚀 Start the game: Ready, set, go! Click 'Start Game' on the main menu to kick off the countdown",
     "🕵️‍♂️ Begin the Hunt: Let the Scavenger Hunt begin! Search for items, solve riddles, and HAVE FUN!",
   ];
   // function to handle the tutorial once the single player selection is established
   // Trigger tutorial when single-player is selected
-
 
   const handleNextStep = () => {
     if (tutorialStep < tutorialContent.length) {
@@ -51,14 +53,14 @@ export const Canvas = () => {
     } else {
       setTutorialStep(0);
       setShowChoices(true);
-      setShowTuto(false) // End the tutorial
+      setShowTuto(false); // End the tutorial
     }
   };
   // handle the skip tuto
   const handleSkipTuto = () => {
     setTutorialStep(0);
     setShowChoices(true);
-    setShowTuto(false)
+    setShowTuto(false);
   };
   // Canvas clearing interval for bounding boxes for video only
   useEffect(() => {
@@ -93,10 +95,10 @@ export const Canvas = () => {
 
   useEffect(() => {
     const cv = window.cv;
-    console.log("CV: ", cv);
+    // console.log("CV: ", cv);
 
     const loadOpenCV = async () => {
-      console.log("Waiting for OpenCV.js to be defined...");
+      // console.log("Waiting for OpenCV.js to be defined...");
 
       // Step 1: Wait for `cv` to be defined in the global scope
       await new Promise<void>((resolve) => {
@@ -108,7 +110,7 @@ export const Canvas = () => {
         }, 100); // Check every 100ms
       });
 
-      console.log("OpenCV.js is defined. Initializing...");
+      // console.log("OpenCV.js is defined. Initializing...");
 
       // Step 2: Wait for `cv.onRuntimeInitialized` to be defined
 
@@ -144,8 +146,8 @@ export const Canvas = () => {
 
       // Update Zustand state to indicate the canvas is ready
       setCanvasReady(true);
-      console.log("Canvas is ready: ", useGameStore.getState().canvasReady);
-      console.log("Game State: ", useGameStore.getState().gameState);
+      // console.log("Canvas is ready: ", useGameStore.getState().canvasReady);
+      // console.log("Game State: ", useGameStore.getState().gameState);
     };
 
     loadOpenCV();
@@ -154,7 +156,7 @@ export const Canvas = () => {
 
   // TEMPORARY - FOR MAKING SURE THE CANVAS WORKS - LOADS AN IMAGE TO CANVAS ON FIRST LOAD
   // Onload, load the welcome image as a file and display it on the canvas
-  const welcomeImgPath = "/assets/household_items_01.png";
+  const welcomeImgPath = "/assets/GameIMG.png";
   useEffect(() => {
     if (welcomeImageLoaded) return; // Ensure this runs only once
 
@@ -175,7 +177,7 @@ export const Canvas = () => {
         if (!response.ok) throw new Error("Failed to fetch the image");
 
         const blob = await response.blob();
-        const file = new File([blob], "household_items_01.png", {
+        const file = new File([blob], "GameIMG.png", {
           type: "image/png",
         });
 
@@ -214,129 +216,148 @@ export const Canvas = () => {
     loadWelcomeImage();
   }, [welcomeImageLoaded]);
 
+  // The useEffect and handleGameReady function are used to update the game state so the
+  // client knows when to update the db.
+  useEffect(() => {
+    console.log("🎮 Game Room ID updated:", gameRoom);
+  }, [gameRoom]);
+
+  // const handleGameCreated = (newGameId: string) => {
+  //   console.log("🎯 Game created with ID:", newGameId);
+  //   console.log("🎮 GameID updated too?:", gameId);
+  //   setGameId(newGameId);
+  // };
+
   return (
-    <div
-      id="game-container"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "stretch",
-        minWidth: "300px",
-        height: "calc(100vh-64px)",
-      }}
-    >
-      <ChoiceScreen
-        isOpen={showChoices}
-        onClose={() => setShowChoices(false)}
-        onStartTuto={handleStartTuto}
-        onTurnOnCamera={handleTurnOnCamera}
-      />
-      {/* tutorial modal */}
-      <TutoModal
-        isOpen={showTuto}
-        content={tutorialContent}
-        currentStep={tutorialStep - 1}
-        onNext={handleNextStep}
-        onSkip={handleSkipTuto}
-        isLastStep={tutorialStep === tutorialContent.length}
-      />
+    <div>
       <div
-        id="canvas-container"
-        className="relative w-full h-full"
+        id="game-container"
         style={{
-          overflow: "hidden",
           display: "flex",
-          alignItems: "center",
-          maxWidth: singlePlayer ? "100vw" : "60vw",
-          maxHeight: singlePlayer ? "100vh" : "90vh",
-          flex: singlePlayer ? "1 1 auto" : "initial",
+          flexDirection: "row",
+          alignItems: "flex-start", // options are: stretch, flex-start, flex-end, center, baseline, first baseline, last baseline, start, end, self-start, self-end
+          minWidth: "300px",
+          maxHeight: "calc(100vh-64px)",
         }}
       >
-        <canvas
-          id="canvas-main"
-          ref={canvasRef}
-          style={{
-            display: "block",
-            // position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%",
-            height: "100%",
-            zIndex: 10,
-          }}
-        ></canvas>
-        <ControlPanel />
-        <GameStates />
-        <ScavengerGame />
-
-        <video
-          id="video-output"
-          style={{
-            display: "block",
-            position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%",
-            height: "auto",
-            zIndex: 2,
-            objectFit: "contain",
-          }}
-          playsInline
-          muted
-          crossOrigin="anonymous"
-        ></video>
-        <img
-          id="image-output"
-          style={{
-            display: "block",
-            position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%",
-            height: "auto",
-            zIndex: 1,
-            objectFit: "contain",
-          }}
-          crossOrigin="anonymous"
+        <ChoiceScreen
+          isOpen={showChoices}
+          onClose={() => setShowChoices(false)}
+          onStartTuto={handleStartTuto}
+          onTurnOnCamera={handleTurnOnCamera}
         />
+        {/* tutorial modal */}
+        {!multiPlayer && (
+          <TutoModal
+            isOpen={showTuto}
+            content={tutorialContent}
+            currentStep={tutorialStep - 1}
+            onNext={handleNextStep}
+            onSkip={handleSkipTuto}
+            isLastStep={tutorialStep === tutorialContent.length}
+          />
+        )}
         <div
-          id="debug-overlay"
+          id="canvas-container"
+          className="relative w-full h-full"
           style={{
-            display: "block",
-            position: "absolute",
-            top: "0",
-            left: "0",
-            width: "100%",
-            height: "auto",
-            zIndex: 100,
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "flex-start",
+            maxWidth: singlePlayer ? "100vw" : "60vw",
+            maxHeight: singlePlayer ? "100vh" : "90vh",
+            flex: singlePlayer ? "1 1 auto" : "initial",
           }}
         >
-          {/* <GameStoreLiveFeed /> */}
-        </div>
-      </div>
-      {/* New Div Right of Canvas */}
-      {multiPlayer && (
-        <div
-          className="relative z-20 p-4"
-          style={{
-            marginTop: "10px",
-            flex: "1 1 auto",
-          }}
-        >
-          <div
+          <canvas
+            id="canvas-main"
+            ref={canvasRef}
             style={{
-              display: "grid",
-              gridTemplateRows: "2fr 5fr",
-              gap: "2rem",
+              display: "block",
+              // position: "absolute",
+              top: "0",
+              left: "0",
+              width: "100%",
+              height: "auto",
+              zIndex: 10,
+            }}
+          ></canvas>
+          {/* 
+        <GameStates /> */}
+          <ScavengerGame />
+
+          <video
+            id="video-output"
+            style={{
+              display: "block",
+              position: "absolute",
+              top: "0",
+              left: "0",
+              width: "100%",
+              height: "auto",
+              zIndex: 2,
+              objectFit: "contain",
+            }}
+            playsInline
+            muted
+            crossOrigin="anonymous"
+          ></video>
+          <img
+            id="image-output"
+            style={{
+              display: "block",
+              position: "absolute",
+              top: "0",
+              left: "0",
+              width: "100%",
+              height: "auto",
+              zIndex: 1,
+              objectFit: "contain",
+            }}
+            crossOrigin="anonymous"
+          />
+
+          <DetectionOverlay />
+
+          <div
+            id="debug-overlay"
+            style={{
+              display: "block",
+              position: "absolute",
+              top: "0",
+              left: "0",
+              width: "100%",
+              height: "auto",
+              zIndex: 100,
             }}
           >
-            <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
-              <MultiplayerVideoFeed />
-            </div>
-            <MultiplayerChat />
+            {/* <GameStoreLiveFeed /> */}
           </div>
         </div>
-      )}
+        {/* New Div Right of Canvas */}
+        {multiPlayer && (
+          <div
+            className="relative z-20 p-4"
+            style={{
+              marginTop: "10px",
+              flex: "1 1 auto",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateRows: "2fr 5fr",
+                gap: "2rem",
+              }}
+            >
+              <div className="border-2 border-black background-teal-200 dark:bg-teal-950">
+                <MultiplayerVideoFeed />
+              </div>
+              <MultiplayerChat />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

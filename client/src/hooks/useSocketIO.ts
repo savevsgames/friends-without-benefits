@@ -1,6 +1,9 @@
 import { useEffect } from "react";
+import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
 import io from "socket.io-client";
+import type { IGameState } from "@/store";
+import type { IMultiplayerState } from "@/store";
 
 export const useSocketIO = () => {
   const { setSocket } = useMultiplayerStore();
@@ -24,14 +27,58 @@ export const useSocketIO = () => {
           reconnectionAttempts: 5,
           reconnectionDelay: 1000,
         });
+    // Update the store with the instance
+    setSocket(socketIo);
 
     socketIo.on("connect", () => {
       console.log("✅ Socket.IO Connected:", socketIo.id);
-      setSocket(socketIo);
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     socketIo.on("disconnect", (reason: any) => {
       console.log("❌ Socket.IO Disconnected", reason);
+    });
+
+    // Listen for state updates to either game or multiplayer store
+    socketIo.on(
+      "stateUpdate",
+      ({
+        store,
+        updates,
+      }: {
+        store: "game" | "multiplayer";
+        updates: Partial<IGameState | IMultiplayerState>;
+      }) => {
+        if (store === "game") {
+          console.log(`🔄 Incoming GameStore Update (${store}):`, updates);
+          useGameStore
+            .getState()
+            .incomingUpdate(updates as Partial<IGameState>);
+        } else if (store === "multiplayer") {
+          console.log(
+            `🔄 Incoming MultiplayerStore Update (${store}):`,
+            updates
+          );
+          useMultiplayerStore
+            .getState()
+            .incomingUpdate(updates as Partial<IMultiplayerState>);
+        }
+      }
+    );
+
+    // Listen for chat messages
+    socketIo.on("chat-message", (data: { sender: string; message: string }) => {
+      console.log("💬 Chat Message Received:", data);
+      // useMultiplayerStore.getState().addChatMessage(data);
+    });
+
+    socketIo.on("startCountdown", (countdown: number) => {
+      console.log("startCountdown event received:", countdown);
+      // useMultiplayerStore.getState().startCountdown(countdown); // set in scavengerGameLogic.tsx
+    });
+
+    socketIo.on("updateReadyStates", (readyStates: Record<string, boolean>) => {
+      console.log("updateReadyStates event received:", readyStates);
+      // useMultiplayerStore.getState().updatePlayerReadyStates(readyStates); // set in scavengerGameLogic.tsx
     });
 
     socketIo.on("connect_error", (error: Error) => {
@@ -43,6 +90,12 @@ export const useSocketIO = () => {
     });
 
     return () => {
+      socketIo.off("connect");
+      socketIo.off("disconnect");
+      socketIo.off("stateUpdate");
+      socketIo.off("chat-message");
+      socketIo.off("startCountdown");
+      socketIo.off("updateReadyStates");
       socketIo.disconnect();
     };
   }, [setSocket, isDevelopment]);
