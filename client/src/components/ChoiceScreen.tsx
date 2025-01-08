@@ -67,14 +67,17 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
         },
       }}
     >
+      {/* start game */}
+
+      <StartGameButton onClose={onClose} />
       {/* Multiplayer Modal Button */}
       <div className="flex flex-col items-center justify-center gap-6">
         <button
           onClick={handleOpenMPModal}
-          className="card bg-teal-100 text-teal-700 p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
+          className="card bg-teal-600 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 w-full"
         >
           <h2 className="text-2xl font-bold mb-2">Multiplayer Manager</h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-300">
             Playing with friends is always fun!
           </p>
         </button>
@@ -82,10 +85,6 @@ const ChoiceScreen: React.FC<ChoiceScreenProps> = ({
           isOpen={showMultiplayerModal}
           onClose={handleCloseMPModal}
         />
-
-        {/* start game */}
-
-        <StartGameButton onClose={onClose} />
 
         {/* start tutorial */}
         <button
