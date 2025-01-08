@@ -205,7 +205,9 @@ const MultiplayerConnectionManager: React.FC<
     }
   };
 
-  const handleJoinMultiplayerRoom = () => {
+  const handleJoinMultiplayerRoom = async () => {
+    await enableWebcam();
+    setCurrentMediaType("webcam");
     console.log("Joining Room:", inputRoomId);
     if (!user) {
       console.log("No user logged in");
@@ -283,6 +285,7 @@ const MultiplayerConnectionManager: React.FC<
     if (onGameCreation) {
       onGameCreation(inputRoomId);
     }
+
     // close the modal
     if (onClose) {
       onClose();
