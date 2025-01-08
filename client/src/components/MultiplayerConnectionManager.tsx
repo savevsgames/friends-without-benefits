@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa6";
 import { Tooltip } from "react-tooltip";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { runDetectionOnCurrentMedia } from "@/utils/custom-model-utils-2";
 
 interface MultiplayerConnectionManagerProps {
   onClose?: () => void;
@@ -71,6 +72,10 @@ const MultiplayerConnectionManager: React.FC<
   const players = useMultiplayerStore((state) => state.players);
   const setVideoPlaying = useGameStore((state) => state.setVideoPlaying);
   const setCurrentMediaRef = useGameStore((state) => state.setCurrentMediaRef);
+
+  const [isLocalReady, setIsLocalReady] = useState<boolean>(false);
+  const canvasReady = useGameStore((state) => state.canvasReady);
+  const currentMediaType = useGameStore((state) => state.currentMediaType);
 
   const handleWebcamStart = async () => {
     try {
@@ -316,6 +321,7 @@ const MultiplayerConnectionManager: React.FC<
           updatePlayerReadyStates({ [user.data._id]: true });
 
           console.log("🎯 Player is marked ready locally and on the server.");
+          runDetectionOnCurrentMedia();
         } else {
           console.error("❌ Challenger registration failed:", message);
         }
@@ -350,6 +356,38 @@ const MultiplayerConnectionManager: React.FC<
     console.log("Game Room (Zustand):", gameRoom);
     console.log("Players (Zustand):", players);
   }, [roomId]);
+
+  // Attempt to Sync Zustand isReady with local isLocalReady state
+  useEffect(() => {
+    if (!playerId) {
+      return;
+    }
+    const ready = players[playerId]?.isReady ?? false;
+    setIsLocalReady(ready);
+  }, [players, playerId]);
+
+  // Run detection when all conditions are met
+  useEffect(() => {
+    const conditionsMet = isLocalReady && canvasReady && currentMediaType;
+
+    const logConditions = () => {
+      console.log(
+        "isLocalReady: ",
+        isLocalReady,
+        "canvasReady: ",
+        canvasReady,
+        "currentMediaType: ",
+        currentMediaType
+      );
+    };
+
+    if (conditionsMet) {
+      console.log("✅ Conditions met. Starting detection...");
+      runDetectionOnCurrentMedia();
+    } else {
+      logConditions();
+    }
+  }, [isLocalReady, canvasReady, currentMediaType]);
 
   // Cleanup
   const cleanupConnections = () => {
