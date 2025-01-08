@@ -68,7 +68,7 @@ export const useSocketIO = () => {
     // Listen for chat messages
     socketIo.on("chat-message", (data: { sender: string; message: string }) => {
       console.log("💬 Chat Message Received:", data);
-      useMultiplayerStore.getState().addChatMessage(data);
+      // useMultiplayerStore.getState().addChatMessage(data);
     });
 
     socketIo.on("startCountdown", (countdown: number) => {
