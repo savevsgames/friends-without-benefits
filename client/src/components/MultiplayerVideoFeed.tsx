@@ -2,10 +2,12 @@ import React, { useEffect } from "react";
 // import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
 import { enableWebcam } from "@/utils/model-utils";
+import { useUserSession } from "@/store";
 
 const MultiplayerVideoFeed: React.FC = () => {
   const localVideoRef = React.useRef<HTMLVideoElement>(null);
   const remoteVideoRef = React.useRef<HTMLVideoElement>(null);
+  const user = useUserSession((state) => state.user);
 
   useEffect(() => {
     const socket = useMultiplayerStore.getState().socket;
@@ -23,6 +25,11 @@ const MultiplayerVideoFeed: React.FC = () => {
       const peer = useMultiplayerStore.getState().peer;
       const socket = useMultiplayerStore.getState().socket;
       const playerId = useMultiplayerStore.getState().playerId;
+
+      if (!user) {
+        console.error("❌ User not found.");
+        return;
+      }
 
       if (!peer || !socket) {
         console.error("❌ Peer or Socket not initialized.");
@@ -46,7 +53,7 @@ const MultiplayerVideoFeed: React.FC = () => {
       }
 
       console.log("📤 Requesting opponentId from server...");
-      socket.emit("requestOpponentId", { from: playerId });
+      socket.emit("requestOpponentId", { from: user.data._id });
 
       socket.once("opponentId", (opponentId: string) => {
         if (!opponentId) {
