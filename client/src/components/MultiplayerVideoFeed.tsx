@@ -108,6 +108,9 @@ const MultiplayerVideoFeed: React.FC = () => {
           }
         });
 
+        // Enable outgoing webcam stream
+        enableOutgoingWebcamStream();
+
         call.on("error", (error) => {
           console.error("❌ Error during incoming call:", error);
         });
@@ -146,10 +149,10 @@ const MultiplayerVideoFeed: React.FC = () => {
       <button
         onClick={enableOutgoingWebcamStream}
         style={{
-          width: "60%",
+          // width: "60%",
           height: "auto",
-          maxHeight: "50px",
-          backgroundColor: "green",
+          // maxHeight: "50px",
+          backgroundColor: "teal",
           borderRadius: "5px",
           color: "white",
           padding: "0.5rem",
@@ -157,7 +160,7 @@ const MultiplayerVideoFeed: React.FC = () => {
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
         }}
       >
-        Enable Outgoing Stream
+        💻
       </button>
     </div>
   );
