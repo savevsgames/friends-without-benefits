@@ -1,0 +1,1 @@
+{"labels":["headphones","toothbrush","fork","remote","mug"],"modelName":"custom-image-classifier","timeStamp":"2024-12-30T18:58:22.569Z","modelSettings":{"epochs":100,"numLabels":5}}

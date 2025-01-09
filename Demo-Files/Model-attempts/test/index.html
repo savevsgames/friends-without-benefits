@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ONNX Object Detection Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/onnxruntime-web/1.16.3/ort.min.js"></script>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .image-container {
+            position: relative;
+            margin-top: 20px;
+        }
+        #outputCanvas {
+            max-width: 100%;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        #status {
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ONNX Object Detection Test</h1>
+        
+        <div class="controls">
+            <input type="file" id="imageInput" accept="image/*">
+            <button id="detectButton" disabled>Detect Objects</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="image-container">
+            <canvas id="outputCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        
+        
+    </script>
+</body>
+</html>
