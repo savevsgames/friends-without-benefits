@@ -1,0 +1,7 @@
+path: ./
+train: ./data/images/train
+val: ./data/images/val
+nc: 2
+names:
+ 0: headphones
+ 1: mouse
