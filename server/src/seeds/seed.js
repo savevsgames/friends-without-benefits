@@ -28,13 +28,6 @@ const userSeedData = [
     { username: "ProPlayer", email: "pro@test.com", password: "password123" },
     { username: "NewbieFinder", email: "newbie@test.com", password: "password123" },
     { username: "ItemHunter", email: "hunter@test.com", password: "password123" },
-    { username: "QuickScope", email: "quick@test.com", password: "password123" },
-    { username: "TimeWaster", email: "time@test.com", password: "password123" },
-    { username: "SpeedDemon", email: "demon@test.com", password: "password123" },
-    { username: "ObjectSeeker", email: "seeker@test.com", password: "password123" },
-    { username: "RushRunner", email: "rush@test.com", password: "password123" },
-    { username: "SlowPoke", email: "slow@test.com", password: "password123" },
-    { username: "FastTrack", email: "fast@test.com", password: "password123" }
 ];
 
 // Sample items that can be found in games
@@ -82,7 +75,8 @@ const seed = async () => {
         // Single-player games with different durations
         for (const user of users) {
             for (let i = 0; i < 3; i++) {
-                const duration = Math.random() * (120 - 3) + 3; // Random duration between 3 and 120 seconds
+                const duration = (Math.random() * (120 - 90) + 90); // 1:30 to 2 minutes for complete games
+
                 const numItems = Math.floor(Math.random() * 5) + 3;
                 const gameItems = sampleItems
                     .sort(() => 0.5 - Math.random())
@@ -131,7 +125,8 @@ const seed = async () => {
 
             const players = Array.from(playerIndices).map(idx => users[idx]);
             const isComplete = Math.random() > 0.3;
-            const duration = isComplete ? Math.random() * (120 - 3) + 3 : 0; // 3-120 seconds for complete games
+            const duration = isComplete ? (Math.random() * (120 - 90) + 90) : 0; // 1:30 to 2 minutes for complete games
+
 
             const challengers = players.flatMap((player, idx) =>
                 idx === 0
