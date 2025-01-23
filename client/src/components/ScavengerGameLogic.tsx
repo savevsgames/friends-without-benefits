@@ -5,6 +5,7 @@ import Countdown from "./Countdown";
 import "../App.css";
 import { useUpdateGame } from "@/hooks/useUpdateGame";
 import GameCompletionModal from "./GameCompleteModal";
+import { stopDetection } from "@/utils/model-utils";
 
 const ScavengerGame = () => {
   const gameState = useGameStore((state) => state.gameState);
@@ -148,14 +149,14 @@ const ScavengerGame = () => {
 
   // bingoo msg - added itemsArr.length, timeRemaining as missing dependencies
   useEffect(() => {
-    if (timeRemaining < 120 || numFoundItems === itemsArr.length) {
+    if (timeRemaining < 120 || numFoundItems !== itemsArr.length) {
       setShowSuccessMessage(true);
       const timeout = setTimeout(() => {
         setShowSuccessMessage(false);
       }, 1000); //  displayed for 1 second
       return () => clearTimeout(timeout);
     }
-  }, [numFoundItems]);
+  }, [numFoundItems, itemsArr.length]);
 
   // Game start logic - should update the bd once zustand is updated
   useEffect(() => {
@@ -191,16 +192,19 @@ const ScavengerGame = () => {
   // Handles the updating of the game in the database
   useEffect(() => {
     // Check if the game has completed based on conditions
-    const isGameComplete = numFoundItems >= 5 || timeRemaining === 0;
+    const isGameComplete = numFoundItems >= 5 || timeRemaining <= 0;
 
-    if (isGameComplete && gameRoom) {
+    if (isGameComplete && gameRoom && gameState === "playing") {
       console.log(
         "🎯 Game is complete. Preparing to update in the database..."
       );
 
       const handleGameComplete = async () => {
         try {
+          console.log("🔄 Updating game completion in the database...");
+          setGameState("complete"); // Reset the game locally after DB update
           stopTimer();
+          stopDetection();
           await updateGame({
             gameId: gameRoom,
             isComplete: true,
@@ -210,7 +214,6 @@ const ScavengerGame = () => {
           });
 
           console.log("✅ Game completion updated in the database.");
-          setGameState("complete"); // Reset the game locally after DB update
           setIsModalOpen(true);
         } catch (error) {
           console.error(

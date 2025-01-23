@@ -68,19 +68,19 @@ const resolvers = {
                           $filter: {
                             input: "$challengerUsers",
                             as: "u",
-                            cond: { $eq: ["$$u._id", "$$challenger.user"] }
-                          }
+                            cond: { $eq: ["$$u._id", "$$challenger.user"] },
+                          },
                         },
-                        0
-                      ]
+                        0,
+                      ],
                     },
                     score: "$$challenger.score",
                     isReady: "$$challenger.isReady",
-                    isHost: "$$challenger.isHost"
-                  }
-                }
-              }
-            }
+                    isHost: "$$challenger.isHost",
+                  },
+                },
+              },
+            },
           },
           {
             $sort: {
@@ -96,12 +96,12 @@ const resolvers = {
               "shortestRound.duration": 1,
               "shortestRound.challengers": {
                 user: {
-                  username: 1
+                  username: 1,
                 },
                 score: 1,
                 isReady: 1,
-                isHost: 1
-              }
+                isHost: 1,
+              },
             },
           },
         ]);
@@ -126,12 +126,36 @@ const resolvers = {
       _parent: unknown,
       _args: unknown,
       context: Context
-    ): Promise<User | null> => {
+    ): Promise<any> => {
       if (context.user) {
-        // If user is authenticated, return their user data
-        return await User.findOne({ _id: context.user._id });
+        // Fetch user data and populate shortestRound
+        const user = await User.findOne({ _id: context.user._id }).populate({
+          path: "shortestRound",
+          select: "duration challengers",
+          populate: {
+            path: "challengers.user",
+            select: "username",
+          },
+        });
+
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        // Calculate roundsPlayed dynamically
+        const roundsPlayed = await Game.countDocuments({
+          $or: [
+            { author: user._id }, // Games authored by the user
+            { "challengers.user": user._id }, // Games where the user is a challenger
+          ],
+        });
+
+        return {
+          ...user.toObject(),
+          roundsPlayed, // Add roundsPlayed dynamically - we dont need to store it in the User model
+        };
       }
-      // If not authenticated, throw an authentication error
+
       throw AuthenticationError("Not Authenticated");
     },
   },

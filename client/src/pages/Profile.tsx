@@ -17,13 +17,12 @@ function Profile() {
   const { loading, data } = useQuery(QUERY_ME);
 
   if (!loggedIn) {
-    return (
-      <div>LOG IN FIIIIRST // can be changed to reroute to error page</div>
-    );
+    // if the user is not logged in, redirect to the login page
+    window.location.replace("/login");
   }
 
   if (loading) {
-    return <div>LOADING USER PROFILE</div>;
+    return <div>LOADING USER PROFILE...</div>;
   }
 
   const user = data?.me || null;
@@ -81,8 +80,16 @@ function Profile() {
                 { label: "Email:", value: user?.email },
                 // { label: "Started On:", value: user?.createdAt },
                 { label: "Player ID:", value: user?._id },
-                { label: "Shortest Round:", value: user?.shortestRound || null },
-                { label: "Rounds Played:", value: "Rounds Played" },
+                {
+                  label: "Shortest Round:",
+                  value: user?.shortestRound?.duration
+                    ? `${user.shortestRound.duration} seconds`
+                    : "No rounds played yet",
+                },
+                {
+                  label: "Rounds Played:",
+                  value: user?.roundsPlayed ? user.roundsPlayed : 0,
+                },
               ].map((item, index) => (
                 <li key={index} className="grid grid-cols-3 gap-x-2 text-left">
                   <span className="font-medium tracking-widest">
@@ -95,7 +102,7 @@ function Profile() {
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 }

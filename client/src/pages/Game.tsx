@@ -9,18 +9,26 @@ import MultiplayerInitializer from "@/components/MulitplayerInitializer.ts";
 import SideBar from "@/components/SideBar.tsx";
 import { useModel } from "@/hooks/useModelStore.ts";
 import GameOptionsModal from "@/components/GameOptionsModal.tsx";
+import GameCompleteModal from "@/components/GameCompleteModal.tsx";
 
 function Game() {
   // for the modal, have the initial state as true to open on load.
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isGameOptionsModalOpen, setIsGameOptionsModalOpen] = useState(true);
+  const [isGameCompleteModalOpen, setIsGameCompleteModalOpen] = useState(false); // Initially open
 
   // const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => setIsGameOptionsModalOpen(false);
 
   // We store the model as a global or module-level variable
   const { isLoading, model } = useModel(); // removed error - might be causing refreshes needlessly
   // when canvasReady is changed in the store, setCanvasReady is called and the model is loaded
   // const setCanvasReady = useGameStore((state) => state.setCanvasReady);
+
+  const handleGameCompleteClose = () => {
+    setIsGameCompleteModalOpen(false);
+    useGameStore.getState().gameState = "setup";
+    setIsGameOptionsModalOpen(true);
+  };
 
   useEffect(() => {
     // Make sure the model is loaded and there are no errors in the loading process
@@ -36,6 +44,14 @@ function Game() {
       console.log("Error loading model.", error);
     }
   }, [model, isLoading]);
+
+  useEffect(() => {
+    // When the game state changes to "complete", open the modal
+    const gameState = useGameStore.getState().gameState;
+    if (gameState === "complete") {
+      setIsGameCompleteModalOpen(true);
+    }
+  }, []);
 
   if (isLoading) {
     return <div>Loading model...</div>;
@@ -62,7 +78,11 @@ function Game() {
           {/* <GameStoreLiveFeed /> */}
         </div>
       </div>
-      <GameOptionsModal isOpen={isModalOpen} onClose={closeModal} />;
+      <GameOptionsModal isOpen={isGameOptionsModalOpen} onClose={closeModal} />;
+      <GameCompleteModal
+        isOpen={isGameCompleteModalOpen}
+        onClose={() => handleGameCompleteClose()}
+      />
       <Footer />
     </>
   );
