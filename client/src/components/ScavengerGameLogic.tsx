@@ -5,6 +5,7 @@ import Countdown from "./Countdown";
 import "../App.css";
 import { useUpdateGame } from "@/hooks/useUpdateGame";
 import GameCompletionModal from "./GameCompleteModal";
+import { stopDetection } from "@/utils/model-utils";
 
 const ScavengerGame = () => {
   const gameState = useGameStore((state) => state.gameState);
@@ -203,6 +204,7 @@ const ScavengerGame = () => {
           console.log("🔄 Updating game completion in the database...");
           setGameState("complete"); // Reset the game locally after DB update
           stopTimer();
+          stopDetection();
           await updateGame({
             gameId: gameRoom,
             isComplete: true,
