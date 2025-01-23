@@ -2,17 +2,21 @@ import {gql} from "@apollo/client"
 
 export const QUERY_ME = gql`
     query me {
-        me {
-            email
-            password
-            avatar
-            username
-            _id
-            shortestRound {
-                duration
-            }
+  me {
+    _id
+    username
+    email
+    avatar
+    shortestRound {
+      duration
+      challengers {
+        user {
+          username
         }
+      }
     }
+  }
+}
 `;
 
 export const QUERY_TOP_TEN = gql`

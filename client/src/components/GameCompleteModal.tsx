@@ -1,15 +1,18 @@
-import React from 'react';
+import React from "react";
 import ReactModal from "react-modal";
-import { useGameStore } from '@/store';
+import { useGameStore } from "@/store";
 
-ReactModal.setAppElement('#root');
+ReactModal.setAppElement("#root");
 
 interface GameCompletionModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const GameCompletionModal: React.FC<GameCompletionModalProps> = ({ isOpen, onClose }) => {
+const GameCompletionModal: React.FC<GameCompletionModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
   // Get necessary state and actions from store
   const timeRemaining = useGameStore((state) => state.timeRemaining);
   const numFoundItems = useGameStore((state) => state.numFoundItems);
@@ -17,7 +20,7 @@ const GameCompletionModal: React.FC<GameCompletionModalProps> = ({ isOpen, onClo
   const itemsArr = useGameStore((state) => state.itemsArr);
   const resetGame = useGameStore((state) => state.resetGame);
   const setGameState = useGameStore((state) => state.setGameState);
- 
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -25,40 +28,39 @@ const GameCompletionModal: React.FC<GameCompletionModalProps> = ({ isOpen, onClo
   };
 
   const handleClose = () => {
-  
-    // Reset game state
+    console.log("Resetting game state");
     resetGame();
+    console.log("Setting game state to setup");
     setGameState("setup");
-    
-    // Close modal
+    console.log("Game Completion Modal closed");
     onClose();
   };
 
   const customStyles = {
     overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      backgroundColor: "rgba(0, 0, 0, 0.75)",
       zIndex: 1000,
-      position: 'fixed',
+      position: "fixed",
       top: 0,
       left: 0,
       right: 0,
-      bottom: 0
+      bottom: 0,
     },
     content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      transform: 'translate(-50%, -50%)',
-      maxWidth: '500px',
-      width: '90%',
-      padding: '0',
-      border: 'none',
-      backgroundColor: '#1e293b',
-      borderRadius: '1rem',
-      overflow: 'auto',
-      position: 'absolute'
-    }
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      transform: "translate(-50%, -50%)",
+      maxWidth: "500px",
+      width: "90%",
+      padding: "0",
+      border: "none",
+      backgroundColor: "#1e293b",
+      borderRadius: "1rem",
+      overflow: "auto",
+      position: "absolute",
+    },
   };
 
   return (
@@ -82,7 +84,7 @@ const GameCompletionModal: React.FC<GameCompletionModalProps> = ({ isOpen, onClo
 
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold mb-2">
-            {numFoundItems >= 5 ? '🎉 Victory! 🎉' : '⏰ Time\'s Up!'}
+            {numFoundItems >= 5 ? "🎉 Victory! 🎉" : "⏰ Time's Up!"}
           </h2>
           <p className="text-slate-300 text-lg">Here's how you did:</p>
         </div>
@@ -108,12 +110,12 @@ const GameCompletionModal: React.FC<GameCompletionModalProps> = ({ isOpen, onClo
           <h3 className="text-lg font-semibold mb-3">Items Found:</h3>
           <div className="grid grid-cols-2 gap-2">
             {itemsArr.map((item) => (
-              <div 
+              <div
                 key={item}
                 className={`p-2 rounded ${
                   foundItemsArr?.includes(item)
-                    ? 'bg-green-500/20 text-green-300'
-                    : 'bg-slate-700/50 text-slate-400'
+                    ? "bg-green-500/20 text-green-300"
+                    : "bg-slate-700/50 text-slate-400"
                 }`}
               >
                 {item}

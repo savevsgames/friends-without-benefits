@@ -2,110 +2,134 @@ import React, { useEffect } from "react";
 // import { useGameStore } from "@/store";
 import { useMultiplayerStore } from "@/store";
 import { enableWebcam } from "@/utils/model-utils";
+import { useUserSession } from "@/store";
 
 const MultiplayerVideoFeed: React.FC = () => {
-  const {
-    peer,
-    // setPeer,
-    socket,
-    // isConnected,
-    // setIsConnected,
-    playerId,
-    // isHost,
-  } = useMultiplayerStore();
-
   const localVideoRef = React.useRef<HTMLVideoElement>(null);
   const remoteVideoRef = React.useRef<HTMLVideoElement>(null);
+  const user = useUserSession((state) => state.user);
+
+  useEffect(() => {
+    const socket = useMultiplayerStore.getState().socket;
+    const peer = useMultiplayerStore.getState().peer;
+    const playerId = useMultiplayerStore.getState().playerId;
+
+    if (peer && socket && playerId) {
+      console.log("📤 Registering Peer ID with Server...");
+      socket.emit("registerPeerId", { userId: playerId, peerId: peer.id });
+    }
+  }, []);
 
   const enableOutgoingWebcamStream = async () => {
-    // uses the localVideoRef to share the webcam stream
     try {
-      if (!peer || !socket) {
-        console.error("Peer or Socket not initialized...");
+      const peer = useMultiplayerStore.getState().peer;
+      const socket = useMultiplayerStore.getState().socket;
+      const playerId = useMultiplayerStore.getState().playerId;
+
+      if (!user) {
+        console.error("❌ User not found.");
         return;
       }
-      // Webcam will already be enabled for the host
+
+      if (!peer || !socket) {
+        console.error("❌ Peer or Socket not initialized.");
+        return;
+      }
+
       const videoElement = document.getElementById(
         "video-output"
       ) as HTMLVideoElement;
 
-      const stream = videoElement.srcObject as MediaStream;
-      // set the local ref to the host webcam stream (output in their video-output)
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-        console.log("Outgoing Stream Enabled...");
+      if (!videoElement || !videoElement.srcObject) {
+        console.error("❌ No webcam stream detected.");
+        return;
       }
 
-      // Notify "opponent" of incoming stream - currently by setting isReady to true
-      // TODO:
-      // eventually add a parameter to the store as a flag to indicate that the stream is incoming
-      // for MVP it should work to just set isReady to true to enable both the incoming stream and outgoing stream
+      const stream = videoElement.srcObject as MediaStream;
 
-      // Request Opponent's peerId using socket io
-      socket.emit("requestOpponentId", { from: playerId });
-      console.log("Requesting opponentId from server...");
-      socket.on("opponentId", (opponentId: string) => {
+      // Set local video feed
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+
+      console.log("📤 Requesting opponentId from server...");
+      socket.emit("requestOpponentId", { from: user.data._id });
+
+      socket.once("opponentId", (opponentId: string) => {
         if (!opponentId) {
-          console.error("No opponentId found...");
+          console.error("❌ No opponentId received from server.");
           return;
         }
-        console.log("Calling opponent with id: ", opponentId);
-        // Create a call to opponent by id to send webcam stream
+
+        console.log("📞 Initiating call to opponent with ID:", opponentId);
+
         const call = peer.call(opponentId, stream);
+
         call.on("stream", (remoteStream) => {
-          console.log("Outgoing Stream Enabled...");
+          console.log("📥 Incoming remote stream from opponent...");
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = remoteStream;
           }
         });
 
         call.on("error", (error) => {
-          console.error("Error calling opponent: ", error);
+          console.error("❌ Error during call:", error);
         });
       });
-      // Update Zustand using socket.io
+
+      // Update Zustand state
       socket.emit("storeUpdate", {
         updates: { isReady: true },
         playerId: playerId,
       });
     } catch (error) {
-      console.error("Error sharing webcam stream", error);
+      console.error("❌ Error enabling outgoing webcam stream:", error);
     }
   };
 
   // Handle the incoming stream from opponent
   useEffect(() => {
-    try {
-      if (!peer) {
-        console.log("Peer not initialized...");
-        return;
-      }
-      peer.on("call", async (call) => {
-        console.log("Incoming call from opponent: ", call.peer);
-        // Enable the webcam stream for the opponent
+    const peer = useMultiplayerStore.getState().peer;
+
+    if (!peer) {
+      console.log("❌ Peer not initialized...");
+      return;
+    }
+
+    peer.on("call", async (call) => {
+      console.log("📞 Incoming call from:", call.peer);
+
+      try {
         const stream = await enableWebcam();
         if (!stream) {
-          console.error("Error enabling webcam stream...");
+          console.error("❌ Failed to enable webcam for incoming call.");
           return;
         }
-        // Respond to the call with the webcam stream
+
         call.answer(stream);
+
         call.on("stream", (remoteStream) => {
-          console.log("Incoming Stream Enabled...");
+          console.log("📥 Remote stream received from opponent.");
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = remoteStream;
           }
         });
-      });
 
-      return () => {
-        // Clean up the peer event listener for "call"
-        peer.off("call");
-      };
-    } catch (error) {
-      console.error("Error sharing webcam stream", error);
-    }
-  }, [peer]);
+        // Enable outgoing webcam stream
+        enableOutgoingWebcamStream();
+
+        call.on("error", (error) => {
+          console.error("❌ Error during incoming call:", error);
+        });
+      } catch (error) {
+        console.error("❌ Error handling incoming call:", error);
+      }
+    });
+
+    return () => {
+      peer.off("call");
+    };
+  }, []);
 
   return (
     <div
@@ -132,10 +156,10 @@ const MultiplayerVideoFeed: React.FC = () => {
       <button
         onClick={enableOutgoingWebcamStream}
         style={{
-          width: "60%",
+          // width: "60%",
           height: "auto",
-          maxHeight: "50px",
-          backgroundColor: "green",
+          // maxHeight: "50px",
+          backgroundColor: "teal",
           borderRadius: "5px",
           color: "white",
           padding: "0.5rem",
@@ -143,7 +167,7 @@ const MultiplayerVideoFeed: React.FC = () => {
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
         }}
       >
-        Enable Outgoing Stream
+        💻
       </button>
     </div>
   );
